@@ -1,7 +1,138 @@
 diff -ruN free-my-tv-main/app/src/io/freemytv/HomeApps.java free-my-tv-main/app/src/io/freemytv/HomeApps.java
 --- free-my-tv-main/app/src/io/freemytv/HomeApps.java	2026-10-31 03:42:25.000000000 +0000
-+++ free-my-tv-main/app/src/io/freemytv/HomeApps.java	2026-10-31 07:23:22.120754311 +0000
-@@ -703,6 +703,12 @@
++++ free-my-tv-main/app/src/io/freemytv/HomeApps.java	2026-10-31 08:47:16.237604073 +0000
+@@ -62,6 +62,10 @@
+     static final int RECENTS = 8;
+     /** A Home Assistant entity in the drawer (HomeAssistant): OK calls its service, nothing opens. */
+     static final int HOME_ASSISTANT = 9;
++    /** The top gear: opens the quick panel (inputs, display, sound, Wi-Fi, All Apps, Free My TV's settings, TV Settings). */
++    static final int PANEL = 10;
++    /** The top Wi-Fi button: opens the TV's network settings. */
++    static final int WIFI = 11;
+     /** Image size of each card (16:9; on screen it shows up to ~330 px wide). */
+     static final int TILE_W = 384, TILE_H = 216;
+ 
+@@ -260,10 +264,11 @@
+ 
+     // MARK: - Top buttons (the round ones at the top right)
+ 
+-    static final String TOP_LIVE = "live", TOP_INPUTS = "inputs", TOP_SETTINGS = "settings", TOP_RECENTS = "recents", TOP_STORE = "store";
+-    static final List<String> TOP_DEFAULT = Collections.unmodifiableList(java.util.Arrays.asList(TOP_LIVE, TOP_INPUTS, TOP_SETTINGS));
+-    /** What can be a top button: the default three, and Recent Apps and App Store for whoever adds them. */
+-    static final List<String> TOP_ALL = Collections.unmodifiableList(java.util.Arrays.asList(TOP_LIVE, TOP_INPUTS, TOP_SETTINGS, TOP_RECENTS, TOP_STORE));
++    static final String TOP_LIVE = "live", TOP_INPUTS = "inputs", TOP_SETTINGS = "settings", TOP_RECENTS = "recents", TOP_STORE = "store",
++            TOP_WIFI = "wifi";
++    static final List<String> TOP_DEFAULT = Collections.unmodifiableList(java.util.Arrays.asList(TOP_LIVE, TOP_INPUTS, TOP_WIFI, TOP_SETTINGS));
++    /** What can be a top button: the default four, and Recent Apps and App Store for whoever adds them. */
++    static final List<String> TOP_ALL = Collections.unmodifiableList(java.util.Arrays.asList(TOP_LIVE, TOP_INPUTS, TOP_WIFI, TOP_SETTINGS, TOP_RECENTS, TOP_STORE));
+     static final int MAX_TOP = TOP_ALL.size();
+ 
+     /** The keys of the top buttons, in order (Settings > Top Buttons; by default Live TV, HDMI Inputs, Settings). */
+@@ -304,10 +309,11 @@
+     private static Item topButton(String key) {
+         switch (key) {
+             case TOP_LIVE: return action(LIVE_TV, TOP_LIVE, Ui.tr("light|Live TV"), "live_tv");
+-            case TOP_INPUTS: return action(INPUTS, TOP_INPUTS, Ui.tr("HDMI Inputs"), "hdmi");
++            case TOP_INPUTS: return action(INPUTS, TOP_INPUTS, Ui.tr("Inputs"), "hdmi");
++            case TOP_WIFI: return action(WIFI, TOP_WIFI, Ui.tr("Wi-Fi"), "wifi");
+             case TOP_RECENTS: return action(RECENTS, TOP_RECENTS, Ui.tr("Recent Apps"), "recents");
+             case TOP_STORE: return action(APP, TOP_STORE, Ui.tr("App Store"), "store");
+-            default: return action(SETTINGS, TOP_SETTINGS, Ui.tr("light|Settings"), "settings");
++            default: return action(PANEL, TOP_SETTINGS, Ui.tr("light|Settings"), "settings");
+         }
+     }
+ 
+@@ -492,9 +498,57 @@
+         // MIUI TV knows three HDMI ports; a board reporting a fourth leaves it with no way to be opened (a Redmi TV
+         // lists HDMI 4 and answers no number for it), so it isn't shown.
+         else if (xiaomiInputs(c)) out.removeIf(it -> !xiaomiPort(it));
++        // AV (composite), component, VGA and the other hardware inputs: in the full list only (the drawer and the
++        // quick panel), dimmed while nothing is connected. The antenna is Live TV, not here.
++        if (all && !allwinner && !xiaomiInputs(c)) {
++            try {
++                List<TvInputInfo> extra = new ArrayList<>();
++                for (TvInputInfo info : tim.getTvInputList()) {
++                    if (isOtherHardwareInput(info)) extra.add(info);
++                }
++                Collections.sort(extra, (a, b) -> a.getId().compareTo(b.getId()));
++                for (TvInputInfo info : extra) {
++                    CharSequence custom = null;
++                    try {
++                        custom = info.loadCustomLabel(c);
++                    } catch (RuntimeException ignored) {
++                    }
++                    String label = custom != null && custom.length() > 0 ? custom.toString() : String.valueOf(info.loadLabel(c)).trim();
++                    if (label.isEmpty()) label = "AV";
++                    int state = TvInputManager.INPUT_STATE_DISCONNECTED;
++                    try {
++                        state = tim.getInputState(info.getId());
++                    } catch (RuntimeException ignored) {
++                    }
++                    Item it = shortcut(INPUT, "input:" + info.getId(), label, "tv");
++                    it.inputId = info.getId();
++                    it.number = "";
++                    it.connected = state == TvInputManager.INPUT_STATE_CONNECTED;
++                    out.add(it);
++                }
++            } catch (RuntimeException ignored) {
++            }
++        }
+         return out;
+     }
+ 
++    /** A hardware input that isn't HDMI or the tuner: AV (composite), component, S-Video, SCART, VGA, DVI, DisplayPort. */
++    private static boolean isOtherHardwareInput(TvInputInfo info) {
++        if (!info.isPassthroughInput()) return false;
++        switch (info.getType()) {
++            case TvInputInfo.TYPE_COMPOSITE:
++            case TvInputInfo.TYPE_COMPONENT:
++            case TvInputInfo.TYPE_SVIDEO:
++            case TvInputInfo.TYPE_SCART:
++            case TvInputInfo.TYPE_VGA:
++            case TvInputInfo.TYPE_DVI:
++            case TvInputInfo.TYPE_DISPLAY_PORT:
++                return true;
++            default:
++                return false;
++        }
++    }
++
+     /** Allwinner's live TV player (HY300 and HY320 projectors), the stock home screen's way to HDMI. */
+     private static final ComponentName ALLWINNER_TV = new ComponentName("com.softwinner.awlivetv", "com.softwinner.awlivetv.MainActivity");
+     /** Xiaomi's own source player (MIUI TV, the Chinese firmware): it takes the port as a number of its own. */
+@@ -543,6 +597,10 @@
+      * player. Allwinner's takes the port in "input_source" ("HDMI1"); Xiaomi's takes it as its own "input" number.
+      */
+     private static Intent inputIntent(Context c, Item it) {
++        // AV, component and the other hardware inputs: always the standard passthrough request.
++        if (!it.key.startsWith("hdmi")) {
++            return new Intent(Intent.ACTION_VIEW, TvContract.buildChannelUriForPassthroughInput(it.inputId));
++        }
+         if (allwinnerInputs(c)) {
+             // Its own player switches the port when the intent names it ("HDMI1"), as its source picker does. The
+             // HY320 needs it; the HY300 ignores it and opens its only port anyway.
+@@ -636,12 +694,19 @@
+                 intent = liveTv(a);
+                 break;
+             case INPUT:
+-                if (HomeMode.AMAZON && fireInput(a, it)) return true;
++                if (HomeMode.AMAZON && it.key.startsWith("hdmi") && fireInput(a, it)) return true;
+                 intent = inputIntent(a, it);
+                 break;
+             case SETTINGS:
+                 intent = new Intent().setComponent(new ComponentName(a, SettingsActivity.class));
+                 break;
++            case PANEL:
++                intent = new Intent().setComponent(new ComponentName(a, QuickPanelActivity.class));
++                break;
++            case WIFI:
++                intent = new Intent(Settings.ACTION_WIFI_SETTINGS);
++                plain = new Intent().setComponent(new ComponentName("com.android.tv.settings", "com.android.tv.settings.MainSettings"));
++                break;
+             case ANDROID_SETTINGS:
+                 intent = new Intent(Settings.ACTION_SETTINGS);
+                 // Where nothing answers it, Android TV's own settings by name: on the HY300 Pro+ the stock home
+@@ -703,6 +768,12 @@
       */
      static Intent liveTv(Context c) {
          PackageManager pm = c.getPackageManager();
@@ -29,6 +160,39 @@ diff -ruN free-my-tv-main/app/src/io/freemytv/Prefs.java free-my-tv-main/app/src
      // MARK: - Widgets and coins
  
      static boolean weather() { return sp().getBoolean("weather", true); }
+diff -ruN free-my-tv-main/app/src/io/freemytv/QuickPanelActivity.java free-my-tv-main/app/src/io/freemytv/QuickPanelActivity.java
+--- free-my-tv-main/app/src/io/freemytv/QuickPanelActivity.java	2026-10-31 03:42:25.000000000 +0000
++++ free-my-tv-main/app/src/io/freemytv/QuickPanelActivity.java	2026-10-31 08:47:16.238640098 +0000
+@@ -55,7 +55,7 @@
+     private static final String TV_SETTINGS = "com.android.tv.settings";
+     private static final int INPUTS = 0;
+     /** The panel in a 1920×1080 space: its size and the margin to the screen's corner. */
+-    private static final float W = 600, H = 800, MARGIN = 40;
++    private static final float W = 600, H = 960, MARGIN = 40;
+ 
+     private PanelView view;
+     private Click click;
+@@ -93,7 +93,10 @@
+                     new Intent("com.android.tv.settings.DEVICES").setPackage(TV_SETTINGS),
+                     new Intent(Settings.ACTION_BLUETOOTH_SETTINGS)),
+             new Tile(Ui.tr("Accessibility"), "accessibility", 0xFF30D158, new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)),
+-            new Tile(Ui.tr("Settings"), "settings", 0xFF8E8E9A, new Intent(Settings.ACTION_SETTINGS)),
++            new Tile(Ui.tr("All Apps"), "apps", 0xFF5E5CE6,
++                    new Intent(this, HomeActivity.class).putExtra(HomeActivity.EXTRA_ALL_APPS, true)),
++            new Tile("Free My TV", "home", 0xFFBF5AF2, new Intent(this, SettingsActivity.class)),
++            new Tile(Ui.tr("TV Settings"), "settings", 0xFF8E8E9A, new Intent(Settings.ACTION_SETTINGS)),
+         };
+     }
+ 
+@@ -185,7 +188,7 @@
+         private final int[] chipColor = new int[16];
+         private final LinearGradient[] chipShader = new LinearGradient[16];
+         private int chips;
+-        private final float[] tileX = new float[8], tileY = new float[8], labelSize = new float[8];   // labelSize: shrunk to fit long words
++        private final float[] tileX = new float[12], tileY = new float[12], labelSize = new float[12];   // labelSize: shrunk to fit long words
+         private float tileW;
+ 
+         private final Runnable frame = new Runnable() {
 diff -ruN free-my-tv-main/app/src/io/freemytv/SettingsActivity.java free-my-tv-main/app/src/io/freemytv/SettingsActivity.java
 --- free-my-tv-main/app/src/io/freemytv/SettingsActivity.java	2026-10-31 03:42:25.000000000 +0000
 +++ free-my-tv-main/app/src/io/freemytv/SettingsActivity.java	2026-10-31 07:23:22.123168404 +0000
