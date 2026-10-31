@@ -60,7 +60,7 @@ diff -ruN free-my-tv-main/app/src/io/freemytv/HomeActivity.java free-my-tv-main/
              home.destroy();
 diff -ruN free-my-tv-main/app/src/io/freemytv/HomeApps.java free-my-tv-main/app/src/io/freemytv/HomeApps.java
 --- free-my-tv-main/app/src/io/freemytv/HomeApps.java	2026-10-31 03:42:25.000000000 +0000
-+++ free-my-tv-main/app/src/io/freemytv/HomeApps.java	2026-10-31 09:12:54.196354287 +0000
++++ free-my-tv-main/app/src/io/freemytv/HomeApps.java	2026-10-31 09:23:32.147079892 +0000
 @@ -62,6 +62,10 @@
      static final int RECENTS = 8;
      /** A Home Assistant entity in the drawer (HomeAssistant): OK calls its service, nothing opens. */
@@ -82,8 +82,8 @@ diff -ruN free-my-tv-main/app/src/io/freemytv/HomeApps.java free-my-tv-main/app/
 -    static final List<String> TOP_ALL = Collections.unmodifiableList(java.util.Arrays.asList(TOP_LIVE, TOP_INPUTS, TOP_SETTINGS, TOP_RECENTS, TOP_STORE));
 +    static final String TOP_LIVE = "live", TOP_INPUTS = "inputs", TOP_SETTINGS = "settings", TOP_RECENTS = "recents", TOP_STORE = "store",
 +            TOP_WIFI = "wifi";
-+    static final List<String> TOP_DEFAULT = Collections.unmodifiableList(java.util.Arrays.asList(TOP_LIVE, TOP_INPUTS, TOP_WIFI, TOP_SETTINGS));
-+    /** What can be a top button: the default four, and Recent Apps and App Store for whoever adds them. */
++    static final List<String> TOP_DEFAULT = Collections.unmodifiableList(java.util.Arrays.asList(TOP_LIVE, TOP_WIFI, TOP_SETTINGS));
++    /** What can be a top button: the default three (the inputs are in the gear's panel), and Recent Apps and App Store for whoever adds them. */
 +    static final List<String> TOP_ALL = Collections.unmodifiableList(java.util.Arrays.asList(TOP_LIVE, TOP_INPUTS, TOP_WIFI, TOP_SETTINGS, TOP_RECENTS, TOP_STORE));
      static final int MAX_TOP = TOP_ALL.size();
  
@@ -334,7 +334,7 @@ diff -ruN free-my-tv-main/app/src/io/freemytv/Prefs.java free-my-tv-main/app/src
      static boolean weather() { return sp().getBoolean("weather", true); }
 diff -ruN free-my-tv-main/app/src/io/freemytv/QuickPanelActivity.java free-my-tv-main/app/src/io/freemytv/QuickPanelActivity.java
 --- free-my-tv-main/app/src/io/freemytv/QuickPanelActivity.java	2026-10-31 03:42:25.000000000 +0000
-+++ free-my-tv-main/app/src/io/freemytv/QuickPanelActivity.java	2026-10-31 09:12:54.197094204 +0000
++++ free-my-tv-main/app/src/io/freemytv/QuickPanelActivity.java	2026-10-31 09:29:58.949616599 +0000
 @@ -2,6 +2,7 @@
  
  import android.app.Activity;
@@ -353,11 +353,11 @@ diff -ruN free-my-tv-main/app/src/io/freemytv/QuickPanelActivity.java free-my-tv
      private static final int INPUTS = 0;
      /** The panel in a 1920×1080 space: its size and the margin to the screen's corner. */
 -    private static final float W = 600, H = 800, MARGIN = 40;
-+    private static final float W = 600, H = 960, MARGIN = 40;
++    private static final float W = 600, H = 700, MARGIN = 40;
  
      private PanelView view;
      private Click click;
-@@ -77,6 +80,7 @@
+@@ -77,23 +80,24 @@
          overridePendingTransition(0, 0);   // the panel springs in by itself
          view = new PanelView(this, k, tiles());
          setContentView(view);
@@ -365,26 +365,33 @@ diff -ruN free-my-tv-main/app/src/io/freemytv/QuickPanelActivity.java free-my-tv
      }
  
      private Tile[] tiles() {
-@@ -88,12 +92,16 @@
-             new Tile(Ui.tr("Sound"), "speaker", 0xFFFF375F,
-                     new Intent("com.android.tv.action.VIEW_SOUND_SETTINGS").setPackage(TV_SETTINGS),
-                     new Intent(Settings.ACTION_SOUND_SETTINGS)),
++        // The same route the remote's All Apps button takes: the home intent, with the flag that opens All Apps.
++        Intent allApps = new Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_HOME)
++                .setPackage(getPackageName()).putExtra(HomeActivity.EXTRA_ALL_APPS, true);
+         return new Tile[] {
+             new Tile(Ui.tr("Inputs"), "hdmi", 0xFF30B0C7),
+-            new Tile(Ui.tr("Display"), "tv_settings", 0xFFFF9F0A,
+-                    new Intent(Settings.ACTION_DISPLAY_SETTINGS).setPackage(TV_SETTINGS),
+-                    new Intent(Settings.ACTION_DISPLAY_SETTINGS)),
+-            new Tile(Ui.tr("Sound"), "speaker", 0xFFFF375F,
+-                    new Intent("com.android.tv.action.VIEW_SOUND_SETTINGS").setPackage(TV_SETTINGS),
+-                    new Intent(Settings.ACTION_SOUND_SETTINGS)),
 -            new Tile(Ui.tr("Network"), "wifi", 0xFF0A84FF, new Intent(Settings.ACTION_WIFI_SETTINGS)),
-+            new Tile(Ui.tr("Network"), "wifi", 0xFF0A84FF, HomeApps.wifiSettings(this),
-+                    new Intent().setComponent(new ComponentName(TV_SETTINGS, TV_SETTINGS + ".MainSettings"))),
              new Tile(Ui.tr("Bluetooth"), "bluetooth", 0xFF3F7CFF,
                      new Intent("com.android.tv.settings.DEVICES").setPackage(TV_SETTINGS),
                      new Intent(Settings.ACTION_BLUETOOTH_SETTINGS)),
-             new Tile(Ui.tr("Accessibility"), "accessibility", 0xFF30D158, new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)),
+-            new Tile(Ui.tr("Accessibility"), "accessibility", 0xFF30D158, new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)),
 -            new Tile(Ui.tr("Settings"), "settings", 0xFF8E8E9A, new Intent(Settings.ACTION_SETTINGS)),
-+            new Tile(Ui.tr("All Apps"), "apps", 0xFF5E5CE6,
-+                    new Intent(this, HomeActivity.class).putExtra(HomeActivity.EXTRA_ALL_APPS, true)),
++            new Tile(Ui.tr("All Apps"), "apps", 0xFF5E5CE6, allApps),
 +            new Tile("Free My TV", "home", 0xFFBF5AF2, new Intent(this, SettingsActivity.class)),
-+            new Tile(Ui.tr("TV Settings"), "settings", 0xFF8E8E9A, new Intent(Settings.ACTION_SETTINGS)),
++            // The Android TV's own settings app, opened on its main screen.
++            new Tile(Ui.tr("TV Settings"), "settings", 0xFF8E8E9A,
++                    new Intent().setComponent(new ComponentName(TV_SETTINGS, TV_SETTINGS + ".MainSettings")),
++                    new Intent(Settings.ACTION_SETTINGS)),
          };
      }
  
-@@ -185,7 +193,7 @@
+@@ -185,7 +189,7 @@
          private final int[] chipColor = new int[16];
          private final LinearGradient[] chipShader = new LinearGradient[16];
          private int chips;
@@ -393,7 +400,7 @@ diff -ruN free-my-tv-main/app/src/io/freemytv/QuickPanelActivity.java free-my-tv
          private float tileW;
  
          private final Runnable frame = new Runnable() {
-@@ -618,6 +626,18 @@
+@@ -618,6 +622,18 @@
              aimLens(false);
              invalidate();
              spoken.focusMoved();
