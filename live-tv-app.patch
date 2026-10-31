@@ -60,7 +60,7 @@ diff -ruN free-my-tv-main/app/src/io/freemytv/HomeActivity.java free-my-tv-main/
              home.destroy();
 diff -ruN free-my-tv-main/app/src/io/freemytv/HomeApps.java free-my-tv-main/app/src/io/freemytv/HomeApps.java
 --- free-my-tv-main/app/src/io/freemytv/HomeApps.java	2026-10-31 03:42:25.000000000 +0000
-+++ free-my-tv-main/app/src/io/freemytv/HomeApps.java	2026-10-31 08:47:16.237604073 +0000
++++ free-my-tv-main/app/src/io/freemytv/HomeApps.java	2026-10-31 09:12:54.196354287 +0000
 @@ -62,6 +62,10 @@
      static final int RECENTS = 8;
      /** A Home Assistant entity in the drawer (HomeAssistant): OK calls its service, nothing opens. */
@@ -160,7 +160,27 @@ diff -ruN free-my-tv-main/app/src/io/freemytv/HomeApps.java free-my-tv-main/app/
      /** Allwinner's live TV player (HY300 and HY320 projectors), the stock home screen's way to HDMI. */
      private static final ComponentName ALLWINNER_TV = new ComponentName("com.softwinner.awlivetv", "com.softwinner.awlivetv.MainActivity");
      /** Xiaomi's own source player (MIUI TV, the Chinese firmware): it takes the port as a number of its own. */
-@@ -543,6 +597,10 @@
+@@ -503,6 +557,19 @@
+     /** MIUI TV's numbers for HDMI 1 to 3 (VGA is 0 and AV 2). A number it doesn't know drops the TV to no source at all. */
+     private static final int[] XIAOMI_HDMI = {23, 24, 25};
+ 
++    /** The TV's Wi-Fi screen: its own settings app first, then any app that answers, then the wireless settings. */
++    static Intent wifiSettings(Context c) {
++        PackageManager pm = c.getPackageManager();
++        Intent[] tries = {
++            new Intent(Settings.ACTION_WIFI_SETTINGS).setPackage("com.android.tv.settings"),
++            new Intent(Settings.ACTION_WIFI_SETTINGS),
++            new Intent(Settings.ACTION_WIRELESS_SETTINGS).setPackage("com.android.tv.settings"),
++            new Intent(Settings.ACTION_WIRELESS_SETTINGS),
++        };
++        for (Intent i : tries) if (i.resolveActivity(pm) != null) return i;
++        return tries[1];
++    }
++
+     /** Whether the activity is really there: Intent.resolveActivity hands an explicit component back without looking. */
+     private static boolean exists(Context c, ComponentName component) {
+         return new Intent().setComponent(component).resolveActivityInfo(c.getPackageManager(), 0) != null;
+@@ -543,6 +610,10 @@
       * player. Allwinner's takes the port in "input_source" ("HDMI1"); Xiaomi's takes it as its own "input" number.
       */
      private static Intent inputIntent(Context c, Item it) {
@@ -171,7 +191,7 @@ diff -ruN free-my-tv-main/app/src/io/freemytv/HomeApps.java free-my-tv-main/app/
          if (allwinnerInputs(c)) {
              // Its own player switches the port when the intent names it ("HDMI1"), as its source picker does. The
              // HY320 needs it; the HY300 ignores it and opens its only port anyway.
-@@ -636,12 +694,19 @@
+@@ -636,12 +707,23 @@
                  intent = liveTv(a);
                  break;
              case INPUT:
@@ -185,14 +205,18 @@ diff -ruN free-my-tv-main/app/src/io/freemytv/HomeApps.java free-my-tv-main/app/
 +            case PANEL:
 +                intent = new Intent().setComponent(new ComponentName(a, QuickPanelActivity.class));
 +                break;
++            case INPUTS:   // the Inputs button: the quick panel, with its list of inputs already open
++                intent = new Intent().setComponent(new ComponentName(a, QuickPanelActivity.class))
++                        .putExtra(QuickPanelActivity.EXTRA_INPUTS, true);
++                break;
 +            case WIFI:
-+                intent = new Intent(Settings.ACTION_WIFI_SETTINGS);
++                intent = wifiSettings(a);
 +                plain = new Intent().setComponent(new ComponentName("com.android.tv.settings", "com.android.tv.settings.MainSettings"));
 +                break;
              case ANDROID_SETTINGS:
                  intent = new Intent(Settings.ACTION_SETTINGS);
                  // Where nothing answers it, Android TV's own settings by name: on the HY300 Pro+ the stock home
-@@ -703,6 +768,12 @@
+@@ -703,6 +785,12 @@
       */
      static Intent liveTv(Context c) {
          PackageManager pm = c.getPackageManager();
@@ -207,7 +231,7 @@ diff -ruN free-my-tv-main/app/src/io/freemytv/HomeApps.java free-my-tv-main/app/
          // and Live TV on its own plays the last channel, which can be an app's (RaiPlay's).
 diff -ruN free-my-tv-main/app/src/io/freemytv/HomeView.java free-my-tv-main/app/src/io/freemytv/HomeView.java
 --- free-my-tv-main/app/src/io/freemytv/HomeView.java	2026-10-31 03:42:25.000000000 +0000
-+++ free-my-tv-main/app/src/io/freemytv/HomeView.java	2026-10-31 08:50:17.845898728 +0000
++++ free-my-tv-main/app/src/io/freemytv/HomeView.java	2026-10-31 09:12:54.194980626 +0000
 @@ -1331,7 +1331,7 @@
  
      /** Day or night right now (from the sun at your location); `animate`: with the transition. */
@@ -217,7 +241,70 @@ diff -ruN free-my-tv-main/app/src/io/freemytv/HomeView.java free-my-tv-main/app/
          if (want == nightTarget) return;
          nightTarget = want;
          if (animate && running) {
-@@ -4502,6 +4502,7 @@
+@@ -2005,8 +2005,9 @@
+     // MARK: - Bottom drawer
+ 
+     private static List<HomeApps.Item> drawerList(Context c) {
+-        List<HomeApps.Item> list = HomeApps.allInputs(c);
+-        list.addAll(HomeApps.drawerShortcuts(c));
++        // Inputs and shortcuts live in the top buttons now (the Inputs button and the gear): the drawer keeps the
++        // weather, the prices and, when set up, Home Assistant's tiles.
++        List<HomeApps.Item> list = new ArrayList<>();
+         list.addAll(HomeAssistant.items(c));   // empty unless configured and on in Home Settings
+         return list;
+     }
+@@ -2069,8 +2070,13 @@
+         drawerDirty = true;
+     }
+ 
++    /** The weather or the prices card is on: the drawer has something to show even without tiles. */
++    private boolean drawerHasCards() {
++        return Prefs.weather() || Prefs.quotes() && HomeData.active().length > 0;
++    }
++
+     private void openDrawer() {
+-        if (drawerItems.isEmpty()) return;
++        if (drawerItems.isEmpty() && !drawerHasCards()) return;
+         drawerOpen = true;
+         drawer.target = 1;
+         zone = Z_DRAWER;
+@@ -2152,7 +2158,7 @@
+     }
+ 
+     private void drawDrawer(Canvas c) {
+-        if (drawerItems.isEmpty()) return;
++        if (drawerItems.isEmpty() && !drawerHasCards()) return;
+         rowTitle.setColor(tone(L_DIM, 0xB3FFFFFF));
+         cardTitle.setColor(tone(L_DIM, 0xB3FFFFFF));
+         cardText.setColor(drawerInk(0.95f));
+@@ -3108,7 +3114,7 @@
+                         return;
+                     }
+                 } else {
+-                    if (drawerItems.isEmpty()) return;
++                    if (drawerItems.isEmpty() && !drawerHasCards()) return;
+                     openDrawer();
+                 }
+                 break;
+@@ -3301,17 +3307,6 @@
+             openSheet();
+             return;
+         }
+-        if (it.kind == HomeApps.INPUTS) {
+-            openDrawer();
+-            for (int i = 0; i < drawerItems.size(); i++) {
+-                if (drawerItems.get(i).kind == HomeApps.INPUT) {
+-                    drawerIndex = i;
+-                    break;
+-                }
+-            }
+-            retarget(false);
+-            return;
+-        }
+         boolean opened = HomeApps.open(activity, it, this, Math.round(r.left), Math.round(r.top),
+                 Math.round(r.width()), Math.round(r.height()));
+         if (!opened) showToast(Ui.trf("Couldn't open {app}.", "app", it.label));
+@@ -4502,6 +4497,7 @@
       * the same photo almost black (or a dark gradient), drawn on top during the transition.
       */
      private void drawLightSky(Canvas c) {
@@ -247,8 +334,21 @@ diff -ruN free-my-tv-main/app/src/io/freemytv/Prefs.java free-my-tv-main/app/src
      static boolean weather() { return sp().getBoolean("weather", true); }
 diff -ruN free-my-tv-main/app/src/io/freemytv/QuickPanelActivity.java free-my-tv-main/app/src/io/freemytv/QuickPanelActivity.java
 --- free-my-tv-main/app/src/io/freemytv/QuickPanelActivity.java	2026-10-31 03:42:25.000000000 +0000
-+++ free-my-tv-main/app/src/io/freemytv/QuickPanelActivity.java	2026-10-31 08:47:16.238640098 +0000
-@@ -55,7 +55,7 @@
++++ free-my-tv-main/app/src/io/freemytv/QuickPanelActivity.java	2026-10-31 09:12:54.197094204 +0000
+@@ -2,6 +2,7 @@
+ 
+ import android.app.Activity;
+ import android.content.ActivityNotFoundException;
++import android.content.ComponentName;
+ import android.content.Context;
+ import android.content.Intent;
+ import android.graphics.Canvas;
+@@ -52,10 +53,12 @@
+         }
+     }
+ 
++    /** Opens the panel with its Inputs list already showing (the home screen's Inputs button). */
++    static final String EXTRA_INPUTS = "io.freemytv.INPUTS";
      private static final String TV_SETTINGS = "com.android.tv.settings";
      private static final int INPUTS = 0;
      /** The panel in a 1920×1080 space: its size and the margin to the screen's corner. */
@@ -257,7 +357,22 @@ diff -ruN free-my-tv-main/app/src/io/freemytv/QuickPanelActivity.java free-my-tv
  
      private PanelView view;
      private Click click;
-@@ -93,7 +93,10 @@
+@@ -77,6 +80,7 @@
+         overridePendingTransition(0, 0);   // the panel springs in by itself
+         view = new PanelView(this, k, tiles());
+         setContentView(view);
++        if (getIntent().getBooleanExtra(EXTRA_INPUTS, false)) view.post(view::showInputs);
+     }
+ 
+     private Tile[] tiles() {
+@@ -88,12 +92,16 @@
+             new Tile(Ui.tr("Sound"), "speaker", 0xFFFF375F,
+                     new Intent("com.android.tv.action.VIEW_SOUND_SETTINGS").setPackage(TV_SETTINGS),
+                     new Intent(Settings.ACTION_SOUND_SETTINGS)),
+-            new Tile(Ui.tr("Network"), "wifi", 0xFF0A84FF, new Intent(Settings.ACTION_WIFI_SETTINGS)),
++            new Tile(Ui.tr("Network"), "wifi", 0xFF0A84FF, HomeApps.wifiSettings(this),
++                    new Intent().setComponent(new ComponentName(TV_SETTINGS, TV_SETTINGS + ".MainSettings"))),
+             new Tile(Ui.tr("Bluetooth"), "bluetooth", 0xFF3F7CFF,
                      new Intent("com.android.tv.settings.DEVICES").setPackage(TV_SETTINGS),
                      new Intent(Settings.ACTION_BLUETOOTH_SETTINGS)),
              new Tile(Ui.tr("Accessibility"), "accessibility", 0xFF30D158, new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)),
@@ -269,7 +384,7 @@ diff -ruN free-my-tv-main/app/src/io/freemytv/QuickPanelActivity.java free-my-tv
          };
      }
  
-@@ -185,7 +188,7 @@
+@@ -185,7 +193,7 @@
          private final int[] chipColor = new int[16];
          private final LinearGradient[] chipShader = new LinearGradient[16];
          private int chips;
@@ -278,6 +393,25 @@ diff -ruN free-my-tv-main/app/src/io/freemytv/QuickPanelActivity.java free-my-tv
          private float tileW;
  
          private final Runnable frame = new Runnable() {
+@@ -618,6 +626,18 @@
+             aimLens(false);
+             invalidate();
+             spoken.focusMoved();
++        }
++
++        /** The Inputs list, open from the start (the Inputs button on the home screen). */
++        void showInputs() {
++            if (inputsOpen) return;
++            inputs = HomeApps.allInputs(getContext());
++            inputsOpen = true;
++            inputFocus = 0;
++            page.target = 1;
++            aimLens(false);
++            invalidate();
++            spoken.focusMoved();
+         }
+ 
+         private void select() {
 diff -ruN free-my-tv-main/app/src/io/freemytv/SettingsActivity.java free-my-tv-main/app/src/io/freemytv/SettingsActivity.java
 --- free-my-tv-main/app/src/io/freemytv/SettingsActivity.java	2026-10-31 03:42:25.000000000 +0000
 +++ free-my-tv-main/app/src/io/freemytv/SettingsActivity.java	2026-10-31 08:50:33.179926206 +0000
