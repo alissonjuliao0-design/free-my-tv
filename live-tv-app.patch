@@ -14,19 +14,30 @@ diff -ruN free-my-tv-main/app/AndroidManifest.xml free-my-tv-main/app/AndroidMan
      <uses-permission android:name="android.permission.BLUETOOTH" android:maxSdkVersion="30" />
 diff -ruN free-my-tv-main/app/src/io/freemytv/HomeActivity.java free-my-tv-main/app/src/io/freemytv/HomeActivity.java
 --- free-my-tv-main/app/src/io/freemytv/HomeActivity.java	2026-10-31 03:42:25.000000000 +0000
-+++ free-my-tv-main/app/src/io/freemytv/HomeActivity.java	2026-10-31 08:50:33.177102480 +0000
-@@ -20,6 +20,7 @@
++++ free-my-tv-main/app/src/io/freemytv/HomeActivity.java	2026-10-31 18:11:12.505698296 +0000
+@@ -20,6 +20,17 @@
      /** Opens All Apps (a remote's All Apps button, RemoteKeys). */
      static final String EXTRA_ALL_APPS = "io.freemytv.ALL_APPS";
      private HomeView home;
++    /** The home screen that's alive in this process, so the quick panel can ask it for All Apps without a round trip. */
++    private static HomeActivity instance;
++
++    /** Opens All Apps on the live home screen. False when there is none (then the caller starts the home screen). */
++    static boolean showAllApps() {
++        HomeActivity h = instance;
++        if (h == null || h.home == null || h.isFinishing()) return false;
++        h.home.showAllApps();
++        return true;
++    }
 +    private android.view.View root;   // the wallpaper (if any) under the home screen
      private int prefsVersion = Prefs.version;   // settings changed while we were away: start over
  
      @Override protected void onCreate(Bundle savedInstanceState) {
-@@ -40,8 +41,10 @@
+@@ -40,8 +51,11 @@
              return;
          }
          Ui.init(this);
++        instance = this;
 +        Wallpaper.active = Wallpaper.chosen(this) != null;   // before the home screen reads day or night
          home = new HomeView(this);
 -        setContentView(home);
@@ -35,7 +46,7 @@ diff -ruN free-my-tv-main/app/src/io/freemytv/HomeActivity.java free-my-tv-main/
          getWindow().setBackgroundDrawable(null);
          if (getIntent().getBooleanExtra(EXTRA_ALL_APPS, false)) home.showAllApps();
          // At power-on "Live TV" (#346): the first time the home screen comes up after a full start, in Free My TV mode.
-@@ -73,12 +76,14 @@
+@@ -73,12 +87,14 @@
              recreate();   // a new language or city: draw everything again
              return;
          }
@@ -50,10 +61,11 @@ diff -ruN free-my-tv-main/app/src/io/freemytv/HomeActivity.java free-my-tv-main/
          if (home != null) home.pause();
          super.onPause();
      }
-@@ -103,6 +108,7 @@
+@@ -103,6 +119,8 @@
      private static final long TWICE_MS = 700;
  
      @Override protected void onDestroy() {
++        if (instance == this) instance = null;
 +        Wallpaper.release(root);
          if (home != null) {
              home.removeCallbacks(powerOnLive);
@@ -334,7 +346,7 @@ diff -ruN free-my-tv-main/app/src/io/freemytv/Prefs.java free-my-tv-main/app/src
      static boolean weather() { return sp().getBoolean("weather", true); }
 diff -ruN free-my-tv-main/app/src/io/freemytv/QuickPanelActivity.java free-my-tv-main/app/src/io/freemytv/QuickPanelActivity.java
 --- free-my-tv-main/app/src/io/freemytv/QuickPanelActivity.java	2026-10-31 03:42:25.000000000 +0000
-+++ free-my-tv-main/app/src/io/freemytv/QuickPanelActivity.java	2026-10-31 09:29:58.949616599 +0000
++++ free-my-tv-main/app/src/io/freemytv/QuickPanelActivity.java	2026-10-31 18:11:12.508185040 +0000
 @@ -2,6 +2,7 @@
  
  import android.app.Activity;
@@ -343,7 +355,7 @@ diff -ruN free-my-tv-main/app/src/io/freemytv/QuickPanelActivity.java free-my-tv
  import android.content.Context;
  import android.content.Intent;
  import android.graphics.Canvas;
-@@ -52,10 +53,12 @@
+@@ -52,10 +53,14 @@
          }
      }
  
@@ -351,13 +363,15 @@ diff -ruN free-my-tv-main/app/src/io/freemytv/QuickPanelActivity.java free-my-tv
 +    static final String EXTRA_INPUTS = "io.freemytv.INPUTS";
      private static final String TV_SETTINGS = "com.android.tv.settings";
      private static final int INPUTS = 0;
++    /** The All Apps tile's place in tiles(). */
++    private static final int ALL_APPS = 2;
      /** The panel in a 1920×1080 space: its size and the margin to the screen's corner. */
 -    private static final float W = 600, H = 800, MARGIN = 40;
 +    private static final float W = 600, H = 700, MARGIN = 40;
  
      private PanelView view;
      private Click click;
-@@ -77,23 +80,24 @@
+@@ -77,23 +82,29 @@
          overridePendingTransition(0, 0);   // the panel springs in by itself
          view = new PanelView(this, k, tiles());
          setContentView(view);
@@ -377,11 +391,17 @@ diff -ruN free-my-tv-main/app/src/io/freemytv/QuickPanelActivity.java free-my-tv
 -                    new Intent("com.android.tv.action.VIEW_SOUND_SETTINGS").setPackage(TV_SETTINGS),
 -                    new Intent(Settings.ACTION_SOUND_SETTINGS)),
 -            new Tile(Ui.tr("Network"), "wifi", 0xFF0A84FF, new Intent(Settings.ACTION_WIFI_SETTINGS)),
++            // Bluetooth: each TV keeps it somewhere else, so try the usual places, and end on the settings' main screen.
              new Tile(Ui.tr("Bluetooth"), "bluetooth", 0xFF3F7CFF,
                      new Intent("com.android.tv.settings.DEVICES").setPackage(TV_SETTINGS),
-                     new Intent(Settings.ACTION_BLUETOOTH_SETTINGS)),
+-                    new Intent(Settings.ACTION_BLUETOOTH_SETTINGS)),
 -            new Tile(Ui.tr("Accessibility"), "accessibility", 0xFF30D158, new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)),
 -            new Tile(Ui.tr("Settings"), "settings", 0xFF8E8E9A, new Intent(Settings.ACTION_SETTINGS)),
++                    new Intent(Settings.ACTION_BLUETOOTH_SETTINGS).setPackage(TV_SETTINGS),
++                    new Intent(Settings.ACTION_BLUETOOTH_SETTINGS),
++                    new Intent().setComponent(new ComponentName(TV_SETTINGS, TV_SETTINGS + ".accessories.AddAccessoryActivity")),
++                    new Intent().setComponent(new ComponentName(TV_SETTINGS, TV_SETTINGS + ".MainSettings")),
++                    new Intent(Settings.ACTION_SETTINGS)),
 +            new Tile(Ui.tr("All Apps"), "apps", 0xFF5E5CE6, allApps),
 +            new Tile("Free My TV", "home", 0xFFBF5AF2, new Intent(this, SettingsActivity.class)),
 +            // The Android TV's own settings app, opened on its main screen.
@@ -391,7 +411,7 @@ diff -ruN free-my-tv-main/app/src/io/freemytv/QuickPanelActivity.java free-my-tv
          };
      }
  
-@@ -185,7 +189,7 @@
+@@ -185,7 +196,7 @@
          private final int[] chipColor = new int[16];
          private final LinearGradient[] chipShader = new LinearGradient[16];
          private int chips;
@@ -400,12 +420,10 @@ diff -ruN free-my-tv-main/app/src/io/freemytv/QuickPanelActivity.java free-my-tv
          private float tileW;
  
          private final Runnable frame = new Runnable() {
-@@ -618,6 +622,18 @@
-             aimLens(false);
-             invalidate();
+@@ -620,6 +631,18 @@
              spoken.focusMoved();
-+        }
-+
+         }
+ 
 +        /** The Inputs list, open from the start (the Inputs button on the home screen). */
 +        void showInputs() {
 +            if (inputsOpen) return;
@@ -416,9 +434,24 @@ diff -ruN free-my-tv-main/app/src/io/freemytv/QuickPanelActivity.java free-my-tv
 +            aimLens(false);
 +            invalidate();
 +            spoken.focusMoved();
-         }
- 
++        }
++
          private void select() {
+             click.open();
+             if (inputsOpen) {
+@@ -637,7 +660,12 @@
+                 spoken.focusMoved();
+                 return;
+             }
++            if (focus == ALL_APPS && HomeActivity.showAllApps()) {   // same process as the home screen: ask it directly
++                finish();
++                return;
++            }
+             if (open(tiles[focus].intents)) finish();
++            else android.widget.Toast.makeText(getContext(), Ui.tr("Couldn't open this on your TV"), android.widget.Toast.LENGTH_SHORT).show();
+         }
+     }
+ }
 diff -ruN free-my-tv-main/app/src/io/freemytv/SettingsActivity.java free-my-tv-main/app/src/io/freemytv/SettingsActivity.java
 --- free-my-tv-main/app/src/io/freemytv/SettingsActivity.java	2026-10-31 03:42:25.000000000 +0000
 +++ free-my-tv-main/app/src/io/freemytv/SettingsActivity.java	2026-10-31 08:50:33.179926206 +0000
