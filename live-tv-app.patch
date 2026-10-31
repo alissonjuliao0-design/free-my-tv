@@ -1,0 +1,96 @@
+diff -ruN free-my-tv-main/app/src/io/freemytv/HomeApps.java free-my-tv-main/app/src/io/freemytv/HomeApps.java
+--- free-my-tv-main/app/src/io/freemytv/HomeApps.java	2026-10-31 03:42:25.000000000 +0000
++++ free-my-tv-main/app/src/io/freemytv/HomeApps.java	2026-10-31 07:23:22.120754311 +0000
+@@ -703,6 +703,12 @@
+      */
+     static Intent liveTv(Context c) {
+         PackageManager pm = c.getPackageManager();
++        // The app the user pinned (Home Settings > Live TV app) always wins: no tuner input, no brand's TV app.
++        String pinned = Prefs.liveApp();
++        if (!pinned.isEmpty()) {
++            Intent mine = launchIntent(pm, pinned);
++            if (mine != null) return mine;   // uninstalled: falls back to the TV's own live TV below
++        }
+         // Fire TV: the antenna (digital terrestrial) entry of Amazon's Live TV, which plays the antenna's channels or
+         // opens the channel scan when there are none yet. The channels request would also offer Vewd's HbbTV player,
+         // and Live TV on its own plays the last channel, which can be an app's (RaiPlay's).
+diff -ruN free-my-tv-main/app/src/io/freemytv/Prefs.java free-my-tv-main/app/src/io/freemytv/Prefs.java
+--- free-my-tv-main/app/src/io/freemytv/Prefs.java	2026-10-31 03:42:25.000000000 +0000
++++ free-my-tv-main/app/src/io/freemytv/Prefs.java	2026-10-31 07:23:22.119437882 +0000
+@@ -325,6 +325,11 @@
+ 
+     static void setPowerOn(String v) { put("powerOn", v); }
+ 
++    /** The app the Live TV button always opens (Home Settings > Live TV app): a package, or "" for the TV's own live TV. */
++    static String liveApp() { return sp().getString("liveApp", ""); }
++
++    static void setLiveApp(String pkg) { put("liveApp", pkg == null ? "" : pkg); }
++
+     // MARK: - Widgets and coins
+ 
+     static boolean weather() { return sp().getBoolean("weather", true); }
+diff -ruN free-my-tv-main/app/src/io/freemytv/SettingsActivity.java free-my-tv-main/app/src/io/freemytv/SettingsActivity.java
+--- free-my-tv-main/app/src/io/freemytv/SettingsActivity.java	2026-10-31 03:42:25.000000000 +0000
++++ free-my-tv-main/app/src/io/freemytv/SettingsActivity.java	2026-10-31 07:23:22.123168404 +0000
+@@ -976,7 +976,7 @@
+         private static final int CLOCK_ROW = 3, PHOTOS_ROW = 4, TOP_ROW = 6, PICKS_ROW = 7, WATCH_ROW = 8,
+                 SAVER_ROW = 9, ANDROID_APPS_ROW = 10, STATUS_ICONS_ROW = 11, RECENTS_ROW = 12, POWER_ON_ROW = 13,
+                 WEATHER_ROW = 14, CITY_ROW = 15, FORECAST_ROW = 16, PLAYING_ROW = 17, HOME_ROW = Config.HOME_ASSISTANT ? 18 : -1,
+-                QUOTES_ROW = Config.HOME_ASSISTANT ? 19 : 18, COIN_ROWS = QUOTES_ROW + 1;
++                LIVE_ROW = Config.HOME_ASSISTANT ? 19 : 18, QUOTES_ROW = LIVE_ROW + 1, COIN_ROWS = QUOTES_ROW + 1;
+         /** No "home" on Xiaomi TVs: their remote sends one Home press as a burst of presses (HomeView.BURST_MS). */
+         private static final String[] RECENTS = RemoteKeys.XIAOMI ? new String[] {"off", "drawer"}
+                 : new String[] {"off", "drawer", "home"};
+@@ -1008,6 +1008,7 @@
+             l.add(Ui.tr("Forecast"));
+             l.add(Ui.tr("Now Playing widget"));
+             if (HOME_ROW >= 0) l.add("Home Assistant");
++            l.add(Ui.tr("Live TV app"));
+             l.add(Ui.tr("Quotes widget"));
+             l.add("Bitcoin");
+             l.add("Ethereum");
+@@ -1083,6 +1084,28 @@
+                     .show();
+         }
+ 
++        /** The Live TV app row: the pinned app's name, or "TV's own" while none is pinned (or it was uninstalled). */
++        private String liveAppLabel() {
++            String pkg = Prefs.liveApp();
++            if (pkg.isEmpty()) return Ui.tr("TV's own");
++            for (String[] app : HomeApps.launchable(getContext())) if (app[0].equals(pkg)) return app[1];
++            return Ui.tr("TV's own");
++        }
++
++        /** ← → on the Live TV app row: "TV's own", then every installed app by name; the Live TV button opens it. */
++        private void stepLiveApp(int dir) {
++            List<String[]> found = new ArrayList<>();
++            for (String[] app : HomeApps.launchable(getContext())) {
++                if (!app[0].equals(getContext().getPackageName())) found.add(app);
++            }
++            Collections.sort(found, (a, b) -> a[1].toLowerCase(Locale.ROOT).compareTo(b[1].toLowerCase(Locale.ROOT)));
++            List<String> pkgs = new ArrayList<>();
++            pkgs.add("");
++            for (String[] f : found) pkgs.add(f[0]);
++            int at = Math.max(0, pkgs.indexOf(Prefs.liveApp()));
++            Prefs.setLiveApp(pkgs.get((at + dir + pkgs.size()) % pkgs.size()));
++        }
++
+         private String[] settingValues() {
+             String[] labels = settingLabels();
+             String[] v = new String[labels.length];
+@@ -1117,6 +1140,7 @@
+             v[FORECAST_ROW] = Prefs.forecast().equals("days") ? Ui.tr("Next days") : Ui.tr("Next hours");
+             v[PLAYING_ROW] = onOff(Prefs.nowPlaying());
+             if (HOME_ROW >= 0) v[HOME_ROW] = onOff(HomeAssistant.on(getContext()));
++            v[LIVE_ROW] = liveAppLabel();
+             v[QUOTES_ROW] = onOff(Prefs.quotes());
+             // No quotes widget, nowhere to show prices: the coins read as off (and stay locked) until it is back on.
+             for (int i = COIN_ROWS; i < v.length - 3; i++) v[i] = onOff(Prefs.quotes() && Prefs.coin(i - COIN_ROWS));
+@@ -1485,6 +1509,7 @@
+                     Prefs.setHomeAssistant(!Prefs.homeAssistant());
+                     if (!Prefs.homeAssistant()) HomeAssistant.forget(getContext());
+                     return;
++                case LIVE_ROW: stepLiveApp(dir); return;
+                 case QUOTES_ROW: Prefs.setQuotes(!Prefs.quotes()); break;
+                 default:
+                     if (row >= keyRow() || !Prefs.quotes()) return;   // the keys and Updates act on OK only
