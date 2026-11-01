@@ -243,8 +243,18 @@ diff -ruN free-my-tv-main/app/src/io/freemytv/HomeApps.java free-my-tv-main/app/
          // and Live TV on its own plays the last channel, which can be an app's (RaiPlay's).
 diff -ruN free-my-tv-main/app/src/io/freemytv/HomeView.java free-my-tv-main/app/src/io/freemytv/HomeView.java
 --- free-my-tv-main/app/src/io/freemytv/HomeView.java	2026-10-31 03:42:25.000000000 +0000
-+++ free-my-tv-main/app/src/io/freemytv/HomeView.java	2026-10-31 09:12:54.194980626 +0000
-@@ -1331,7 +1331,7 @@
++++ free-my-tv-main/app/src/io/freemytv/HomeView.java	2026-10-31 18:24:22.143076943 +0000
+@@ -251,6 +251,9 @@
+     private final android.graphics.PorterDuffColorFilter whiteLogo =
+             new android.graphics.PorterDuffColorFilter(0xFFFFFFFF, android.graphics.PorterDuff.Mode.SRC_IN);
+     private final RectF platterRect = new RectF();
++    /** The Minimal theme (Home Settings > Theme): the clock, the date and the weather, and the apps in one big row, no glass. */
++    private final boolean minimal = Prefs.minimal();
++    private static final float MINIMAL_GROW = 1.4f;
+     private int shelfIndex;
+     /** The first app the shelf shows: with more apps than fit, it scrolls with the focus. */
+     private int shelfFirst;
+@@ -1331,7 +1334,7 @@
  
      /** Day or night right now (from the sun at your location); `animate`: with the transition. */
      private void checkNight(boolean animate) {
@@ -253,7 +263,42 @@ diff -ruN free-my-tv-main/app/src/io/freemytv/HomeView.java free-my-tv-main/app/
          if (want == nightTarget) return;
          nightTarget = want;
          if (animate && running) {
-@@ -2005,8 +2005,9 @@
+@@ -1616,9 +1619,11 @@
+         float full = (CONTENT_R - MARGIN) * k;
+         // Tiles in the TV banners' own 16:9, so an app's art is never stretched; never taller than L_TILE_H. The glass
+         // keeps its bottom edge, so with more apps it only gets lower.
+-        float tw = Math.min(L_TILE_H * 16f / 9 * k, (full - Math.max(0, n - 1) * gap) / Math.max(1, n));
++        float tileH = minimal ? L_TILE_H * MINIMAL_GROW : L_TILE_H;
++        float tw = Math.min(tileH * 16f / 9 * k, (full - Math.max(0, n - 1) * gap) / Math.max(1, n));
+         float th = tw * 9f / 16;
+-        float width = n * tw + Math.max(0, n - 1) * gap, left = (w - width) / 2f;
++        // Minimal: bigger tiles, from the left margin like the clock above them (the platter isn't drawn).
++        float width = n * tw + Math.max(0, n - 1) * gap, left = minimal ? MARGIN * k + pad : (w - width) / 2f;
+         float top = (L_PLATTER_TOP + L_TILE_H) * k - th;
+         platterRect.set(left - pad, top, left + width + pad, top + th + 2 * pad);
+         snap(platterRect);
+@@ -1651,7 +1656,7 @@
+ 
+     /** Shelf layer: the glass bar and its shadow (it only changes with the background). */
+     private void drawPlatter(Canvas c) {
+-        if (shelf.isEmpty()) return;
++        if (shelf.isEmpty() || minimal) return;
+         float radius = (TILE_RADIUS + SHELF_PAD) * k;
+         tmp.set(platterRect);
+         tmp.offset(0, 18 * k);
+@@ -1816,6 +1821,11 @@
+     }
+ 
+     private void drawTiles(Canvas c) {
++        if (minimal && !shelf.isEmpty() && tileRects.length > 0 && lWeather != null) {
++            applyTone();
++            String label = Ui.tr("My apps");
++            c.drawText(label, MARGIN * k - Ui.leftBearing(lWeather, label), tileRects[0].top - 26 * k, lWeather);
++        }
+         // The focused one last: it grows over its neighbors without being covered by them.
+         int top = -1;
+         float most = 0.02f;
+@@ -2005,8 +2015,9 @@
      // MARK: - Bottom drawer
  
      private static List<HomeApps.Item> drawerList(Context c) {
@@ -265,7 +310,7 @@ diff -ruN free-my-tv-main/app/src/io/freemytv/HomeView.java free-my-tv-main/app/
          list.addAll(HomeAssistant.items(c));   // empty unless configured and on in Home Settings
          return list;
      }
-@@ -2069,8 +2070,13 @@
+@@ -2069,8 +2080,13 @@
          drawerDirty = true;
      }
  
@@ -280,7 +325,7 @@ diff -ruN free-my-tv-main/app/src/io/freemytv/HomeView.java free-my-tv-main/app/
          drawerOpen = true;
          drawer.target = 1;
          zone = Z_DRAWER;
-@@ -2152,7 +2158,7 @@
+@@ -2152,7 +2168,7 @@
      }
  
      private void drawDrawer(Canvas c) {
@@ -289,7 +334,7 @@ diff -ruN free-my-tv-main/app/src/io/freemytv/HomeView.java free-my-tv-main/app/
          rowTitle.setColor(tone(L_DIM, 0xB3FFFFFF));
          cardTitle.setColor(tone(L_DIM, 0xB3FFFFFF));
          cardText.setColor(drawerInk(0.95f));
-@@ -3108,7 +3114,7 @@
+@@ -3108,7 +3124,7 @@
                          return;
                      }
                  } else {
@@ -298,7 +343,7 @@ diff -ruN free-my-tv-main/app/src/io/freemytv/HomeView.java free-my-tv-main/app/
                      openDrawer();
                  }
                  break;
-@@ -3301,17 +3307,6 @@
+@@ -3301,17 +3317,6 @@
              openSheet();
              return;
          }
@@ -316,7 +361,25 @@ diff -ruN free-my-tv-main/app/src/io/freemytv/HomeView.java free-my-tv-main/app/
          boolean opened = HomeApps.open(activity, it, this, Math.round(r.left), Math.round(r.top),
                  Math.round(r.width()), Math.round(r.height()));
          if (!opened) showToast(Ui.trf("Couldn't open {app}.", "app", it.label));
-@@ -4502,6 +4497,7 @@
+@@ -4048,7 +4053,7 @@
+ 
+     /** Picks need a TMDB key: without one, "picks" shows the clock, like "nothing". */
+     private boolean picksMode() {
+-        return topMode.equals(Prefs.TOP_PICKS) && picksOn();
++        return !minimal && topMode.equals(Prefs.TOP_PICKS) && picksOn();
+     }
+ 
+     /** The clock, the date and the weather: nothing at the top, or picks without a TMDB key. */
+@@ -4057,7 +4062,7 @@
+     }
+ 
+     private boolean continueMode() {
+-        return topMode.equals(Prefs.TOP_CONTINUE);
++        return !minimal && topMode.equals(Prefs.TOP_CONTINUE);
+     }
+ 
+     /** What the top shows now (from reload, off the main thread) and, for Continue Watching, its list. */
+@@ -4502,6 +4507,7 @@
       * the same photo almost black (or a dark gradient), drawn on top during the transition.
       */
      private void drawLightSky(Canvas c) {
@@ -326,8 +389,8 @@ diff -ruN free-my-tv-main/app/src/io/freemytv/HomeView.java free-my-tv-main/app/
          boolean fading = bgFadeAt != 0;
 diff -ruN free-my-tv-main/app/src/io/freemytv/Prefs.java free-my-tv-main/app/src/io/freemytv/Prefs.java
 --- free-my-tv-main/app/src/io/freemytv/Prefs.java	2026-10-31 03:42:25.000000000 +0000
-+++ free-my-tv-main/app/src/io/freemytv/Prefs.java	2026-10-31 08:50:17.844184567 +0000
-@@ -325,6 +325,16 @@
++++ free-my-tv-main/app/src/io/freemytv/Prefs.java	2026-10-31 18:24:22.134604519 +0000
+@@ -325,6 +325,23 @@
  
      static void setPowerOn(String v) { put("powerOn", v); }
  
@@ -335,6 +398,13 @@ diff -ruN free-my-tv-main/app/src/io/freemytv/Prefs.java free-my-tv-main/app/src
 +    static String liveApp() { return sp().getString("liveApp", ""); }
 +
 +    static void setLiveApp(String pkg) { put("liveApp", pkg == null ? "" : pkg); }
++
++    /** The launcher's look (Home Settings > Theme, or the gear's panel): "classic" (Free My TV's own) or "minimal". */
++    static String launcherTheme() { return "minimal".equals(sp().getString("launcherTheme", "classic")) ? "minimal" : "classic"; }
++
++    static boolean minimal() { return launcherTheme().equals("minimal"); }
++
++    static void setLauncherTheme(String v) { put("launcherTheme", v); }
 +
 +    /** The wallpaper behind the home screen (Home Settings > Wallpaper): a photo or video's path, or "" for none. */
 +    static String wallpaper() { return sp().getString("wallpaper", ""); }
@@ -346,7 +416,7 @@ diff -ruN free-my-tv-main/app/src/io/freemytv/Prefs.java free-my-tv-main/app/src
      static boolean weather() { return sp().getBoolean("weather", true); }
 diff -ruN free-my-tv-main/app/src/io/freemytv/QuickPanelActivity.java free-my-tv-main/app/src/io/freemytv/QuickPanelActivity.java
 --- free-my-tv-main/app/src/io/freemytv/QuickPanelActivity.java	2026-10-31 03:42:25.000000000 +0000
-+++ free-my-tv-main/app/src/io/freemytv/QuickPanelActivity.java	2026-10-31 18:11:12.508185040 +0000
++++ free-my-tv-main/app/src/io/freemytv/QuickPanelActivity.java	2026-10-31 18:24:22.147269731 +0000
 @@ -2,6 +2,7 @@
  
  import android.app.Activity;
@@ -355,7 +425,7 @@ diff -ruN free-my-tv-main/app/src/io/freemytv/QuickPanelActivity.java free-my-tv
  import android.content.Context;
  import android.content.Intent;
  import android.graphics.Canvas;
-@@ -52,10 +53,14 @@
+@@ -52,10 +53,16 @@
          }
      }
  
@@ -365,13 +435,15 @@ diff -ruN free-my-tv-main/app/src/io/freemytv/QuickPanelActivity.java free-my-tv
      private static final int INPUTS = 0;
 +    /** The All Apps tile's place in tiles(). */
 +    private static final int ALL_APPS = 2;
++    /** The look switch's place in tiles(). */
++    private static final int LOOK = 5;
      /** The panel in a 1920×1080 space: its size and the margin to the screen's corner. */
 -    private static final float W = 600, H = 800, MARGIN = 40;
 +    private static final float W = 600, H = 700, MARGIN = 40;
  
      private PanelView view;
      private Click click;
-@@ -77,23 +82,29 @@
+@@ -77,23 +84,31 @@
          overridePendingTransition(0, 0);   // the panel springs in by itself
          view = new PanelView(this, k, tiles());
          setContentView(view);
@@ -408,10 +480,12 @@ diff -ruN free-my-tv-main/app/src/io/freemytv/QuickPanelActivity.java free-my-tv
 +            new Tile(Ui.tr("TV Settings"), "settings", 0xFF8E8E9A,
 +                    new Intent().setComponent(new ComponentName(TV_SETTINGS, TV_SETTINGS + ".MainSettings")),
 +                    new Intent(Settings.ACTION_SETTINGS)),
++            // Switches the launcher's look (Free My TV <-> Minimal) right away; it is read in select().
++            new Tile(Ui.tr(Prefs.minimal() ? "Free My TV look" : "Minimal look"), "tv_settings", 0xFFFF9F0A),
          };
      }
  
-@@ -185,7 +196,7 @@
+@@ -185,7 +200,7 @@
          private final int[] chipColor = new int[16];
          private final LinearGradient[] chipShader = new LinearGradient[16];
          private int chips;
@@ -420,7 +494,7 @@ diff -ruN free-my-tv-main/app/src/io/freemytv/QuickPanelActivity.java free-my-tv
          private float tileW;
  
          private final Runnable frame = new Runnable() {
-@@ -620,6 +631,18 @@
+@@ -620,6 +635,18 @@
              spoken.focusMoved();
          }
  
@@ -439,10 +513,15 @@ diff -ruN free-my-tv-main/app/src/io/freemytv/QuickPanelActivity.java free-my-tv
          private void select() {
              click.open();
              if (inputsOpen) {
-@@ -637,7 +660,12 @@
+@@ -637,7 +664,17 @@
                  spoken.focusMoved();
                  return;
              }
++            if (focus == LOOK) {
++                Prefs.setLauncherTheme(Prefs.minimal() ? "classic" : "minimal");   // the home screen starts over by itself
++                finish();
++                return;
++            }
 +            if (focus == ALL_APPS && HomeActivity.showAllApps()) {   // same process as the home screen: ask it directly
 +                finish();
 +                return;
@@ -454,7 +533,7 @@ diff -ruN free-my-tv-main/app/src/io/freemytv/QuickPanelActivity.java free-my-tv
  }
 diff -ruN free-my-tv-main/app/src/io/freemytv/SettingsActivity.java free-my-tv-main/app/src/io/freemytv/SettingsActivity.java
 --- free-my-tv-main/app/src/io/freemytv/SettingsActivity.java	2026-10-31 03:42:25.000000000 +0000
-+++ free-my-tv-main/app/src/io/freemytv/SettingsActivity.java	2026-10-31 08:50:33.179926206 +0000
++++ free-my-tv-main/app/src/io/freemytv/SettingsActivity.java	2026-11-01 05:04:51.720118981 +0000
 @@ -36,6 +36,7 @@
  
  import java.io.IOException;
@@ -468,21 +547,22 @@ diff -ruN free-my-tv-main/app/src/io/freemytv/SettingsActivity.java free-my-tv-m
                  SAVER_ROW = 9, ANDROID_APPS_ROW = 10, STATUS_ICONS_ROW = 11, RECENTS_ROW = 12, POWER_ON_ROW = 13,
                  WEATHER_ROW = 14, CITY_ROW = 15, FORECAST_ROW = 16, PLAYING_ROW = 17, HOME_ROW = Config.HOME_ASSISTANT ? 18 : -1,
 -                QUOTES_ROW = Config.HOME_ASSISTANT ? 19 : 18, COIN_ROWS = QUOTES_ROW + 1;
-+                LIVE_ROW = Config.HOME_ASSISTANT ? 19 : 18, WALLPAPER_ROW = LIVE_ROW + 1, QUOTES_ROW = WALLPAPER_ROW + 1,
++                LIVE_ROW = Config.HOME_ASSISTANT ? 19 : 18, WALLPAPER_ROW = LIVE_ROW + 1, THEME_ROW = WALLPAPER_ROW + 1, QUOTES_ROW = THEME_ROW + 1,
 +                COIN_ROWS = QUOTES_ROW + 1;
          /** No "home" on Xiaomi TVs: their remote sends one Home press as a burst of presses (HomeView.BURST_MS). */
          private static final String[] RECENTS = RemoteKeys.XIAOMI ? new String[] {"off", "drawer"}
                  : new String[] {"off", "drawer", "home"};
-@@ -1008,6 +1010,8 @@
+@@ -1008,6 +1010,9 @@
              l.add(Ui.tr("Forecast"));
              l.add(Ui.tr("Now Playing widget"));
              if (HOME_ROW >= 0) l.add("Home Assistant");
 +            l.add(Ui.tr("Live TV app"));
 +            l.add(Ui.tr("Wallpaper"));
++            l.add(Ui.tr("Theme"));
              l.add(Ui.tr("Quotes widget"));
              l.add("Bitcoin");
              l.add("Ethereum");
-@@ -1083,6 +1087,51 @@
+@@ -1083,6 +1088,43 @@
                      .show();
          }
  
@@ -508,54 +588,48 @@ diff -ruN free-my-tv-main/app/src/io/freemytv/SettingsActivity.java free-my-tv-m
 +            Prefs.setLiveApp(pkgs.get((at + dir + pkgs.size()) % pkgs.size()));
 +        }
 +
-+        /** The Wallpaper row: Off, the chosen file's name, or what to do first. */
++        /** The Wallpaper row: Off, "My photos", one of them, a file, or what to do first. */
 +        private String wallpaperLabel() {
-+            Context c = getContext();
-+            if (!Wallpaper.allowed(c)) return Ui.tr("Allow storage access (press →)");
-+            File f = Wallpaper.chosen(c);
-+            if (f != null) return f.getName();
-+            return Wallpaper.files(c).isEmpty() ? Ui.tr("Put files in a FreeMyTV folder") : Ui.tr("Off");
++            return Wallpaper.label(getContext(), Prefs.wallpaper());
 +        }
 +
-+        /** ← → on the Wallpaper row: Off, then each photo or video in a FreeMyTV folder. */
++        /** ← → on the Wallpaper row: Off, My photos (a new one each hour), each photo, then the files in the folders. */
 +        private void stepWallpaper(int dir) {
 +            Context c = getContext();
-+            if (!Wallpaper.allowed(c)) {
-+                Wallpaper.request(activity);
-+                return;
-+            }
-+            List<String> paths = new ArrayList<>();
-+            paths.add("");
-+            for (File f : Wallpaper.files(c)) paths.add(f.getPath());
-+            int at = Math.max(0, paths.indexOf(Prefs.wallpaper()));
-+            Prefs.setWallpaper(paths.get((at + dir + paths.size()) % paths.size()));
++            List<String> list = Wallpaper.choices(c);
++            int at = Math.max(0, list.indexOf(Prefs.wallpaper()));
++            String next = list.get((at + dir + list.size()) % list.size());
++            Prefs.setWallpaper(next);
++            if (next.equals(Wallpaper.ASK)) Wallpaper.request(activity);
 +        }
 +
          private String[] settingValues() {
              String[] labels = settingLabels();
              String[] v = new String[labels.length];
-@@ -1117,6 +1166,8 @@
+@@ -1117,6 +1159,9 @@
              v[FORECAST_ROW] = Prefs.forecast().equals("days") ? Ui.tr("Next days") : Ui.tr("Next hours");
              v[PLAYING_ROW] = onOff(Prefs.nowPlaying());
              if (HOME_ROW >= 0) v[HOME_ROW] = onOff(HomeAssistant.on(getContext()));
 +            v[LIVE_ROW] = liveAppLabel();
 +            v[WALLPAPER_ROW] = wallpaperLabel();
++            v[THEME_ROW] = Prefs.minimal() ? "Minimal" : "Free My TV";
              v[QUOTES_ROW] = onOff(Prefs.quotes());
              // No quotes widget, nowhere to show prices: the coins read as off (and stay locked) until it is back on.
              for (int i = COIN_ROWS; i < v.length - 3; i++) v[i] = onOff(Prefs.quotes() && Prefs.coin(i - COIN_ROWS));
-@@ -1485,6 +1536,8 @@
+@@ -1485,6 +1530,9 @@
                      Prefs.setHomeAssistant(!Prefs.homeAssistant());
                      if (!Prefs.homeAssistant()) HomeAssistant.forget(getContext());
                      return;
 +                case LIVE_ROW: stepLiveApp(dir); return;
 +                case WALLPAPER_ROW: stepWallpaper(dir); return;
++                case THEME_ROW: Prefs.setLauncherTheme(Prefs.minimal() ? "classic" : "minimal"); return;
                  case QUOTES_ROW: Prefs.setQuotes(!Prefs.quotes()); break;
                  default:
                      if (row >= keyRow() || !Prefs.quotes()) return;   // the keys and Updates act on OK only
 diff -ruN free-my-tv-main/app/src/io/freemytv/Wallpaper.java free-my-tv-main/app/src/io/freemytv/Wallpaper.java
 --- free-my-tv-main/app/src/io/freemytv/Wallpaper.java	1970-01-01 00:00:00.000000000 +0000
-+++ free-my-tv-main/app/src/io/freemytv/Wallpaper.java	2026-10-31 08:50:33.176495376 +0000
-@@ -0,0 +1,189 @@
++++ free-my-tv-main/app/src/io/freemytv/Wallpaper.java	2026-11-01 05:04:51.718103533 +0000
+@@ -0,0 +1,242 @@
 +package io.freemytv;
 +
 +import android.Manifest;
@@ -588,8 +662,10 @@ diff -ruN free-my-tv-main/app/src/io/freemytv/Wallpaper.java free-my-tv-main/app
 + * Your own wallpaper behind the home screen (Home Settings > Wallpaper): a sharp photo, or a video that plays in a
 + * loop with no sound. Android TV has no live wallpapers of its own, so this lives inside Free My TV only.
 + *
-+ * The files are the ones in a folder called "FreeMyTV" on the TV's storage or on a USB drive (Pictures, Movies, DCIM,
-+ * Download, or the drive's root): put them there with Send Files to TV, a USB stick or any file manager.
++ * Where they come from: the photos you already sent to Free My TV ("My photos", one for each hour or one you pick),
++ * the app's own wallpaper folder (Android/data/io.freemytv/files/wallpaper, no permission needed), and a folder called
++ * "FreeMyTV" on the TV's storage or on a USB drive (Pictures, Movies, DCIM, Download, or the drive's root), which asks
++ * for the storage permission once.
 + */
 +final class Wallpaper {
 +    private Wallpaper() {}
@@ -597,6 +673,8 @@ diff -ruN free-my-tv-main/app/src/io/freemytv/Wallpaper.java free-my-tv-main/app
 +    /** A wallpaper is chosen and on screen: the home screen leaves its own background out and takes the night look. */
 +    static volatile boolean active;
 +
++    /** The Wallpaper row's "My photos, a different one each hour" and the "allow storage access" step. */
++    static final String ROTATE = "photos:rotate", ASK = "ask:storage";
 +    private static final String FOLDER = "FreeMyTV";
 +    private static final String[] IMAGES = {"jpg", "jpeg", "png", "webp"};
 +    private static final String[] VIDEOS = {"mp4", "webm", "mkv", "3gp"};
@@ -630,21 +708,39 @@ diff -ruN free-my-tv-main/app/src/io/freemytv/Wallpaper.java free-my-tv-main/app
 +        return has(f.getName(), VIDEOS);
 +    }
 +
-+    /** Every photo and video in a "FreeMyTV" folder, by name. Empty without the storage permission. */
++    /** The app's own folder for wallpapers: the TV lets the app read it without asking. */
++    private static File ownFolder(Context c) {
++        return c.getExternalFilesDir("wallpaper");
++    }
++
++    private static boolean own(Context c, File f) {
++        String p = f.getPath();
++        File ext = c.getExternalFilesDir(null);
++        return p.startsWith(c.getFilesDir().getPath()) || ext != null && p.startsWith(ext.getPath());
++    }
++
++    /** Every photo and video in the app's wallpaper folder and, with the permission, in the "FreeMyTV" folders, by name. */
 +    static List<File> files(Context c) {
 +        List<File> out = new ArrayList<>();
-+        if (!allowed(c)) return out;
 +        List<File> roots = new ArrayList<>();
-+        for (String type : new String[] {Environment.DIRECTORY_PICTURES, Environment.DIRECTORY_MOVIES,
-+                Environment.DIRECTORY_DCIM, Environment.DIRECTORY_DOWNLOADS}) {
-+            roots.add(new File(Environment.getExternalStoragePublicDirectory(type), FOLDER));
++        File mine = ownFolder(c);
++        if (mine != null) {
++            //noinspection ResultOfMethodCallIgnored
++            mine.mkdirs();
++            roots.add(mine);
 +        }
-+        roots.add(new File(Environment.getExternalStorageDirectory(), FOLDER));
-+        File[] volumes = new File("/storage").listFiles();   // USB drives and SD cards
-+        if (volumes != null) {
-+            for (File v : volumes) {
-+                if (v.getName().equals("self") || v.getName().equals("emulated")) continue;
-+                roots.add(new File(v, FOLDER));
++        if (allowed(c)) {
++            for (String type : new String[] {Environment.DIRECTORY_PICTURES, Environment.DIRECTORY_MOVIES,
++                    Environment.DIRECTORY_DCIM, Environment.DIRECTORY_DOWNLOADS}) {
++                roots.add(new File(Environment.getExternalStoragePublicDirectory(type), FOLDER));
++            }
++            roots.add(new File(Environment.getExternalStorageDirectory(), FOLDER));
++            File[] volumes = new File("/storage").listFiles();   // USB drives and SD cards
++            if (volumes != null) {
++                for (File v : volumes) {
++                    if (v.getName().equals("self") || v.getName().equals("emulated")) continue;
++                    roots.add(new File(v, FOLDER));
++                }
 +            }
 +        }
 +        for (File root : roots) {
@@ -658,12 +754,43 @@ diff -ruN free-my-tv-main/app/src/io/freemytv/Wallpaper.java free-my-tv-main/app
 +        return out;
 +    }
 +
-+    /** The chosen file, or null (none chosen, moved away, or no permission). */
++    /** What the Wallpaper row steps through: Off, "My photos", each of them, the files, and the permission step. */
++    static List<String> choices(Context c) {
++        List<String> out = new ArrayList<>();
++        out.add("");
++        List<File> photos = Photos.files(c);
++        if (!photos.isEmpty()) out.add(ROTATE);
++        for (File f : photos) out.add(f.getPath());
++        for (File f : files(c)) out.add(f.getPath());
++        if (!allowed(c)) out.add(ASK);
++        return out;
++    }
++
++    /** The name the Wallpaper row shows for a choice. */
++    static String label(Context c, String value) {
++        if (value.isEmpty()) return Ui.tr("Off");
++        if (value.equals(ROTATE)) return Ui.tr("My photos (a new one each hour)");
++        if (value.equals(ASK)) return Ui.tr("Allow storage access (press →)");
++        List<File> photos = Photos.files(c);
++        for (int i = 0; i < photos.size(); i++) {
++            if (photos.get(i).getPath().equals(value)) return Ui.tr("My photo") + " " + (i + 1);
++        }
++        File f = new File(value);
++        return f.isFile() ? f.getName() : Ui.tr("Off");
++    }
++
++    /** The chosen file, or null (none chosen, moved away, or no permission for it). */
 +    static File chosen(Context c) {
-+        String path = Prefs.wallpaper();
-+        if (path.isEmpty() || !allowed(c)) return null;
-+        File f = new File(path);
-+        return f.isFile() ? f : null;
++        String value = Prefs.wallpaper();
++        if (value.isEmpty() || value.equals(ASK)) return null;
++        if (value.equals(ROTATE)) {
++            List<File> photos = Photos.files(c);
++            if (photos.isEmpty()) return null;
++            return photos.get((int) ((System.currentTimeMillis() / 3_600_000L) % photos.size()));
++        }
++        File f = new File(value);
++        if (!f.isFile()) return null;
++        return own(c, f) || allowed(c) ? f : null;
 +    }
 +
 +    // MARK: - On screen
