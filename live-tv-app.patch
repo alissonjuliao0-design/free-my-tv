@@ -269,7 +269,7 @@ diff -ruN free-my-tv-main/app/src/io/freemytv/CustomKeys.java free-my-tv-main/ap
 +}
 diff -ruN free-my-tv-main/app/src/io/freemytv/HomeActivity.java free-my-tv-main/app/src/io/freemytv/HomeActivity.java
 --- free-my-tv-main/app/src/io/freemytv/HomeActivity.java	2026-10-31 03:42:25.000000000 +0000
-+++ free-my-tv-main/app/src/io/freemytv/HomeActivity.java	2026-11-03 06:36:18.747731087 +0000
++++ free-my-tv-main/app/src/io/freemytv/HomeActivity.java	2026-11-03 06:53:45.624899509 +0000
 @@ -20,6 +20,18 @@
      /** Opens All Apps (a remote's All Apps button, RemoteKeys). */
      static final String EXTRA_ALL_APPS = "io.freemytv.ALL_APPS";
@@ -289,7 +289,7 @@ diff -ruN free-my-tv-main/app/src/io/freemytv/HomeActivity.java free-my-tv-main/
      private int prefsVersion = Prefs.version;   // settings changed while we were away: start over
  
      @Override protected void onCreate(Bundle savedInstanceState) {
-@@ -40,8 +52,17 @@
+@@ -40,8 +52,18 @@
              return;
          }
          Ui.init(this);
@@ -301,6 +301,7 @@ diff -ruN free-my-tv-main/app/src/io/freemytv/HomeActivity.java free-my-tv-main/
 +        root = layers;
 +        neon = Neon.create(this);   // the glow along the edges, over everything (null when off)
 +        if (neon != null) {
++            neon.followApp(() -> home.focusedApp());
 +            layers.addView(neon, new android.widget.FrameLayout.LayoutParams(
 +                    android.view.ViewGroup.LayoutParams.MATCH_PARENT, android.view.ViewGroup.LayoutParams.MATCH_PARENT));
 +        }
@@ -308,7 +309,7 @@ diff -ruN free-my-tv-main/app/src/io/freemytv/HomeActivity.java free-my-tv-main/
          getWindow().setBackgroundDrawable(null);
          if (getIntent().getBooleanExtra(EXTRA_ALL_APPS, false)) home.showAllApps();
          // At power-on "Live TV" (#346): the first time the home screen comes up after a full start, in Free My TV mode.
-@@ -73,12 +94,16 @@
+@@ -73,12 +95,16 @@
              recreate();   // a new language or city: draw everything again
              return;
          }
@@ -325,7 +326,7 @@ diff -ruN free-my-tv-main/app/src/io/freemytv/HomeActivity.java free-my-tv-main/
          if (home != null) home.pause();
          super.onPause();
      }
-@@ -103,6 +128,9 @@
+@@ -103,6 +129,9 @@
      private static final long TWICE_MS = 700;
  
      @Override protected void onDestroy() {
@@ -337,8 +338,8 @@ diff -ruN free-my-tv-main/app/src/io/freemytv/HomeActivity.java free-my-tv-main/
              home.destroy();
 diff -ruN free-my-tv-main/app/src/io/freemytv/HomeApps.java free-my-tv-main/app/src/io/freemytv/HomeApps.java
 --- free-my-tv-main/app/src/io/freemytv/HomeApps.java	2026-10-31 03:42:25.000000000 +0000
-+++ free-my-tv-main/app/src/io/freemytv/HomeApps.java	2026-10-31 09:23:32.147079892 +0000
-@@ -62,6 +62,10 @@
++++ free-my-tv-main/app/src/io/freemytv/HomeApps.java	2026-11-03 06:53:22.597215811 +0000
+@@ -62,9 +62,27 @@
      static final int RECENTS = 8;
      /** A Home Assistant entity in the drawer (HomeAssistant): OK calls its service, nothing opens. */
      static final int HOME_ASSISTANT = 9;
@@ -349,7 +350,24 @@ diff -ruN free-my-tv-main/app/src/io/freemytv/HomeApps.java free-my-tv-main/app/
      /** Image size of each card (16:9; on screen it shows up to ~330 px wide). */
      static final int TILE_W = 384, TILE_H = 216;
  
-@@ -260,10 +264,11 @@
++    /** The brand colour of a known shelf app (Netflix red, Prime blue...), or 0 for any other. */
++    static int brand(String key) {
++        if (key == null) return 0;
++        for (String[] row : SHELF) {
++            if (!row[0].equals(key) || row.length < 4) continue;
++            try {
++                return 0xFF000000 | Integer.parseInt(row[3], 16);
++            } catch (NumberFormatException e) {
++                return 0;
++            }
++        }
++        return 0;
++    }
++
+     static final class Item {
+         int kind;
+         String key, label, pkg, inputId, number;
+@@ -260,10 +278,11 @@
  
      // MARK: - Top buttons (the round ones at the top right)
  
@@ -365,7 +383,7 @@ diff -ruN free-my-tv-main/app/src/io/freemytv/HomeApps.java free-my-tv-main/app/
      static final int MAX_TOP = TOP_ALL.size();
  
      /** The keys of the top buttons, in order (Settings > Top Buttons; by default Live TV, HDMI Inputs, Settings). */
-@@ -304,10 +309,11 @@
+@@ -304,10 +323,11 @@
      private static Item topButton(String key) {
          switch (key) {
              case TOP_LIVE: return action(LIVE_TV, TOP_LIVE, Ui.tr("light|Live TV"), "live_tv");
@@ -379,7 +397,7 @@ diff -ruN free-my-tv-main/app/src/io/freemytv/HomeApps.java free-my-tv-main/app/
          }
      }
  
-@@ -492,9 +498,57 @@
+@@ -492,9 +512,57 @@
          // MIUI TV knows three HDMI ports; a board reporting a fourth leaves it with no way to be opened (a Redmi TV
          // lists HDMI 4 and answers no number for it), so it isn't shown.
          else if (xiaomiInputs(c)) out.removeIf(it -> !xiaomiPort(it));
@@ -437,7 +455,7 @@ diff -ruN free-my-tv-main/app/src/io/freemytv/HomeApps.java free-my-tv-main/app/
      /** Allwinner's live TV player (HY300 and HY320 projectors), the stock home screen's way to HDMI. */
      private static final ComponentName ALLWINNER_TV = new ComponentName("com.softwinner.awlivetv", "com.softwinner.awlivetv.MainActivity");
      /** Xiaomi's own source player (MIUI TV, the Chinese firmware): it takes the port as a number of its own. */
-@@ -503,6 +557,19 @@
+@@ -503,6 +571,19 @@
      /** MIUI TV's numbers for HDMI 1 to 3 (VGA is 0 and AV 2). A number it doesn't know drops the TV to no source at all. */
      private static final int[] XIAOMI_HDMI = {23, 24, 25};
  
@@ -457,7 +475,7 @@ diff -ruN free-my-tv-main/app/src/io/freemytv/HomeApps.java free-my-tv-main/app/
      /** Whether the activity is really there: Intent.resolveActivity hands an explicit component back without looking. */
      private static boolean exists(Context c, ComponentName component) {
          return new Intent().setComponent(component).resolveActivityInfo(c.getPackageManager(), 0) != null;
-@@ -543,6 +610,10 @@
+@@ -543,6 +624,10 @@
       * player. Allwinner's takes the port in "input_source" ("HDMI1"); Xiaomi's takes it as its own "input" number.
       */
      private static Intent inputIntent(Context c, Item it) {
@@ -468,7 +486,7 @@ diff -ruN free-my-tv-main/app/src/io/freemytv/HomeApps.java free-my-tv-main/app/
          if (allwinnerInputs(c)) {
              // Its own player switches the port when the intent names it ("HDMI1"), as its source picker does. The
              // HY320 needs it; the HY300 ignores it and opens its only port anyway.
-@@ -636,12 +707,23 @@
+@@ -636,12 +721,23 @@
                  intent = liveTv(a);
                  break;
              case INPUT:
@@ -493,7 +511,7 @@ diff -ruN free-my-tv-main/app/src/io/freemytv/HomeApps.java free-my-tv-main/app/
              case ANDROID_SETTINGS:
                  intent = new Intent(Settings.ACTION_SETTINGS);
                  // Where nothing answers it, Android TV's own settings by name: on the HY300 Pro+ the stock home
-@@ -703,6 +785,12 @@
+@@ -703,6 +799,12 @@
       */
      static Intent liveTv(Context c) {
          PackageManager pm = c.getPackageManager();
@@ -525,7 +543,7 @@ diff -ruN free-my-tv-main/app/src/io/freemytv/HomeMode.java free-my-tv-main/app/
          } catch (IOException e) {
 diff -ruN free-my-tv-main/app/src/io/freemytv/HomeView.java free-my-tv-main/app/src/io/freemytv/HomeView.java
 --- free-my-tv-main/app/src/io/freemytv/HomeView.java	2026-10-31 03:42:25.000000000 +0000
-+++ free-my-tv-main/app/src/io/freemytv/HomeView.java	2026-11-01 05:41:16.828704891 +0000
++++ free-my-tv-main/app/src/io/freemytv/HomeView.java	2026-11-03 06:53:22.600104224 +0000
 @@ -251,6 +251,11 @@
      private final android.graphics.PorterDuffColorFilter whiteLogo =
              new android.graphics.PorterDuffColorFilter(0xFFFFFFFF, android.graphics.PorterDuff.Mode.SRC_IN);
@@ -538,7 +556,15 @@ diff -ruN free-my-tv-main/app/src/io/freemytv/HomeView.java free-my-tv-main/app/
      private int shelfIndex;
      /** The first app the shelf shows: with more apps than fit, it scrolls with the focus. */
      private int shelfFirst;
-@@ -1331,7 +1336,7 @@
+@@ -927,6 +932,7 @@
+         lDate = Ui.text(Ui.semibold, 34 * k, L_DIM);
+         lClock = Ui.numbers(Ui.light, 200 * k, L_INK);
+         lClock.setLetterSpacing(-0.01f);
++        applyClockStyle();
+         lWeather = Ui.text(Ui.medium, 34 * k, L_DIM);
+         lClockQuote = Ui.numbers(Ui.medium, 28 * k, L_DIM);
+         lightGradient = tintShade = null;
+@@ -1331,7 +1337,7 @@
  
      /** Day or night right now (from the sun at your location); `animate`: with the transition. */
      private void checkNight(boolean animate) {
@@ -547,7 +573,7 @@ diff -ruN free-my-tv-main/app/src/io/freemytv/HomeView.java free-my-tv-main/app/
          if (want == nightTarget) return;
          nightTarget = want;
          if (animate && running) {
-@@ -1616,9 +1621,11 @@
+@@ -1616,9 +1622,11 @@
          float full = (CONTENT_R - MARGIN) * k;
          // Tiles in the TV banners' own 16:9, so an app's art is never stretched; never taller than L_TILE_H. The glass
          // keeps its bottom edge, so with more apps it only gets lower.
@@ -561,7 +587,7 @@ diff -ruN free-my-tv-main/app/src/io/freemytv/HomeView.java free-my-tv-main/app/
          float top = (L_PLATTER_TOP + L_TILE_H) * k - th;
          platterRect.set(left - pad, top, left + width + pad, top + th + 2 * pad);
          snap(platterRect);
-@@ -1651,7 +1658,7 @@
+@@ -1651,7 +1659,7 @@
  
      /** Shelf layer: the glass bar and its shadow (it only changes with the background). */
      private void drawPlatter(Canvas c) {
@@ -570,7 +596,7 @@ diff -ruN free-my-tv-main/app/src/io/freemytv/HomeView.java free-my-tv-main/app/
          float radius = (TILE_RADIUS + SHELF_PAD) * k;
          tmp.set(platterRect);
          tmp.offset(0, 18 * k);
-@@ -1816,6 +1823,11 @@
+@@ -1816,6 +1824,11 @@
      }
  
      private void drawTiles(Canvas c) {
@@ -582,7 +608,7 @@ diff -ruN free-my-tv-main/app/src/io/freemytv/HomeView.java free-my-tv-main/app/
          // The focused one last: it grows over its neighbors without being covered by them.
          int top = -1;
          float most = 0.02f;
-@@ -2005,8 +2017,9 @@
+@@ -2005,8 +2018,9 @@
      // MARK: - Bottom drawer
  
      private static List<HomeApps.Item> drawerList(Context c) {
@@ -594,7 +620,7 @@ diff -ruN free-my-tv-main/app/src/io/freemytv/HomeView.java free-my-tv-main/app/
          list.addAll(HomeAssistant.items(c));   // empty unless configured and on in Home Settings
          return list;
      }
-@@ -2069,8 +2082,13 @@
+@@ -2069,8 +2083,13 @@
          drawerDirty = true;
      }
  
@@ -609,7 +635,7 @@ diff -ruN free-my-tv-main/app/src/io/freemytv/HomeView.java free-my-tv-main/app/
          drawerOpen = true;
          drawer.target = 1;
          zone = Z_DRAWER;
-@@ -2152,7 +2170,7 @@
+@@ -2152,7 +2171,7 @@
      }
  
      private void drawDrawer(Canvas c) {
@@ -618,7 +644,7 @@ diff -ruN free-my-tv-main/app/src/io/freemytv/HomeView.java free-my-tv-main/app/
          rowTitle.setColor(tone(L_DIM, 0xB3FFFFFF));
          cardTitle.setColor(tone(L_DIM, 0xB3FFFFFF));
          cardText.setColor(drawerInk(0.95f));
-@@ -3108,7 +3126,7 @@
+@@ -3108,7 +3127,7 @@
                          return;
                      }
                  } else {
@@ -627,7 +653,7 @@ diff -ruN free-my-tv-main/app/src/io/freemytv/HomeView.java free-my-tv-main/app/
                      openDrawer();
                  }
                  break;
-@@ -3301,17 +3319,6 @@
+@@ -3301,17 +3320,6 @@
              openSheet();
              return;
          }
@@ -645,7 +671,7 @@ diff -ruN free-my-tv-main/app/src/io/freemytv/HomeView.java free-my-tv-main/app/
          boolean opened = HomeApps.open(activity, it, this, Math.round(r.left), Math.round(r.top),
                  Math.round(r.width()), Math.round(r.height()));
          if (!opened) showToast(Ui.trf("Couldn't open {app}.", "app", it.label));
-@@ -4048,7 +4055,7 @@
+@@ -4048,16 +4056,21 @@
  
      /** Picks need a TMDB key: without one, "picks" shows the clock, like "nothing". */
      private boolean picksMode() {
@@ -654,7 +680,13 @@ diff -ruN free-my-tv-main/app/src/io/freemytv/HomeView.java free-my-tv-main/app/
      }
  
      /** The clock, the date and the weather: nothing at the top, or picks without a TMDB key. */
-@@ -4057,7 +4064,7 @@
++    /** The app on the shelf that has focus, or null while it is somewhere else: the glow that follows the apps asks. */
++    HomeApps.Item focusedApp() {
++        return zone == Z_SHELF && shelfIndex >= 0 && shelfIndex < shelf.size() ? shelf.get(shelfIndex) : null;
++    }
++
+     private boolean clockMode() {
+         return !picksMode() && !continueMode();
      }
  
      private boolean continueMode() {
@@ -663,7 +695,7 @@ diff -ruN free-my-tv-main/app/src/io/freemytv/HomeView.java free-my-tv-main/app/
      }
  
      /** What the top shows now (from reload, off the main thread) and, for Continue Watching, its list. */
-@@ -4502,6 +4509,7 @@
+@@ -4502,6 +4515,7 @@
       * the same photo almost black (or a dark gradient), drawn on top during the transition.
       */
      private void drawLightSky(Canvas c) {
@@ -671,7 +703,7 @@ diff -ruN free-my-tv-main/app/src/io/freemytv/HomeView.java free-my-tv-main/app/
          long up = SystemClock.uptimeMillis();
          float e = bgFadeAt == 0 ? 1 : fadeEase(bgFadeAt, up);
          boolean fading = bgFadeAt != 0;
-@@ -4600,6 +4608,7 @@
+@@ -4600,6 +4614,7 @@
          applyTone();
          if (clockMode()) {
              titleRight = 0;
@@ -679,7 +711,82 @@ diff -ruN free-my-tv-main/app/src/io/freemytv/HomeView.java free-my-tv-main/app/
              drawClock(c);
              if (HomeData.coinCount() > 0 || playingTab != null) drawQuotes(c);
              return;
-@@ -4814,7 +4823,7 @@
+@@ -4649,10 +4664,73 @@
+         return Recs.hasKey(getContext());
+     }
+ 
++    // The clock's look (Home Settings > Clock style): the weight and size of the digits, or an outline, a neon line or a
++    // gradient. 0 is the original.
++    private int clockStyle;
++    private float clockBase;
++    private android.graphics.LinearGradient clockShader;
++    private final android.graphics.Matrix clockMatrix = new android.graphics.Matrix();
++
++    private void applyClockStyle() {
++        clockStyle = Math.max(0, Math.min(Prefs.CLOCK_STYLES.length - 1, Prefs.clockStyle()));
++        float size = 200 * k;
++        switch (clockStyle) {
++            case 1: lClock.setTypeface(Ui.thin); break;
++            case 2: lClock.setTypeface(Ui.semibold); size = 190 * k; break;
++            case 3: lClock.setTypeface(Ui.medium); size = 130 * k; break;
++            case 4: lClock.setLetterSpacing(0.14f); size = 170 * k; break;
++            case 5: lClock.setTypeface(Ui.medium); lClock.setTextSkewX(-0.2f); size = 190 * k; break;
++            case 6: case 7: lClock.setTypeface(Ui.regular); lClock.setStrokeJoin(Paint.Join.ROUND); break;
++            case 8: lClock.setTypeface(Ui.semibold); size = 190 * k; break;
++            default: break;
++        }
++        lClock.setTextSize(size);
++        // The small clock sits right under the date, not where the big one's top would be.
++        clockBase = clockStyle == 3 ? L_DATE_BASE * k + 70 * k + Ui.cap(lClock) : L_CLOCK_BASE * k;
++        clockShader = null;
++        if (clockStyle == 8) {
++            float w = lClock.measureText("00:00");
++            clockShader = new android.graphics.LinearGradient(0, 0, w, 0, 0xFF00E5FF, 0xFFFF2BD6, Shader.TileMode.CLAMP);
++        }
++    }
++
++    private void drawClockText(Canvas c, float x) {
++        float tx = x - Ui.leftBearing(lClock, clockText);
++        if (clockStyle == 6 || clockStyle == 7) {
++            int ink = lClock.getColor();
++            lClock.setStyle(Paint.Style.STROKE);
++            if (clockStyle == 7) {   // neon: two soft halos under a thin bright line, in the glow's colour
++                int glow = Neon.accent() & 0xFFFFFF;
++                float[] widths = {16 * k, 9 * k, 4 * k};
++                int[] alphas = {0x32, 0x5A, 0xFF};
++                for (int i = 0; i < widths.length; i++) {
++                    lClock.setStrokeWidth(widths[i]);
++                    lClock.setColor((alphas[i] << 24) | glow);
++                    c.drawText(clockText, tx, clockBase, lClock);
++                }
++            } else {
++                lClock.setStrokeWidth(3 * k);
++                c.drawText(clockText, tx, clockBase, lClock);
++            }
++            lClock.setStyle(Paint.Style.FILL);
++            lClock.setColor(ink);
++            return;
++        }
++        if (clockShader != null) {
++            clockMatrix.setTranslate(tx, 0);
++            clockShader.setLocalMatrix(clockMatrix);
++            lClock.setShader(clockShader);
++            c.drawText(clockText, tx, clockBase, lClock);
++            lClock.setShader(null);
++            return;
++        }
++        c.drawText(clockText, tx, clockBase, lClock);
++    }
++
+     private void drawClock(Canvas c) {
+         float x = MARGIN * k;
+         c.drawText(dateText, x - Ui.leftBearing(lDate, dateText), L_DATE_BASE * k, lDate);
+-        c.drawText(clockText, x - Ui.leftBearing(lClock, clockText), L_CLOCK_BASE * k, lClock);
++        drawClockText(c, x);
+         HomeData.Weather wx = data.weather;
+         if (!Prefs.weather() || Double.isNaN(wx.temp)) return;
+         if (data.weatherAt != weatherLineAt || Prefs.version != weatherLinePrefs || !Ui.language.equals(weatherLineLanguage)) {
+@@ -4814,7 +4892,7 @@
  
      /** Wi-Fi/Ethernet, Bluetooth (when something is connected) and a USB drive, at the top left. */
      private void drawStatusIcons(Canvas c) {
@@ -690,8 +797,8 @@ diff -ruN free-my-tv-main/app/src/io/freemytv/HomeView.java free-my-tv-main/app/
          float x = MARGIN * k;
 diff -ruN free-my-tv-main/app/src/io/freemytv/Neon.java free-my-tv-main/app/src/io/freemytv/Neon.java
 --- free-my-tv-main/app/src/io/freemytv/Neon.java	1970-01-01 00:00:00.000000000 +0000
-+++ free-my-tv-main/app/src/io/freemytv/Neon.java	2026-11-03 06:40:00.048776511 +0000
-@@ -0,0 +1,267 @@
++++ free-my-tv-main/app/src/io/freemytv/Neon.java	2026-11-03 06:53:45.534405048 +0000
+@@ -0,0 +1,358 @@
 +package io.freemytv;
 +
 +import android.animation.ValueAnimator;
@@ -728,8 +835,9 @@ diff -ruN free-my-tv-main/app/src/io/freemytv/Neon.java free-my-tv-main/app/src/
 +final class Neon {
 +    private Neon() {}
 +
-+    static final String[] NAMES = {"Off", "Ocean", "Neon", "Sunset", "Forest", "Fire", "Follow wallpaper"};
-+    private static final int FOLLOW = 6;
++    static final String[] NAMES = {"Off", "Ocean", "Neon", "Sunset", "Forest", "Fire", "Follow wallpaper", "Follow app"};
++    private static final int FOLLOW = 6, APP = 7;
++    private static final int MODE_FIXED = 0, MODE_WALLPAPER = 1, MODE_APP = 2;
 +    private static final int[][] COLORS = {
 +        {},
 +        {0xFF00E5FF, 0xFF2979FF, 0xFF7C4DFF},
@@ -737,6 +845,7 @@ diff -ruN free-my-tv-main/app/src/io/freemytv/Neon.java free-my-tv-main/app/src/
 +        {0xFFFF9100, 0xFFFF1744, 0xFFD500F9},
 +        {0xFF00E676, 0xFF00BFA5, 0xFF2979FF},
 +        {0xFFFFEA00, 0xFFFF6D00, 0xFFFF1744},
++        {},
 +        {},
 +    };
 +    private static final ExecutorService worker = Executors.newSingleThreadExecutor();
@@ -748,9 +857,63 @@ diff -ruN free-my-tv-main/app/src/io/freemytv/Neon.java free-my-tv-main/app/src/
 +    static NeonView create(Context c) {
 +        int scheme = Prefs.neon();
 +        if (scheme <= 0 || scheme >= COLORS.length || Prefs.cinema()) return null;
-+        boolean follow = scheme == FOLLOW;
-+        // Following: it starts in the Neon colours until the first frame has been read.
-+        return new NeonView(c, render(gradient(COLORS[follow ? 2 : scheme])), follow);
++        int mode = scheme == FOLLOW ? MODE_WALLPAPER : scheme == APP ? MODE_APP : MODE_FIXED;
++        // Following: it starts in the Neon colours until the first frame (or the first app) has been read.
++        return new NeonView(c, render(gradient(COLORS[mode == MODE_FIXED ? scheme : 2])), mode);
++    }
++
++    /** The colour the clock's neon style uses: the middle of the scheme in use, or a cyan when it follows something. */
++    static int accent() {
++        int scheme = Prefs.neon();
++        return scheme >= 1 && scheme < COLORS.length && COLORS[scheme].length > 1 ? COLORS[scheme][1] : 0xFF00E5FF;
++    }
++
++    // MARK: - Following the apps
++
++    private static final java.util.Map<String, Integer> appColors = new java.util.HashMap<>();
++
++    /** The glow's colour for an app: its brand colour, or the main colour of its card or logo. 0: none to show. */
++    static int appColor(HomeApps.Item it) {
++        if (it == null) return 0;
++        String key = it.key != null ? it.key : it.label;
++        Integer known = key == null ? null : appColors.get(key);
++        if (known != null) return known;
++        int c = HomeApps.brand(it.key);
++        if (c == 0) c = dominant(it.tile != null ? it.tile : it.logo);
++        if (c == 0) return it.kind == HomeApps.APP ? accent() : 0;   // the card isn't loaded yet: not remembered
++        c = vivid(c);
++        if (key != null) appColors.put(key, c);
++        return c;
++    }
++
++    /** The colour that stands out most in a picture: the average of its pixels, weighted by how vivid they are. */
++    private static int dominant(Bitmap b) {
++        if (b == null || b.isRecycled()) return 0;
++        Bitmap small = Bitmap.createScaledBitmap(b, 16, 9, true);
++        int[] px = new int[16 * 9];
++        small.getPixels(px, 0, 16, 0, 0, 16, 9);
++        float[] hsv = new float[3];
++        double r = 0, g = 0, bl = 0, total = 0;
++        for (int c : px) {
++            if (Color.alpha(c) < 128) continue;
++            Color.colorToHSV(c, hsv);
++            double w = hsv[1] * hsv[2];
++            w = w * w + 0.0005;
++            r += Color.red(c) * w;
++            g += Color.green(c) * w;
++            bl += Color.blue(c) * w;
++            total += w;
++        }
++        if (total <= 0) return 0;
++        return Color.rgb((int) (r / total), (int) (g / total), (int) (bl / total));
++    }
++
++    /** The same colour with its hue turned by some degrees. */
++    private static int shift(int c, float degrees) {
++        float[] hsv = new float[3];
++        Color.colorToHSV(c, hsv);
++        hsv[0] = (hsv[0] + degrees + 360f) % 360f;
++        return Color.HSVToColor(255, hsv);
 +    }
 +
 +    // MARK: - Drawing
@@ -877,24 +1040,36 @@ diff -ruN free-my-tv-main/app/src/io/freemytv/Neon.java free-my-tv-main/app/src/
 +        return render(e);
 +    }
 +
++    /** What has focus on the home screen: asked every moment by the glow that follows the apps. */
++    interface Focus {
++        HomeApps.Item app();
++    }
++
 +    static final class NeonView extends ImageView {
-+        private final boolean follow;
++        private final int mode;
 +        private final Handler main = new Handler(Looper.getMainLooper());
 +        private ValueAnimator breathe;
 +        private boolean running;
 +        private File sampled;
++        private Focus focus;
++        private int lastApp;
 +
 +        private final Runnable follower = new Runnable() {
 +            @Override public void run() {
 +                if (!running) return;
-+                sample();
-+                main.postDelayed(this, FOLLOW_MS);
++                if (mode == MODE_APP) {
++                    pollApp();
++                    main.postDelayed(this, 250);
++                } else {
++                    sample();
++                    main.postDelayed(this, FOLLOW_MS);
++                }
 +            }
 +        };
 +
-+        NeonView(Context c, Bitmap bitmap, boolean follow) {
++        NeonView(Context c, Bitmap bitmap, int mode) {
 +            super(c);
-+            this.follow = follow;
++            this.mode = mode;
 +            setImageBitmap(bitmap);
 +            setScaleType(ScaleType.FIT_XY);
 +            setFocusable(false);
@@ -921,7 +1096,29 @@ diff -ruN free-my-tv-main/app/src/io/freemytv/Neon.java free-my-tv-main/app/src/
 +            });
 +        }
 +
++        void followApp(Focus f) {
++            focus = f;
++        }
++
++        /** The app with focus has a colour: the glow turns to it (and stays while the focus is elsewhere). */
++        private void pollApp() {
++            int color = Neon.appColor(focus == null ? null : focus.app());
++            if (color == 0 || color == lastApp) return;
++            lastApp = color;
++            final int c = color;
++            worker.execute(() -> {
++                final Bitmap glow = render(gradient(new int[] {shift(c, -28f), c, shift(c, 28f)}));
++                main.post(() -> {
++                    if (running) fadeTo(glow, 450);
++                });
++            });
++        }
++
 +        private void fadeTo(Bitmap glow) {
++            fadeTo(glow, 1100);
++        }
++
++        private void fadeTo(Bitmap glow, int ms) {
 +            Drawable previous = getDrawable();
 +            if (previous instanceof TransitionDrawable) previous = ((TransitionDrawable) previous).getDrawable(1);   // not a chain
 +            if (previous == null) {
@@ -931,7 +1128,7 @@ diff -ruN free-my-tv-main/app/src/io/freemytv/Neon.java free-my-tv-main/app/src/
 +            TransitionDrawable t = new TransitionDrawable(new Drawable[] {previous, new BitmapDrawable(getResources(), glow)});
 +            t.setCrossFadeEnabled(true);
 +            setImageDrawable(t);
-+            t.startTransition(1100);
++            t.startTransition(ms);
 +        }
 +
 +        /** The slow breathing, and the following of the wallpaper, run while the home screen is on screen. */
@@ -939,7 +1136,7 @@ diff -ruN free-my-tv-main/app/src/io/freemytv/Neon.java free-my-tv-main/app/src/
 +            running = on;
 +            if (on) {
 +                if (breathe == null) {
-+                    breathe = ValueAnimator.ofFloat(follow ? 0.8f : 0.6f, 1f);
++                    breathe = ValueAnimator.ofFloat(mode != MODE_FIXED ? 0.8f : 0.6f, 1f);
 +                    breathe.setDuration(3600);
 +                    breathe.setRepeatCount(ValueAnimator.INFINITE);
 +                    breathe.setRepeatMode(ValueAnimator.REVERSE);
@@ -947,8 +1144,9 @@ diff -ruN free-my-tv-main/app/src/io/freemytv/Neon.java free-my-tv-main/app/src/
 +                    breathe.addUpdateListener(a -> setAlpha((Float) a.getAnimatedValue()));
 +                }
 +                if (!breathe.isStarted()) breathe.start();
-+                if (follow) {
++                if (mode != MODE_FIXED) {
 +                    sampled = null;   // look again as soon as it is back on screen
++                    lastApp = 0;
 +                    main.removeCallbacks(follower);
 +                    main.post(follower);
 +                }
@@ -961,8 +1159,8 @@ diff -ruN free-my-tv-main/app/src/io/freemytv/Neon.java free-my-tv-main/app/src/
 +}
 diff -ruN free-my-tv-main/app/src/io/freemytv/Prefs.java free-my-tv-main/app/src/io/freemytv/Prefs.java
 --- free-my-tv-main/app/src/io/freemytv/Prefs.java	2026-10-31 03:42:25.000000000 +0000
-+++ free-my-tv-main/app/src/io/freemytv/Prefs.java	2026-11-03 06:40:57.663007756 +0000
-@@ -325,6 +325,43 @@
++++ free-my-tv-main/app/src/io/freemytv/Prefs.java	2026-11-03 06:53:22.601394817 +0000
+@@ -325,6 +325,50 @@
  
      static void setPowerOn(String v) { put("powerOn", v); }
  
@@ -987,6 +1185,13 @@ diff -ruN free-my-tv-main/app/src/io/freemytv/Prefs.java free-my-tv-main/app/src
 +    static int wallpaperMinutes() { return Math.max(1, sp().getInt("wallpaperMinutes", 60)); }
 +
 +    static void setWallpaperMinutes(int m) { put("wallpaperMinutes", m); }
++
++    /** The look of the big clock (Home Settings > Clock style); 0 is the original. */
++    static final String[] CLOCK_STYLES = {"Classic", "Thin", "Bold", "Compact", "Spaced", "Slanted", "Outline", "Neon", "Gradient"};
++
++    static int clockStyle() { return sp().getInt("clockStyle", 0); }
++
++    static void setClockStyle(int n) { put("clockStyle", n); }
 +
 +    /** The neon glow along the screen's edges (Home Settings > Neon edge): 0 off, then the colour schemes of Neon. */
 +    static int neon() { return sp().getInt("neon", 0); }
@@ -1190,7 +1395,7 @@ diff -ruN free-my-tv-main/app/src/io/freemytv/RemoteKeys.java free-my-tv-main/ap
          int source = e.getSource();
 diff -ruN free-my-tv-main/app/src/io/freemytv/SettingsActivity.java free-my-tv-main/app/src/io/freemytv/SettingsActivity.java
 --- free-my-tv-main/app/src/io/freemytv/SettingsActivity.java	2026-10-31 03:42:25.000000000 +0000
-+++ free-my-tv-main/app/src/io/freemytv/SettingsActivity.java	2026-11-03 06:36:18.750265158 +0000
++++ free-my-tv-main/app/src/io/freemytv/SettingsActivity.java	2026-11-04 04:29:02.802074438 +0000
 @@ -36,6 +36,7 @@
  
  import java.io.IOException;
@@ -1204,13 +1409,13 @@ diff -ruN free-my-tv-main/app/src/io/freemytv/SettingsActivity.java free-my-tv-m
                  SAVER_ROW = 9, ANDROID_APPS_ROW = 10, STATUS_ICONS_ROW = 11, RECENTS_ROW = 12, POWER_ON_ROW = 13,
                  WEATHER_ROW = 14, CITY_ROW = 15, FORECAST_ROW = 16, PLAYING_ROW = 17, HOME_ROW = Config.HOME_ASSISTANT ? 18 : -1,
 -                QUOTES_ROW = Config.HOME_ASSISTANT ? 19 : 18, COIN_ROWS = QUOTES_ROW + 1;
-+                LIVE_ROW = Config.HOME_ASSISTANT ? 19 : 18, WALLPAPER_ROW = LIVE_ROW + 1, NIGHT_ROW = WALLPAPER_ROW + 1, EVERY_ROW = NIGHT_ROW + 1, NEON_ROW = EVERY_ROW + 1, CUSTOM_ROW = NEON_ROW + 1,
++                LIVE_ROW = Config.HOME_ASSISTANT ? 19 : 18, WALLPAPER_ROW = LIVE_ROW + 1, NIGHT_ROW = WALLPAPER_ROW + 1, EVERY_ROW = NIGHT_ROW + 1, NEON_ROW = EVERY_ROW + 1, STYLE_ROW = NEON_ROW + 1, CUSTOM_ROW = STYLE_ROW + 1,
 +                THEME_ROW = CUSTOM_ROW + 4, QUOTES_ROW = THEME_ROW + 1,
 +                COIN_ROWS = QUOTES_ROW + 1;
          /** No "home" on Xiaomi TVs: their remote sends one Home press as a burst of presses (HomeView.BURST_MS). */
          private static final String[] RECENTS = RemoteKeys.XIAOMI ? new String[] {"off", "drawer"}
                  : new String[] {"off", "drawer", "home"};
-@@ -1008,6 +1011,13 @@
+@@ -1008,6 +1011,14 @@
              l.add(Ui.tr("Forecast"));
              l.add(Ui.tr("Now Playing widget"));
              if (HOME_ROW >= 0) l.add("Home Assistant");
@@ -1219,12 +1424,13 @@ diff -ruN free-my-tv-main/app/src/io/freemytv/SettingsActivity.java free-my-tv-m
 +            l.add(Ui.tr("Night wallpaper"));
 +            l.add(Ui.tr("Change every"));
 +            l.add(Ui.tr("Neon edge"));
++            l.add(Ui.tr("Clock style"));
 +            for (int i = 1; i <= 4; i++) l.add(Ui.tr("Custom button") + " " + i);
 +            l.add(Ui.tr("Theme"));
              l.add(Ui.tr("Quotes widget"));
              l.add("Bitcoin");
              l.add("Ethereum");
-@@ -1083,6 +1093,142 @@
+@@ -1083,6 +1094,142 @@
                      .show();
          }
  
@@ -1367,7 +1573,7 @@ diff -ruN free-my-tv-main/app/src/io/freemytv/SettingsActivity.java free-my-tv-m
          private String[] settingValues() {
              String[] labels = settingLabels();
              String[] v = new String[labels.length];
-@@ -1117,6 +1263,13 @@
+@@ -1117,6 +1264,14 @@
              v[FORECAST_ROW] = Prefs.forecast().equals("days") ? Ui.tr("Next days") : Ui.tr("Next hours");
              v[PLAYING_ROW] = onOff(Prefs.nowPlaying());
              if (HOME_ROW >= 0) v[HOME_ROW] = onOff(HomeAssistant.on(getContext()));
@@ -1375,13 +1581,14 @@ diff -ruN free-my-tv-main/app/src/io/freemytv/SettingsActivity.java free-my-tv-m
 +            v[WALLPAPER_ROW] = wallpaperLabel();
 +            v[NIGHT_ROW] = nightLabel();
 +            v[EVERY_ROW] = everyLabel();
++            v[STYLE_ROW] = Ui.tr(Prefs.CLOCK_STYLES[Math.min(Math.max(0, Prefs.clockStyle()), Prefs.CLOCK_STYLES.length - 1)]);
 +            v[NEON_ROW] = Ui.tr(Neon.NAMES[Math.min(Math.max(0, Prefs.neon()), Neon.NAMES.length - 1)]);
 +            for (int i = 0; i < 4; i++) v[CUSTOM_ROW + i] = customLabel(i);
 +            v[THEME_ROW] = Prefs.minimal() ? "Minimal" : "Free My TV";
              v[QUOTES_ROW] = onOff(Prefs.quotes());
              // No quotes widget, nowhere to show prices: the coins read as off (and stay locked) until it is back on.
              for (int i = COIN_ROWS; i < v.length - 3; i++) v[i] = onOff(Prefs.quotes() && Prefs.coin(i - COIN_ROWS));
-@@ -1485,6 +1638,15 @@
+@@ -1485,6 +1640,16 @@
                      Prefs.setHomeAssistant(!Prefs.homeAssistant());
                      if (!Prefs.homeAssistant()) HomeAssistant.forget(getContext());
                      return;
@@ -1389,6 +1596,7 @@ diff -ruN free-my-tv-main/app/src/io/freemytv/SettingsActivity.java free-my-tv-m
 +                case WALLPAPER_ROW: stepWallpaper(dir); return;
 +                case NIGHT_ROW: stepNight(dir); return;
 +                case EVERY_ROW: stepEvery(dir); return;
++                case STYLE_ROW: Prefs.setClockStyle((Prefs.clockStyle() + dir + Prefs.CLOCK_STYLES.length) % Prefs.CLOCK_STYLES.length); return;
 +                case NEON_ROW: Prefs.setNeon((Prefs.neon() + dir + Neon.NAMES.length) % Neon.NAMES.length); return;
 +                case CUSTOM_ROW: case CUSTOM_ROW + 1: case CUSTOM_ROW + 2: case CUSTOM_ROW + 3:
 +                    stepCustom(row - CUSTOM_ROW, dir);
