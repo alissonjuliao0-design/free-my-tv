@@ -1,758 +1,476 @@
-diff -ruN '--exclude=*.class' '--exclude=.git' '--exclude=out' '--exclude=*.apk' '--exclude=*.idsig' free-my-tv-main/app/src/io/freemytv/PictureOverlay.java full_new/free-my-tv-main/app/src/io/freemytv/PictureOverlay.java
---- free-my-tv-main/app/src/io/freemytv/PictureOverlay.java	2026-11-04 09:17:13.622000000 +0000
-+++ full_new/free-my-tv-main/app/src/io/freemytv/PictureOverlay.java	2026-11-04 09:40:00.000000000 +0000
-@@ -1,248 +1,290 @@
- package io.freemytv;
+diff --git a/app/AndroidManifest.xml b/app/AndroidManifest.xml
+--- a/app/AndroidManifest.xml
++++ b/app/AndroidManifest.xml
+@@ -19,6 +19,13 @@
+     <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
+     <!-- "Continue watching": what you left half-way in your apps, from Android TV's own Watch Next list. -->
+     <uses-permission android:name="android.permission.READ_TV_LISTINGS" />
++    <!-- "Clear memory" in the gear's panel: closes what runs in the background -->
++    <uses-permission android:name="android.permission.KILL_BACKGROUND_PROCESSES" />
++    <!-- Your wallpaper: photos and videos in a FreeMyTV folder (Home Settings > Wallpaper) -->
++    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="32" />
++    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
++    <uses-permission android:name="android.permission.READ_MEDIA_VIDEO" />
++    <!-- Uninstalling an app from the home screen (hold OK on it > Uninstall) -->
+     <!-- The Bluetooth status icon: whether headphones or a speaker are connected. Before Android 12 the permission is
+          granted at install; from 12 it is asked for when Status icons is turned on (and only the icon needs it). -->
+     <uses-permission android:name="android.permission.BLUETOOTH" android:maxSdkVersion="30" />
+@@ -269,6 +276,18 @@
+             </intent-filter>
+         </service>
  
- import android.app.Notification;
- import android.app.NotificationChannel;
- import android.app.NotificationManager;
- import android.app.Service;
- import android.content.Context;
- import android.content.Intent;
- import android.graphics.Canvas;
- import android.graphics.ColorMatrix;
- import android.graphics.ColorMatrixColorFilter;
- import android.graphics.Paint;
- import android.graphics.PixelFormat;
- import android.os.Build;
- import android.os.Handler;
- import android.os.IBinder;
- import android.os.Looper;
- import android.provider.Settings;
- import android.view.Gravity;
- import android.view.View;
- import android.view.WindowManager;
- import android.widget.Toast;
- 
- /**
-  * Picture mode over other apps (same overlay permission as Cinema / sleep timer).
-  * Applies a soft colour matrix (contrast, saturation, temperature) on top of whatever is open.
-- * Modes: Off, Cinema, Sports, Vivid, Movie, Night — chosen in the gear panel.
-+ * Modes: Off, Cinema, Sports, Vivid, Movie, Night, Game — chosen in the gear panel.
-+ * Ganho agressivo: combina ColorMatrix forte + véu de reforço por modo.
-  */
- public class PictureOverlay extends Service {
-     private static final String CH = "picture";
-     private View veil;
-     private static final Handler main = new Handler(Looper.getMainLooper());
- 
-     /** Show or hide according to preference and whether home is in front. */
-     static void update(Context c, boolean homeInFront) {
-         Intent i = new Intent(c, PictureOverlay.class);
-         boolean wanted = Prefs.pictureMode() > 0 && !homeInFront && !Prefs.cinema();
-         if (wanted && Settings.canDrawOverlays(c)) {
-             try {
-                 if (Build.VERSION.SDK_INT >= 26) c.startForegroundService(i);
-                 else c.startService(i);
-             } catch (RuntimeException e) {
-                 AppLog.w("picture overlay start: " + e.getMessage());
-             }
-             return;
-         }
-         try { c.stopService(i); } catch (RuntimeException ignored) {}
-         if (wanted) {
-             if (Capabilities.overlay(c) || Capabilities.adb(c)) {
-                 allow(c.getApplicationContext());
-             }
-         }
-     }
- 
-     static void onModeChanged(Context c) {
-         if (Prefs.pictureMode() <= 0) {
-             update(c, true);
-             return;
-         }
-         if (!Settings.canDrawOverlays(c)) {
-             allow(c.getApplicationContext());
-             main.post(() -> Toast.makeText(c.getApplicationContext(),
-                     Ui.tr("Picture mode over other apps needs overlay permission (Free My TV mode / ADB)."),
-                     Toast.LENGTH_LONG).show());
-         }
-         update(c, true);  // home usually still in front; real veil on next onPause
-     }
- 
-     private static final java.util.concurrent.atomic.AtomicBoolean allowing =
-             new java.util.concurrent.atomic.AtomicBoolean();
- 
-     private static void allow(Context c) {
-         if (!allowing.compareAndSet(false, true)) return;
-         new Thread(() -> {
-             try (Adb adb = Adb.connect(c, 10_000, null)) {
-                 adb.shell("appops set " + HomeMode.PKG + " SYSTEM_ALERT_WINDOW allow");
-             } catch (java.io.IOException e) {
-                 AppLog.w("picture overlay allow: " + e.getMessage());
-                 allowing.set(false);
-                 return;
-             }
-             boolean works = Settings.canDrawOverlays(c);
-             for (int i = 0; i < 8 && !works; i++) {
-                 android.os.SystemClock.sleep(250);
-                 works = Settings.canDrawOverlays(c);
-             }
-             Capabilities.prove(c, Capabilities.OVERLAY, works);
-             allowing.set(false);
-         }).start();
-     }
- 
--    /** Colour matrices per mode. Values tuned to be visible but not extreme on a TV. */
-+    /** Perfis com ganho agressivo, estilo "picture mode" de TVs topo de linha. */
-     static ColorMatrix matrixFor(int mode) {
-         ColorMatrix m = new ColorMatrix();
-         switch (mode) {
--            case 1: // Cinema — slightly lower contrast, warmer, less saturation
--                m.setSaturation(0.85f);
--                m.postConcat(contrast(0.92f));
--                m.postConcat(temperature(1.08f, 0.98f, 0.90f));
-+            case 1: // CINEMA — contraste alto, warm controlado, saturação viva
-+                m.setSaturation(1.15f);
-+                m.postConcat(contrast(1.22f));
-+                m.postConcat(temperature(1.06f, 1.00f, 0.92f));
-+                m.postConcat(brightness(6f));
-                 break;
--            case 2: // Sports — more sharpness feel via contrast + saturation
--                m.setSaturation(1.20f);
--                m.postConcat(contrast(1.12f));
-+            case 2: // SPORTS — nitidez perceptual via contraste + saturação forte, neutro
-+                m.setSaturation(1.45f);
-+                m.postConcat(contrast(1.30f));
-+                m.postConcat(temperature(1.00f, 1.00f, 1.02f));
-+                m.postConcat(brightness(4f));
-                 break;
--            case 3: // Vivid / HDR+ look
--                m.setSaturation(1.35f);
--                m.postConcat(contrast(1.18f));
--                m.postConcat(temperature(1.02f, 1.00f, 1.05f));
-+            case 3: // VIVID / HDR+ — saturação e contraste máximos, leve lift
-+                m.setSaturation(1.65f);
-+                m.postConcat(contrast(1.38f));
-+                m.postConcat(temperature(1.02f, 1.00f, 1.04f));
-+                m.postConcat(brightness(10f));
-                 break;
--            case 4: // Movie — warm, moderate contrast
--                m.setSaturation(0.95f);
--                m.postConcat(contrast(1.05f));
--                m.postConcat(temperature(1.12f, 1.00f, 0.88f));
-+            case 4: // MOVIE — warm cinematográfico, contraste alto, sombras ricas
-+                m.setSaturation(1.10f);
-+                m.postConcat(contrast(1.20f));
-+                m.postConcat(temperature(1.10f, 1.00f, 0.86f));
-+                m.postConcat(brightness(-4f));
-                 break;
--            case 5: // Night — darker, warm, low saturation
--                m.setSaturation(0.75f);
--                m.postConcat(contrast(0.88f));
--                m.postConcat(temperature(1.10f, 0.95f, 0.85f));
--                m.postConcat(brightness(-15f));
-+            case 5: // NIGHT — escurece forte, warm, saturação reduzida
-+                m.setSaturation(0.70f);
-+                m.postConcat(contrast(0.85f));
-+                m.postConcat(temperature(1.08f, 0.95f, 0.82f));
-+                m.postConcat(brightness(-30f));
-+                break;
-+            case 6: // GAME — contraste e saturação extremos, sombras abertas
-+                m.setSaturation(1.55f);
-+                m.postConcat(contrast(1.35f));
-+                m.postConcat(temperature(1.00f, 1.00f, 1.06f));
-+                m.postConcat(brightness(8f));
-                 break;
-             default:
-                 break;
-         }
-         return m;
-     }
- 
-     private static ColorMatrix contrast(float c) {
-         float t = (1f - c) / 2f * 255f;
-         return new ColorMatrix(new float[] {
-                 c, 0, 0, 0, t,
-                 0, c, 0, 0, t,
-                 0, 0, c, 0, t,
-                 0, 0, 0, 1, 0
-         });
-     }
- 
-     private static ColorMatrix temperature(float r, float g, float b) {
-         return new ColorMatrix(new float[] {
-                 r, 0, 0, 0, 0,
-                 0, g, 0, 0, 0,
-                 0, 0, b, 0, 0,
-                 0, 0, 0, 1, 0
-         });
-     }
- 
-     private static ColorMatrix brightness(float v) {
-         return new ColorMatrix(new float[] {
-                 1, 0, 0, 0, v,
-                 0, 1, 0, 0, v,
-                 0, 0, 1, 0, v,
-                 0, 0, 0, 1, 0
-         });
-     }
- 
-     @Override public void onCreate() {
++        <!-- Cinema mode's dim veil over other apps (same overlay permission as the sleep timer). -->
++        <service
++            android:name=".CinemaOverlay"
++            android:process=":sleep"
++            android:exported="false" />
++
++        <!-- Picture mode colour veil over other apps. -->
++        <service
++            android:name=".PictureOverlay"
++            android:process=":sleep"
++            android:exported="false" />
++
+         <receiver
+             android:name=".HomeReceiver"
+             android:exported="false">
+diff --git a/app/src/io/freemytv/App.java b/app/src/io/freemytv/App.java
+--- a/app/src/io/freemytv/App.java
++++ b/app/src/io/freemytv/App.java
+@@ -8,5 +8,7 @@
          super.onCreate();
-         if (Build.VERSION.SDK_INT >= 26) {
-             NotificationChannel ch = new NotificationChannel(CH, "Picture mode", NotificationManager.IMPORTANCE_MIN);
-             ch.setShowBadge(false);
-             ch.setSound(null, null);
-             getSystemService(NotificationManager.class).createNotificationChannel(ch);
-             Notification n = new Notification.Builder(this, CH)
-                     .setContentTitle("Picture mode")
-                     .setContentText(Prefs.PICTURE_MODES[Prefs.pictureMode()])
-                     .setSmallIcon(R.drawable.icon)
-                     .setOngoing(true)
-                     .build();
-             startForeground(73, n);
-         }
-         if (!Settings.canDrawOverlays(this) || Prefs.pictureMode() <= 0) {
-             stopSelf();
-             return;
-         }
-         final int mode = Prefs.pictureMode();
--        // Semi-transparent layer that multiplies the colour matrix onto whatever is below.
--        // Using a full-screen View with a color filter drawn at low alpha keeps input passthrough.
--        veil = new View(this) {
-+        // Camada 1: ColorMatrix (filtro real)
-+        final View filter = new View(this) {
-             private final Paint paint = new Paint();
-             {
-                 paint.setColorFilter(new ColorMatrixColorFilter(matrixFor(mode)));
--                // Very light fill so the matrix still applies without crushing the image
-                 setLayerType(LAYER_TYPE_HARDWARE, paint);
--                setBackgroundColor(0x18FFFFFF);
-+                setBackgroundColor(0x01000000); // quase transparente, só para forçar o draw
-             }
--            @Override protected void onDraw(Canvas canvas) {
--                // The hardware layer + color filter does the work; nothing extra to draw.
--            }
-+            @Override protected void onDraw(Canvas canvas) { /* filtro via layer */ }
-         };
--        // Better approach for true matrix over content: use a semi-transparent dim that
--        // only shifts temperature via a coloured veil (more reliable across TVs than color filter on empty view).
--        veil = new View(this);
--        veil.setBackgroundColor(veilColor(mode));
--
-+        addOverlay(filter);
-+        // Camada 2: véu de reforço (dá o "punch" do modo, funciona mesmo em TVs que ignoram ColorMatrix)
-+        View tint = new View(this);
-+        tint.setBackgroundColor(veilColor(mode));
-+        addOverlay(tint);
-+        veil = filter; // guarda referência para remover depois
-+    }
-+
-+    private void addOverlay(View v) {
-         int type = Build.VERSION.SDK_INT >= 26
-                 ? WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
-                 : WindowManager.LayoutParams.TYPE_SYSTEM_ALERT;
-         WindowManager.LayoutParams lp = new WindowManager.LayoutParams(
-                 WindowManager.LayoutParams.MATCH_PARENT,
-                 WindowManager.LayoutParams.MATCH_PARENT,
-                 type,
-                 WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
-                         | WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE
-                         | WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
-                         | WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS
-                         | WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED,
-                 PixelFormat.TRANSLUCENT);
-         lp.gravity = Gravity.TOP | Gravity.START;
-         try {
--            getSystemService(WindowManager.class).addView(veil, lp);
--            AppLog.w("picture overlay: mode " + Prefs.PICTURE_MODES[mode]);
-+            getSystemService(WindowManager.class).addView(v, lp);
-         } catch (RuntimeException e) {
-             AppLog.w("picture overlay add: " + e.getMessage());
--            stopSelf();
-         }
+         Prefs.init(this);
+         Place.init(this);
++        // Re-apply volume steps if the booster was left on.
++        VolumeBoost.restoreIfNeeded(this);
      }
- 
--    /** Soft coloured veils — reliable on every Android TV (true ColorMatrix on empty views is often ignored). */
-+    /** Véu de reforço: aplicado sobre o ColorMatrix para dar o "punch" do modo. */
-     private static int veilColor(int mode) {
-         switch (mode) {
--            case 1: return 0x22FFAA66; // Cinema warm
--            case 2: return 0x18AADDFF; // Sports cool crisp
--            case 3: return 0x20FFEECC; // Vivid lift
--            case 4: return 0x28FF9955; // Movie warm
--            case 5: return 0x40000000; // Night darken
-+            case 1: return 0x14FFB070; // Cinema: warm sutil
-+            case 2: return 0x10A0D8FF; // Sports: cool crisp
-+            case 3: return 0x18FFE0B0; // Vivid: lift quente
-+            case 4: return 0x1CFF9050; // Movie: warm cinematográfico
-+            case 5: return 0x50000000; // Night: escurece forte
-+            case 6: return 0x14B0FFD0; // Game: verde-água sutil
-             default: return 0x00000000;
-         }
-     }
- 
-     @Override public int onStartCommand(Intent intent, int flags, int startId) {
-         if (Prefs.pictureMode() <= 0 || !Settings.canDrawOverlays(this)) {
-             stopSelf();
-             return START_NOT_STICKY;
-         }
-         return START_STICKY;
-     }
- 
-     @Override public void onDestroy() {
-         if (veil != null) {
-             try { getSystemService(WindowManager.class).removeView(veil); }
-             catch (RuntimeException ignored) {}
-             veil = null;
-         }
-         AppLog.w("picture overlay: destroyed");
-         super.onDestroy();
-     }
- 
-     @Override public IBinder onBind(Intent intent) { return null; }
  }
-diff -ruN '--exclude=*.class' '--exclude=.git' '--exclude=out' '--exclude=*.apk' '--exclude=*.idsig' free-my-tv-main/app/src/io/freemytv/Prefs.java full_new/free-my-tv-main/app/src/io/freemytv/Prefs.java
---- free-my-tv-main/app/src/io/freemytv/Prefs.java	2026-11-04 09:17:14.570000000 +0000
-+++ full_new/free-my-tv-main/app/src/io/freemytv/Prefs.java	2026-11-04 09:40:00.000000000 +0000
-@@ -397,6 +397,14 @@
-     static int pictureMode() {
-         return Math.max(0, Math.min(PICTURE_MODES.length - 1, sp().getInt("pictureMode", 0)));
-     }
- 
-     static void setPictureMode(int n) { put("pictureMode", n); }
- 
-+    /** Volume Boost: 0 a 200 (100 = normal, >100 = super boost com LoudnessEnhancer + EQ). */
-+    static int volumeBoostLevel() { return Math.max(0, Math.min(200, sp().getInt("volumeBoostLevel", 100))); }
+diff --git a/app/src/io/freemytv/CinemaOverlay.java b/app/src/io/freemytv/CinemaOverlay.java
+new file mode 100644
+--- /dev/null
++++ b/app/src/io/freemytv/CinemaOverlay.java
+@@ -0,0 +1,173 @@
++package io.freemytv;
 +
-+    static void setVolumeBoostLevel(int n) { put("volumeBoostLevel", Math.max(0, Math.min(200, n))); }
++import android.app.Notification;
++import android.app.NotificationChannel;
++import android.app.NotificationManager;
++import android.app.Service;
++import android.content.Context;
++import android.content.Intent;
++import android.graphics.PixelFormat;
++import android.os.Build;
++import android.os.Handler;
++import android.os.IBinder;
++import android.os.Looper;
++import android.provider.Settings;
++import android.view.Gravity;
++import android.view.View;
++import android.view.WindowManager;
++import android.widget.Toast;
 +
-     /** The wallpaper behind the home screen (Home Settings > Wallpaper): a photo or video's path, or "" for none. */
-     static String wallpaper() { return sp().getString("wallpaper", ""); }
-diff -ruN '--exclude=*.class' '--exclude=.git' '--exclude=out' '--exclude=*.apk' '--exclude=*.idsig' free-my-tv-main/app/src/io/freemytv/VolumeBoost.java full_new/free-my-tv-main/app/src/io/freemytv/VolumeBoost.java
---- free-my-tv-main/app/src/io/freemytv/VolumeBoost.java	2026-11-04 09:17:13.379000000 +0000
-+++ full_new/free-my-tv-main/app/src/io/freemytv/VolumeBoost.java	2026-11-04 09:40:00.000000000 +0000
-@@ -1,160 +1,175 @@
- package io.freemytv;
- 
- import android.content.Context;
- import android.media.AudioManager;
-+import android.media.audiofx.Equalizer;
- import android.media.audiofx.LoudnessEnhancer;
- import android.os.Handler;
- import android.os.Looper;
- import android.widget.Toast;
- 
- import java.util.concurrent.atomic.AtomicBoolean;
- 
- /**
-- * Volume Booster without root (gear panel On/Off).
-+ * Super Volume Boost estilo apps da Play Store.
-  *
-- * What it does:
-- * 1. Via ADB (Free My TV mode): raises system volume_steps and turns off the safe-volume warning when possible.
-- * 2. Applies a modest LoudnessEnhancer on the current music stream session of this process (helps Free My TV itself).
-- *
-- * Limits: other apps keep their own audio sessions, so the enhancer often only helps inside Free My TV.
-- * Raising volume_steps still increases the real maximum the remote can reach on most TVs.
-+ * 0–100%: volume do sistema (0 a máximo).
-+ * 100–200%: sistema no máximo + LoudnessEnhancer (até +18 dB) + Equalizer com pré-amp
-+ *           para evitar distorção (corta graves que clipam, realça médios/agudos).
-  */
- final class VolumeBoost {
-     private VolumeBoost() {}
- 
--    private static final int TARGET_STEPS = 30;
--    private static final int GAIN_MB = 800;   // +8 dB (millibels) — strong enough to notice, not pure distortion
-+    private static final int MAX_GAIN_MB = 1800; // +18 dB no pico (200%)
-     private static final Handler main = new Handler(Looper.getMainLooper());
-     private static final AtomicBoolean busy = new AtomicBoolean();
--
-     private static LoudnessEnhancer enhancer;
--    private static int enhancerSession = -1;
-+    private static Equalizer equalizer;
- 
--    /** Call when the user toggles the option in the quick panel. */
--    static void onToggled(Context c) {
--        Context app = c.getApplicationContext();
--        if (Prefs.volumeBoost()) {
--            enable(app);
--        } else {
--            disable(app);
--        }
--    }
--
--    static void enable(Context c) {
--        if (!busy.compareAndSet(false, true)) return;
--        new Thread(() -> {
--            try {
--                applySystem(c, true);
--                attachEnhancer(c);
--                main.post(() -> Toast.makeText(c,
--                        Ui.tr("Volume Booster on. Max volume raised (needs Free My TV mode for full effect)."),
--                        Toast.LENGTH_LONG).show());
--            } catch (Exception e) {
--                AppLog.w("volume boost enable: " + e.getMessage());
--                main.post(() -> Toast.makeText(c,
--                        Ui.tr("Volume Booster: could not raise system steps. Is Free My TV mode on?"),
--                        Toast.LENGTH_LONG).show());
--            } finally {
--                busy.set(false);
--            }
--        }, "volume-boost").start();
--    }
--
--    static void disable(Context c) {
--        if (!busy.compareAndSet(false, true)) return;
--        new Thread(() -> {
--            try {
--                applySystem(c, false);
--                releaseEnhancer();
--                main.post(() -> Toast.makeText(c,
--                        Ui.tr("Volume Booster off."),
--                        Toast.LENGTH_SHORT).show());
--            } catch (Exception e) {
--                AppLog.w("volume boost disable: " + e.getMessage());
--            } finally {
--                busy.set(false);
--            }
--        }, "volume-boost").start();
--    }
--
--    /** Re-apply after reboot / process start if the preference is still on. */
--    static void restoreIfNeeded(Context c) {
--        if (!Prefs.volumeBoost()) return;
--        new Thread(() -> {
--            try {
--                applySystem(c, true);
--                attachEnhancer(c);
--            } catch (Exception e) {
--                AppLog.w("volume boost restore: " + e.getMessage());
--            }
--        }, "volume-boost-restore").start();
--    }
--
--    private static void applySystem(Context c, boolean on) throws Exception {
--        if (!Capabilities.adb(c)) {
--            AppLog.w("volume boost: no ADB (Free My TV mode off)");
--            if (on) throw new IllegalStateException("adb off");
--            return;
--        }
--        try (Adb adb = Adb.connect(c, 8_000, null)) {
--            if (on) {
--                // Remember current steps once
--                if (Prefs.volumeStepsOriginal() < 0) {
--                    String cur = adb.shell("settings get system volume_steps").trim();
--                    int n = -1;
--                    try { n = Integer.parseInt(cur); } catch (NumberFormatException ignored) {}
--                    if (n > 0) Prefs.setVolumeStepsOriginal(n);
--                }
--                adb.shell("settings put system volume_steps " + TARGET_STEPS);
--                // Safe media volume warning (headphones / some TVs)
--                adb.shell("settings put global audio_safe_volume_state 2");
--                // Some builds also read media_vol_steps
--                adb.shell("settings put system media_vol_steps " + TARGET_STEPS);
--                AppLog.w("volume boost: steps -> " + TARGET_STEPS);
--            } else {
--                int orig = Prefs.volumeStepsOriginal();
--                if (orig > 0) {
--                    adb.shell("settings put system volume_steps " + orig);
--                    adb.shell("settings put system media_vol_steps " + orig);
--                    AppLog.w("volume boost: steps restored -> " + orig);
--                }
--                Prefs.setVolumeStepsOriginal(-1);
--            }
--        }
--    }
--
--    private static void attachEnhancer(Context c) {
--        releaseEnhancer();
--        try {
--            AudioManager am = (AudioManager) c.getSystemService(Context.AUDIO_SERVICE);
--            if (am == null) return;
--            // Session 0 = output mix on many devices; otherwise try the music stream session.
--            int session = 0;
--            try {
--                // getAudioSessionId is for tracks; for global we often use 0
--                session = 0;
--            } catch (Exception ignored) {}
--            enhancer = new LoudnessEnhancer(session);
--            enhancer.setTargetGain(GAIN_MB);
--            enhancer.setEnabled(true);
--            enhancerSession = session;
--            AppLog.w("volume boost: LoudnessEnhancer +" + (GAIN_MB / 100) + " dB on session " + session);
--        } catch (Throwable t) {
--            // Many TVs reject session 0 or the effect entirely — not fatal.
--            AppLog.w("volume boost enhancer: " + t.getMessage());
--            enhancer = null;
--            enhancerSession = -1;
--        }
--    }
--
--    private static void releaseEnhancer() {
--        if (enhancer != null) {
--            try {
--                enhancer.setEnabled(false);
--                enhancer.release();
--            } catch (Throwable ignored) {}
--            enhancer = null;
--            enhancerSession = -1;
--        }
--    }
-+    /** Chamado quando o usuário muda o nível no painel (0–200). */
-+    static void onLevelChanged(Context c) {
-+        final int level = Prefs.volumeBoostLevel();
-+        new Thread(() -> apply(c.getApplicationContext(), level), "volume-boost").start();
-+    }
++/**
++ * Cinema mode over other apps: a soft black veil on top of whatever is open (Netflix, YouTube, Live TV…), so the room
++ * stays dim the same way the home screen does. The home screen itself already dims its own wallpaper; this only runs
++ * while Free My TV is in the background and Cinema mode is on. Uses the same overlay permission as the sleep timer
++ * (granted through ADB in Free My TV mode on Android TV).
++ */
++public class CinemaOverlay extends Service {
++    private static final String CH = "cinema";
++    private View veil;
++    private static final Handler main = new Handler(Looper.getMainLooper());
 +
-+    static void onToggled(Context c) { onLevelChanged(c); }
-+
-+    static void restoreIfNeeded(Context c) {
-+        if (Prefs.volumeBoost()) onLevelChanged(c);
-+    }
-+
-+    private static void apply(Context c, int level) {
-+        if (!busy.compareAndSet(false, true)) return;
++    /**
++     * Show or hide the veil. {@code homeInFront}: the home screen is visible — never cover it.
++     * Call from HomeActivity onResume/onPause and when Cinema is toggled in the gear panel.
++     */
++    static void update(Context c, boolean homeInFront) {
++        Intent i = new Intent(c, CinemaOverlay.class);
++        boolean wanted = Prefs.cinema() && !homeInFront;
++        if (wanted && Settings.canDrawOverlays(c)) {
++            try {
++                if (Build.VERSION.SDK_INT >= 26) c.startForegroundService(i);
++                else c.startService(i);
++            } catch (RuntimeException e) {
++                AppLog.w("cinema overlay start: " + e.getMessage());
++            }
++            return;
++        }
 +        try {
-+            AudioManager am = (AudioManager) c.getSystemService(Context.AUDIO_SERVICE);
-+            if (am == null) return;
-+
-+            // 1) Volume do sistema: 0–100% mapeia direto; acima disso, sistema no máximo
-+            int max = am.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
-+            int systemPct = Math.min(100, level);
-+            int sysVol = Math.round(max * (systemPct / 100f));
-+            am.setStreamVolume(AudioManager.STREAM_MUSIC, sysVol, 0);
-+
-+            // 2) Super boost acima de 100%
-+            int gainMb = 0;
-+            if (level > 100) {
-+                // 100→200% = 0→+18 dB, com curva quadrática (suave no início, forte no fim)
-+                float t = (level - 100) / 100f; // 0..1
-+                gainMb = Math.round(MAX_GAIN_MB * (t * t));
++            c.stopService(i);
++        } catch (RuntimeException ignored) {
++        }
++        // Need the veil but no permission yet: ask ADB (Free My TV mode), same path as the sleep timer.
++        if (wanted) {
++            if (Capabilities.overlay(c) || Capabilities.adb(c)) {
++                allow(c.getApplicationContext());
++            } else {
++                AppLog.w("cinema overlay: no SYSTEM_ALERT_WINDOW and no ADB");
 +            }
++        }
++    }
 +
-+            // 3) LoudnessEnhancer (ganho real)
-+            releaseEnhancer();
-+            if (gainMb > 0) {
++    /** Turn Cinema on and make sure the overlay path is ready (permission + service when home leaves). */
++    static void onCinemaToggled(Context c) {
++        if (!Prefs.cinema()) {
++            update(c, true);   // off: drop any veil
++            return;
++        }
++        if (!Settings.canDrawOverlays(c)) {
++            allow(c.getApplicationContext());
++            main.post(() -> Toast.makeText(c.getApplicationContext(),
++                    Ui.tr("Cinema over other apps needs overlay permission (Free My TV mode / ADB)."),
++                    Toast.LENGTH_LONG).show());
++        }
++        // Home is usually still in front after the gear panel; the veil starts on the next onPause.
++        update(c, true);
++    }
++
++    private static final java.util.concurrent.atomic.AtomicBoolean allowing =
++            new java.util.concurrent.atomic.AtomicBoolean();
++
++    private static void allow(Context c) {
++        if (!allowing.compareAndSet(false, true)) return;
++        new Thread(() -> {
++            try (Adb adb = Adb.connect(c, 10_000, null)) {
++                adb.shell("appops set " + HomeMode.PKG + " SYSTEM_ALERT_WINDOW allow");
++            } catch (java.io.IOException e) {
++                AppLog.w("cinema overlay allow: " + e.getMessage());
++                allowing.set(false);
++                return;
++            }
++            boolean works = Settings.canDrawOverlays(c);
++            for (int i = 0; i < 8 && !works; i++) {
++                android.os.SystemClock.sleep(250);
++                works = Settings.canDrawOverlays(c);
++            }
++            Capabilities.prove(c, Capabilities.OVERLAY, works);
++            allowing.set(false);
++            AppLog.w("cinema overlay permission: " + works);
++            // Do not show the veil while home is in front; next onPause will start it.
++        }).start();
++    }
++
++    @Override public void onCreate() {
++        super.onCreate();
++        if (Build.VERSION.SDK_INT >= 26) {
++            NotificationChannel ch = new NotificationChannel(CH, "Cinema mode", NotificationManager.IMPORTANCE_MIN);
++            ch.setShowBadge(false);
++            ch.setSound(null, null);
++            getSystemService(NotificationManager.class).createNotificationChannel(ch);
++            Notification n = new Notification.Builder(this, CH)
++                    .setContentTitle("Cinema mode")
++                    .setContentText("Dimmed over other apps")
++                    .setSmallIcon(R.drawable.icon)
++                    .setOngoing(true)
++                    .build();
++            startForeground(72, n);
++        }
++        if (!Settings.canDrawOverlays(this)) {
++            AppLog.w("cinema overlay: no permission in onCreate");
++            stopSelf();
++            return;
++        }
++        veil = new View(this);
++        // Same depth of shade the home screen uses in Cinema mode (~72% black).
++        veil.setBackgroundColor(0xB8000000);
++        int type = Build.VERSION.SDK_INT >= 26
++                ? WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
++                : WindowManager.LayoutParams.TYPE_SYSTEM_ALERT;
++        WindowManager.LayoutParams lp = new WindowManager.LayoutParams(
++                WindowManager.LayoutParams.MATCH_PARENT,
++                WindowManager.LayoutParams.MATCH_PARENT,
++                type,
++                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
++                        | WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE
++                        | WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
++                        | WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS
++                        | WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED,
++                PixelFormat.TRANSLUCENT);
++        lp.gravity = Gravity.TOP | Gravity.START;
++        lp.width = WindowManager.LayoutParams.MATCH_PARENT;
++        lp.height = WindowManager.LayoutParams.MATCH_PARENT;
++        try {
++            getSystemService(WindowManager.class).addView(veil, lp);
++            AppLog.w("cinema overlay: veil added");
++        } catch (RuntimeException e) {
++            AppLog.w("cinema overlay add: " + e.getMessage());
++            stopSelf();
++        }
++    }
++
++    @Override public int onStartCommand(Intent intent, int flags, int startId) {
++        if (!Prefs.cinema() || !Settings.canDrawOverlays(this)) {
++            stopSelf();
++            return START_NOT_STICKY;
++        }
++        return START_STICKY;
++    }
++
++    @Override public void onDestroy() {
++        if (veil != null) {
++            try {
++                getSystemService(WindowManager.class).removeView(veil);
++            } catch (RuntimeException ignored) {
++            }
++            veil = null;
++        }
++        AppLog.w("cinema overlay: destroyed");
++        super.onDestroy();
++    }
++
++    @Override public IBinder onBind(Intent intent) {
++        return null;
++    }
++}
+diff --git a/app/src/io/freemytv/CustomKeys.java b/app/src/io/freemytv/CustomKeys.java
+new file mode 100644
+--- /dev/null
++++ b/app/src/io/freemytv/CustomKeys.java
+@@ -0,0 +1,249 @@
++package io.freemytv;
++
++import android.content.Context;
++import android.content.Intent;
++import android.content.pm.PackageManager;
++import android.provider.Settings;
++import android.view.InputDevice;
++import android.view.KeyEvent;
++
++import java.io.BufferedReader;
++import java.io.File;
++import java.io.FileInputStream;
++import java.io.FileOutputStream;
++import java.io.IOException;
++import java.io.InputStreamReader;
++import java.nio.charset.StandardCharsets;
++import java.util.Arrays;
++
++/**
++ * Your own remote buttons (Home Settings > Custom button 1 to 4): any button of any remote can open any app. You press
++ * "learn", then the button on the remote, and pick the app. Read by the key service (RemoteKeyService), which runs in a
++ * process of its own, so the choices live in a tiny file both processes read, and this class stays small.
++ */
++final class CustomKeys {
++    private CustomKeys() {}
++
++    static final int SLOTS = 4;
++    private static final long LEARN_MS = 30_000;
++    private static final String FILE = "custom-keys.txt", LEARN = "custom-learn.txt";
++
++    private static final int[] codes = new int[SLOTS];
++    private static final String[] pkgs = new String[SLOTS];
++    private static long stamp = Long.MIN_VALUE;
++    /** The key just learned: its key-up is ours too, or the TV would get a key-up with no key-down. */
++    private static int learnedDown;
++
++    private static File file(Context c) {
++        return new File(c.getFilesDir(), FILE);
++    }
++
++    private static File learnFile(Context c) {
++        return new File(c.getFilesDir(), LEARN);
++    }
++
++    /** True once a button was ever set: the key service then stays in step with the choices (on, or off when none is left). */
++    static boolean touched(Context c) {
++        return file(c).exists();
++    }
++
++    /** Reads the file again only when it changed. */
++    private static synchronized void load(Context c) {
++        File f = file(c);
++        long now = f.exists() ? f.lastModified() * 31 + f.length() : -1;
++        if (now == stamp) return;
++        stamp = now;
++        Arrays.fill(codes, 0);
++        Arrays.fill(pkgs, "");
++        if (now == -1) return;
++        try (BufferedReader r = new BufferedReader(new InputStreamReader(new FileInputStream(f), StandardCharsets.UTF_8))) {
++            String line;
++            while ((line = r.readLine()) != null) {   // slot=code|package
++                int eq = line.indexOf('='), bar = line.indexOf('|');
++                if (eq < 1 || bar < eq) continue;
 +                try {
-+                    enhancer = new LoudnessEnhancer(0);
-+                    enhancer.setTargetGain(gainMb);
-+                    enhancer.setEnabled(true);
-+                } catch (Throwable t) {
-+                    AppLog.w("loudness enhancer: " + t.getMessage());
-+                    enhancer = null;
++                    int slot = Integer.parseInt(line.substring(0, eq));
++                    if (slot < 0 || slot >= SLOTS) continue;
++                    codes[slot] = Integer.parseInt(line.substring(eq + 1, bar));
++                    pkgs[slot] = line.substring(bar + 1).trim();
++                } catch (NumberFormatException ignored) {
 +                }
 +            }
++        } catch (IOException ignored) {
++        }
++    }
 +
-+            // 4) Equalizer anti-clipping: corta graves que distorcem, realça médios/agudos
-+            releaseEqualizer();
-+            if (gainMb > 0) {
-+                try {
-+                    equalizer = new Equalizer(0, 0);
-+                    equalizer.setEnabled(true);
-+                    short bands = equalizer.getNumberOfBands();
-+                    short[] range = equalizer.getBandLevelRange();
-+                    short min = range[0], maxLvl = range[1];
-+                    for (short b = 0; b < bands; b++) {
-+                        int freq = equalizer.getCenterFreq(b) / 1000; // Hz
-+                        short lvl;
-+                        if (freq < 200) {
-+                            lvl = (short) (min + (maxLvl - min) * 0.15f); // corta graves
-+                        } else if (freq < 2000) {
-+                            lvl = 0;                                      // médios neutros
-+                        } else {
-+                            lvl = (short) (min + (maxLvl - min) * 0.65f); // realça agudos
-+                        }
-+                        equalizer.setBandLevel(b, lvl);
-+                    }
-+                } catch (Throwable t) {
-+                    AppLog.w("equalizer: " + t.getMessage());
-+                    equalizer = null;
-+                }
++    private static synchronized void save(Context c) {
++        StringBuilder sb = new StringBuilder();
++        for (int i = 0; i < SLOTS; i++) sb.append(i).append('=').append(codes[i]).append('|').append(pkgs[i]).append('\n');
++        File tmp = new File(c.getFilesDir(), "custom-keys." + android.os.Process.myPid() + ".tmp");
++        try (FileOutputStream out = new FileOutputStream(tmp)) {
++            out.write(sb.toString().getBytes(StandardCharsets.UTF_8));
++            out.getFD().sync();
++        } catch (IOException e) {
++            //noinspection ResultOfMethodCallIgnored
++            tmp.delete();
++            return;
++        }
++        if (tmp.renameTo(file(c))) stamp = Long.MIN_VALUE;   // read again, whoever wrote it
++    }
++
++    static synchronized int code(Context c, int slot) {
++        load(c);
++        return codes[slot];
++    }
++
++    /** The app (or "All Apps", or the quick panel) the button opens; "" for nothing. */
++    static synchronized String pkg(Context c, int slot) {
++        load(c);
++        return pkgs[slot];
++    }
++
++    static synchronized void setApp(Context c, int slot, String pkg) {
++        load(c);
++        pkgs[slot] = pkg == null ? "" : pkg;
++        save(c);
++    }
++
++    /** A button learned: it goes to this slot (and leaves any other that had it). The app stays as it was. */
++    private static synchronized void setKey(Context c, int slot, int code) {
++        load(c);
++        for (int i = 0; i < SLOTS; i++) {
++            if (i != slot && codes[i] == code) {
++                codes[i] = 0;
++                pkgs[i] = "";
 +            }
++        }
++        codes[slot] = code;
++        save(c);
++    }
 +
-+            final int shownGain = gainMb;
-+            main.post(() -> Toast.makeText(c,
-+                    "Volume: " + level + "%" + (shownGain > 0 ? " (+" + (shownGain / 100f) + " dB)" : ""),
-+                    Toast.LENGTH_SHORT).show());
++    static synchronized void clear(Context c, int slot) {
++        load(c);
++        codes[slot] = 0;
++        pkgs[slot] = "";
++        save(c);
++    }
++
++    // MARK: - Learning
++
++    static void startLearning(Context c, int slot) {
++        try (FileOutputStream out = new FileOutputStream(learnFile(c))) {
++            out.write((slot + "|" + System.currentTimeMillis()).getBytes(StandardCharsets.UTF_8));
++        } catch (IOException e) {
++            AppLog.w("custom button: " + e.getMessage());
++        }
++    }
++
++    static void stopLearning(Context c) {
++        //noinspection ResultOfMethodCallIgnored
++        learnFile(c).delete();
++    }
++
++    /** The slot waiting for a button press (for 30 seconds), or -1. */
++    static int learningSlot(Context c) {
++        File f = learnFile(c);
++        if (!f.exists()) return -1;
++        try (BufferedReader r = new BufferedReader(new InputStreamReader(new FileInputStream(f), StandardCharsets.UTF_8))) {
++            String line = r.readLine();
++            if (line == null) return -1;
++            int bar = line.indexOf('|');
++            long at = Long.parseLong(line.substring(bar + 1).trim());
++            long age = System.currentTimeMillis() - at;
++            if (age < 0 || age > LEARN_MS) return -1;
++            return Integer.parseInt(line.substring(0, bar));
++        } catch (IOException | RuntimeException e) {
++            return -1;
++        }
++    }
++
++    /** The key service has work: a button opens something, or one is being learned. */
++    static boolean wanted(Context c) {
++        if (learningSlot(c) >= 0) return true;
++        load(c);
++        for (int i = 0; i < SLOTS; i++) if (codes[i] != 0 && !pkgs[i].isEmpty()) return true;
++        return false;
++    }
++
++    /** Whether the key service is switched on in the TV's accessibility settings. */
++    static boolean serviceOn(Context c) {
++        String on = Settings.Secure.getString(c.getContentResolver(), Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES);
++        return on != null && on.contains(HomeMode.PKG + "/" + HomeMode.PKG + ".RemoteKeyService");
++    }
++
++    /** Buttons that can't be learned: moving around, Back, Home, the volume and the power keys. */
++    private static boolean reserved(int code) {
++        switch (code) {
++            case KeyEvent.KEYCODE_UNKNOWN:
++            case KeyEvent.KEYCODE_DPAD_UP:
++            case KeyEvent.KEYCODE_DPAD_DOWN:
++            case KeyEvent.KEYCODE_DPAD_LEFT:
++            case KeyEvent.KEYCODE_DPAD_RIGHT:
++            case KeyEvent.KEYCODE_DPAD_CENTER:
++            case KeyEvent.KEYCODE_ENTER:
++            case KeyEvent.KEYCODE_BACK:
++            case KeyEvent.KEYCODE_HOME:
++            case KeyEvent.KEYCODE_ESCAPE:
++            case KeyEvent.KEYCODE_VOLUME_UP:
++            case KeyEvent.KEYCODE_VOLUME_DOWN:
++            case KeyEvent.KEYCODE_VOLUME_MUTE:
++            case KeyEvent.KEYCODE_POWER:
++            case KeyEvent.KEYCODE_TV_POWER:
++            case KeyEvent.KEYCODE_SLEEP:
++            case KeyEvent.KEYCODE_WAKEUP:
++                return true;
++            default:
++                return false;
++        }
++    }
++
++    // MARK: - The keys
++
++    /** True when the key is one of ours (a button being learned, or one that opens an app): it never reaches the TV. */
++    static boolean onKey(Context c, KeyEvent e) {
++        int source = e.getSource();
++        if ((source & InputDevice.SOURCE_GAMEPAD) == InputDevice.SOURCE_GAMEPAD
++                || (source & InputDevice.SOURCE_JOYSTICK) == InputDevice.SOURCE_JOYSTICK) return false;
++        int code = e.getKeyCode();
++        boolean down = e.getAction() == KeyEvent.ACTION_DOWN;
++        if (!down && code == learnedDown) {
++            learnedDown = 0;
++            return true;
++        }
++        int learning = learnFile(c).exists() ? learningSlot(c) : -1;
++        if (learning >= 0 && down && !reserved(code)) {
++            setKey(c, learning, code);
++            stopLearning(c);
++            learnedDown = code;
++            return true;
++        }
++        String pkg = "";
++        synchronized (CustomKeys.class) {
++            load(c);
++            for (int i = 0; i < SLOTS; i++) if (codes[i] == code && !pkgs[i].isEmpty()) pkg = pkgs[i];
++        }
++        if (pkg.isEmpty()) return false;
++        if (down && e.getRepeatCount() == 0) open(c, pkg);
++        return true;
++    }
++
++    private static void open(Context c, String pkg) {
++        try {
++            if ("all-apps".equals(pkg)) {
++                c.startActivity(new Intent(c, AllAppsActivity.class).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
++            } else if ("quick-panel".equals(pkg)) {
++                c.startActivity(new Intent(c, QuickPanelActivity.class).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
++            } else {
++                PackageManager pm = c.getPackageManager();
++                Intent i = pm.getLeanbackLaunchIntentForPackage(pkg);
++                if (i == null) i = pm.getLaunchIntentForPackage(pkg);
++                if (i != null) c.startActivity(i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
++            }
 +        } catch (Exception e) {
-+            AppLog.w("volume boost: " + e.getMessage());
-+        } finally {
-+            busy.set(false);
++            AppLog.w("custom button open: " + e.getMessage());
 +        }
 +    }
-+
-+    private static void releaseEnhancer() {
-+        if (enhancer != null) {
-+            try { enhancer.setEnabled(false); enhancer.release(); } catch (Throwable ignored) {}
-+            enhancer = null;
-+        }
-+    }
-+
-+    private static void releaseEqualizer() {
-+        if (equalizer != null) {
-+            try { equalizer.setEnabled(false); equalizer.release(); } catch (Throwable ignored) {}
-+            equalizer = null;
-+        }
-+    }
- }
-diff -ruN '--exclude=*.class' '--exclude=.git' '--exclude=out' '--exclude=*.apk' '--exclude=*.idsig' free-my-tv-main/app/src/io/freemytv/QuickPanelActivity.java full_new/free-my-tv-main/app/src/io/freemytv/QuickPanelActivity.java
---- free-my-tv-main/app/src/io/freemytv/QuickPanelActivity.java	2026-11-04 09:17:15.002000000 +0000
-+++ full_new/free-my-tv-main/app/src/io/freemytv/QuickPanelActivity.java	2026-11-04 09:40:00.000000000 +0000
-@@ -52,6 +52,7 @@
-         }
-     }
- 
-+    /** Opens the panel with its Inputs list already showing (the home screen's Inputs button). */
-     static final String EXTRA_INPUTS = "io.freemytv.INPUTS";
-     private static final String TV_SETTINGS = "com.android.tv.settings";
-     private static final int INPUTS = 0;
-@@ -60,7 +61,10 @@
-     private static final int ALL_APPS = 2;
-     /** The look switch's place in tiles(). */
-     private static final int LOOK = 5, CINEMA = 6, VOLUME = 7, PICTURE = 8, LITE = 9, MEMORY = 10;
--    /** The panel in a 1920×1080 space: its size and the margin to the screen's corner. */
--    private static final float W = 600, H = 820, MARGIN = 40;
-+    /** The panel in a 1920×1080 space: largura fixa, altura dinâmica conforme o número de tiles. */
-+    private static final float W = 640, MARGIN = 36;
-+    private static final int COLS = 2;
-+    private static final float ROW_H = 118, GAP_Y = 18, GAP_X = 28;
- 
-     private PanelView view;
-     private Click click;
-@@ -77,23 +81,30 @@
-         overridePendingTransition(0, 0);   // the panel springs in by itself
--        view = new PanelView(this, k, tiles());
-+        Tile[] t = tiles();
-+        view = new PanelView(this, k, t, panelHeight(t.length));
-         setContentView(view);
-         if (getIntent().getBooleanExtra(EXTRA_INPUTS, false)) view.post(view::showInputs);
-     }
- 
-+    /** Altura calculada conforme o número de tiles (2 colunas). */
-+    private static float panelHeight(int tileCount) {
-+        int rows = (tileCount + COLS - 1) / COLS;
-+        return 120 + rows * (ROW_H + GAP_Y) + 40;
-+    }
-+
-     /**
-      * Closes what runs in the background (not the apps you have open, not the TV's own services): the TV's memory
-      * frees up. Says how much came back.
-      */
-     private void clearMemory() {
-         final Context app = getApplicationContext();
-         final android.os.Handler ui = new android.os.Handler(android.os.Looper.getMainLooper());
-         new Thread(() -> {
-             try {
-                 android.app.ActivityManager am = (android.app.ActivityManager) app.getSystemService(Context.ACTIVITY_SERVICE);
-                 android.app.ActivityManager.MemoryInfo info = new android.app.ActivityManager.MemoryInfo();
-                 am.getMemoryInfo(info);
-                 long before = info.availMem;
-                 for (android.content.pm.ApplicationInfo a : app.getPackageManager().getInstalledApplications(0)) {
-                     if (a.packageName.equals(app.getPackageName())) continue;
-                     if ((a.flags & (android.content.pm.ApplicationInfo.FLAG_PERSISTENT | android.content.pm.ApplicationInfo.FLAG_SYSTEM)) != 0 || a.packageName.startsWith("com.tcl.")) continue;
-                     am.killBackgroundProcesses(a.packageName);
-                 }
-                 Thread.sleep(900);
-                 am.getMemoryInfo(info);
-                 final long freed = Math.max(0, (info.availMem - before) / (1024 * 1024));
-                 ui.post(() -> android.widget.Toast.makeText(app,
-                         Ui.tr("Memory cleared") + (freed > 0 ? ": +" + freed + " MB" : ""), android.widget.Toast.LENGTH_LONG).show());
-             } catch (RuntimeException | InterruptedException e) {
-                 AppLog.w("clear memory: " + e.getMessage());
-             }
-         }).start();
-     }
- 
-     private Tile[] tiles() {
-         // The same route the remote's All Apps button takes: the home intent, with the flag that opens All Apps.
-         Intent allApps = new Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_HOME)
-                 .setPackage(getPackageName()).putExtra(HomeActivity.EXTRA_ALL_APPS, true);
-         return new Tile[] {
-             new Tile(Ui.tr("Inputs"), "hdmi", 0xFF30B0C7),
-             // Bluetooth: each TV keeps it somewhere else, so try the usual places, and end on the settings' main screen.
-             new Tile(Ui.tr("Bluetooth"), "bluetooth", 0xFF3F7CFF,
-                     new Intent("com.android.tv.settings.DEVICES").setPackage(TV_SETTINGS),
-                     new Intent(Settings.ACTION_BLUETOOTH_SETTINGS).setPackage(TV_SETTINGS),
-                     new Intent(Settings.ACTION_BLUETOOTH_SETTINGS),
-                     new Intent().setComponent(new ComponentName(TV_SETTINGS, TV_SETTINGS + ".accessories.AddAccessoryActivity")),
-                     new Intent().setComponent(new ComponentName(TV_SETTINGS, TV_SETTINGS + ".MainSettings")),
-                     new Intent(Settings.ACTION_SETTINGS)),
-             new Tile(Ui.tr("All Apps"), "apps", 0xFF5E5CE6, allApps),
-             new Tile("Free My TV", "home", 0xFFBF5AF2, new Intent(this, SettingsActivity.class)),
-             // The Android TV's own settings app, opened on its main screen.
-             new Tile(Ui.tr("TV Settings"), "settings", 0xFF8E8E9A,
-                     new Intent().setComponent(new ComponentName(TV_SETTINGS, TV_SETTINGS + ".MainSettings")),
-                     new Intent(Settings.ACTION_SETTINGS)),
-             // Switches the launcher's look (Free My TV <-> Minimal) right away; it is read in select().
-             new Tile(Ui.tr(Prefs.minimal() ? "Free My TV look" : "Minimal look"), "tv_settings", 0xFFFF9F0A),
-             // Cinema mode (the wallpaper dimmed, no clock, weather or prices) and "clear memory": both read in select().
-             new Tile(Ui.tr(Prefs.cinema() ? "Cinema mode: on" : "Cinema mode"), "play", 0xFFFF453A),
--            // Volume Booster: raises system volume steps (ADB) + soft loudness gain. No root.
--            new Tile(Ui.tr(Prefs.volumeBoost() ? "Volume Booster: on" : "Volume Booster"), "volume_up", 0xFFFFD60A),
-+            // Volume Booster: nível 0–200% (cicla em passos de 20% ao confirmar).
-+            new Tile(Ui.tr("Volume: " + Prefs.volumeBoostLevel() + "%"), "volume_up", 0xFFFFD60A),
-             // Picture mode overlay (Cinema / Sports / Vivid / Movie / Night) over any app.
-             new Tile(Ui.tr("Picture: " + Prefs.PICTURE_MODES[Prefs.pictureMode()]), "tune", 0xFFBF5AF2),
-             // Lite mode: lighter home screen; neon off and video wallpaper frozen on a still frame.
-             new Tile(Ui.tr(Prefs.lite() ? "Lite mode: on" : "Lite mode"), "bolt", 0xFF64D2FF),
-             new Tile(Ui.tr("Clear memory"), "bolt", 0xFF32D74B),
-         };
-     }
- 
-     private static final class Tile {
-@@ -185,11 +196,12 @@
-         private final int[] chipColor = new int[16];
-         private final LinearGradient[] chipShader = new LinearGradient[16];
-         private int chips;
--        private final float[] tileX = new float[12], tileY = new float[12], labelSize = new float[12];   // labelSize: shrunk to fit long words
-+        private final float[] tileX = new float[16], tileY = new float[16], labelSize = new float[16];   // labelSize: shrunk to fit long words
-         private float tileW;
-+        private final float panelH;
- 
--        PanelView(Context c, float k, Tile[] tiles) {
-+        PanelView(Context c, float k, Tile[] tiles, float panelH) {
-             super(c);
-             this.k = k;
-             this.tiles = tiles;
-+            this.panelH = panelH;
-             tileW = (W * k - 2 * MARGIN * k - (COLS - 1) * GAP_X * k) / COLS;
-             for (int i = 0; i < tiles.length; i++) {
--                tileX[i] = MARGIN * k + i * (tileW + 16 * k);
--                tileY[i] = (140 + (i % 2) * 100) * k;
-+                int col = i % COLS;
-+                int row = i / COLS;
-+                tileX[i] = MARGIN * k + col * (tileW + GAP_X * k);
-+                tileY[i] = (140 + row * (ROW_H + GAP_Y)) * k;
-             }
-         }
-@@ -620,6 +632,24 @@
-             spoken.focusMoved();
-         }
- 
-+        @Override protected void onMeasure(int wSpec, int hSpec) {
-+            int w = MeasureSpec.getSize(wSpec);
-+            int h = MeasureSpec.getSize(hSpec);
-+            setMeasuredDimension(w, h); // ocupa a tela toda; o painel é desenhado dentro
-+        }
-+
-+        /** The Inputs list, open from the start (the Inputs button on the home screen). */
-+        void showInputs() {
-+            if (inputsOpen) return;
-+            inputs = HomeApps.allInputs(getContext());
-+            inputsOpen = true;
-+            inputFocus = 0;
-+            page.target = 1;
-+            aimLens(false);
-+            invalidate();
-+            spoken.focusMoved();
-+        }
-+
-         private void select() {
-             click.open();
-             if (inputsOpen) {
-@@ -702,7 +732,12 @@
-                 return;
-             }
-             if (focus == VOLUME) {
--                Prefs.setVolumeBoost(!Prefs.volumeBoost());
-+                int next = Prefs.volumeBoostLevel() + 20;
-+                if (next > 200) next = 0;
-+                Prefs.setVolumeBoostLevel(next);
-                 VolumeBoost.onToggled(getApplicationContext());
-                 finish();
-                 return;
-             }
++}
