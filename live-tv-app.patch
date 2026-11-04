@@ -479,7 +479,6 @@ diff -ruN '--exclude=FreeMyTV.apk' '--exclude=*.idsig' '--exclude=.git' '--exclu
 +    private Neon.NeonView neon;
 +
 +    private final android.os.Handler mainHandler = new android.os.Handler(android.os.Looper.getMainLooper());
-
      private int prefsVersion = Prefs.version;   // settings changed while we were away: start over
  
      @Override protected void onCreate(Bundle savedInstanceState) {
@@ -539,19 +538,6 @@ diff -ruN '--exclude=FreeMyTV.apk' '--exclude=*.idsig' '--exclude=.git' '--exclu
          if (home != null) {
              home.removeCallbacks(powerOnLive);
              home.destroy();
-@@ -115,5 +290,11 @@
-         if (level >= TRIM_MEMORY_COMPLETE) Recs.get(this).trim();
-     }
- 
-+    @Override public boolean dispatchKeyEvent(KeyEvent event) {
-+        keyPressed = true;
-+        if (RemoteKeys.onKey(this, event)) return true;
-+        if (home != null && home.onKey(event)) return true;
-+        return super.dispatchKeyEvent(event);
-+    }
--
- }
-+
 diff -ruN '--exclude=FreeMyTV.apk' '--exclude=*.idsig' '--exclude=.git' '--exclude=out' '--exclude=*.class' '--exclude=*.keystore' free-my-tv-orig/app/src/io/freemytv/HomeApps.java free-my-tv-main/app/src/io/freemytv/HomeApps.java
 --- free-my-tv-orig/app/src/io/freemytv/HomeApps.java	2026-11-04 05:11:38.000000000 +0000
 +++ free-my-tv-main/app/src/io/freemytv/HomeApps.java	2026-11-04 07:22:35.305213512 +0000
