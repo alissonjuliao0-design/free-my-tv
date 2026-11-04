@@ -1,6 +1,6 @@
-diff -ruN '--exclude=FreeMyTV.apk' '--exclude=*.idsig' '--exclude=.git' '--exclude=out' '--exclude=*.class' '--exclude=*.keystore' free-my-tv-orig/app/AndroidManifest.xml free-my-tv-main/app/AndroidManifest.xml
---- free-my-tv-orig/app/AndroidManifest.xml	2026-11-04 05:11:38.000000000 +0000
-+++ free-my-tv-main/app/AndroidManifest.xml	2026-11-04 07:22:35.305213512 +0000
+diff -ruN '--exclude=*.class' '--exclude=.git' '--exclude=out' '--exclude=*.apk' '--exclude=*.idsig' free-my-tv-main/app/AndroidManifest.xml full_new/free-my-tv-main/app/AndroidManifest.xml
+--- free-my-tv-main/app/AndroidManifest.xml	2026-11-04 09:13:36.827000000 +0000
++++ full_new/free-my-tv-main/app/AndroidManifest.xml	2026-11-04 09:17:16.214876407 +0000
 @@ -19,6 +19,13 @@
      <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
      <!-- "Continue watching": what you left half-way in your apps, from Android TV's own Watch Next list. -->
@@ -15,7 +15,7 @@ diff -ruN '--exclude=FreeMyTV.apk' '--exclude=*.idsig' '--exclude=.git' '--exclu
      <!-- The Bluetooth status icon: whether headphones or a speaker are connected. Before Android 12 the permission is
           granted at install; from 12 it is asked for when Status icons is turned on (and only the icon needs it). -->
      <uses-permission android:name="android.permission.BLUETOOTH" android:maxSdkVersion="30" />
-@@ -269,6 +277,12 @@
+@@ -269,6 +276,18 @@
              </intent-filter>
          </service>
  
@@ -25,12 +25,29 @@ diff -ruN '--exclude=FreeMyTV.apk' '--exclude=*.idsig' '--exclude=.git' '--exclu
 +            android:process=":sleep"
 +            android:exported="false" />
 +
++        <!-- Picture mode colour veil over other apps. -->
++        <service
++            android:name=".PictureOverlay"
++            android:process=":sleep"
++            android:exported="false" />
++
          <receiver
              android:name=".HomeReceiver"
              android:exported="false">
-diff -ruN '--exclude=FreeMyTV.apk' '--exclude=*.idsig' '--exclude=.git' '--exclude=out' '--exclude=*.class' '--exclude=*.keystore' free-my-tv-orig/app/src/io/freemytv/CinemaOverlay.java free-my-tv-main/app/src/io/freemytv/CinemaOverlay.java
---- free-my-tv-orig/app/src/io/freemytv/CinemaOverlay.java	1970-01-01 00:00:00.000000000 +0000
-+++ free-my-tv-main/app/src/io/freemytv/CinemaOverlay.java	2026-11-04 07:22:35.305213512 +0000
+diff -ruN '--exclude=*.class' '--exclude=.git' '--exclude=out' '--exclude=*.apk' '--exclude=*.idsig' free-my-tv-main/app/src/io/freemytv/App.java full_new/free-my-tv-main/app/src/io/freemytv/App.java
+--- free-my-tv-main/app/src/io/freemytv/App.java	2026-11-04 08:38:50.686000000 +0000
++++ full_new/free-my-tv-main/app/src/io/freemytv/App.java	2026-11-04 09:17:15.422000000 +0000
+@@ -8,5 +8,7 @@
+         super.onCreate();
+         Prefs.init(this);
+         Place.init(this);
++        // Re-apply volume steps if the booster was left on.
++        VolumeBoost.restoreIfNeeded(this);
+     }
+ }
+diff -ruN '--exclude=*.class' '--exclude=.git' '--exclude=out' '--exclude=*.apk' '--exclude=*.idsig' free-my-tv-main/app/src/io/freemytv/CinemaOverlay.java full_new/free-my-tv-main/app/src/io/freemytv/CinemaOverlay.java
+--- free-my-tv-main/app/src/io/freemytv/CinemaOverlay.java	1970-01-01 00:00:00.000000000 +0000
++++ full_new/free-my-tv-main/app/src/io/freemytv/CinemaOverlay.java	2026-11-04 09:17:06.478000000 +0000
 @@ -0,0 +1,173 @@
 +package io.freemytv;
 +
@@ -205,9 +222,9 @@ diff -ruN '--exclude=FreeMyTV.apk' '--exclude=*.idsig' '--exclude=.git' '--exclu
 +        return null;
 +    }
 +}
-diff -ruN '--exclude=FreeMyTV.apk' '--exclude=*.idsig' '--exclude=.git' '--exclude=out' '--exclude=*.class' '--exclude=*.keystore' free-my-tv-orig/app/src/io/freemytv/CustomKeys.java free-my-tv-main/app/src/io/freemytv/CustomKeys.java
---- free-my-tv-orig/app/src/io/freemytv/CustomKeys.java	1970-01-01 00:00:00.000000000 +0000
-+++ free-my-tv-main/app/src/io/freemytv/CustomKeys.java	2026-11-04 07:22:35.305213512 +0000
+diff -ruN '--exclude=*.class' '--exclude=.git' '--exclude=out' '--exclude=*.apk' '--exclude=*.idsig' free-my-tv-main/app/src/io/freemytv/CustomKeys.java full_new/free-my-tv-main/app/src/io/freemytv/CustomKeys.java
+--- free-my-tv-main/app/src/io/freemytv/CustomKeys.java	1970-01-01 00:00:00.000000000 +0000
++++ full_new/free-my-tv-main/app/src/io/freemytv/CustomKeys.java	2026-11-04 09:17:07.058000000 +0000
 @@ -0,0 +1,249 @@
 +package io.freemytv;
 +
@@ -458,9 +475,9 @@ diff -ruN '--exclude=FreeMyTV.apk' '--exclude=*.idsig' '--exclude=.git' '--exclu
 +        }
 +    }
 +}
-diff -ruN '--exclude=FreeMyTV.apk' '--exclude=*.idsig' '--exclude=.git' '--exclude=out' '--exclude=*.class' '--exclude=*.keystore' free-my-tv-orig/app/src/io/freemytv/HomeActivity.java free-my-tv-main/app/src/io/freemytv/HomeActivity.java
---- free-my-tv-orig/app/src/io/freemytv/HomeActivity.java	2026-11-04 05:11:38.000000000 +0000
-+++ free-my-tv-main/app/src/io/freemytv/HomeActivity.java	2026-11-04 07:23:15.669214956 +0000
+diff -ruN '--exclude=*.class' '--exclude=.git' '--exclude=out' '--exclude=*.apk' '--exclude=*.idsig' free-my-tv-main/app/src/io/freemytv/HomeActivity.java full_new/free-my-tv-main/app/src/io/freemytv/HomeActivity.java
+--- free-my-tv-main/app/src/io/freemytv/HomeActivity.java	2026-11-04 08:38:52.832000000 +0000
++++ full_new/free-my-tv-main/app/src/io/freemytv/HomeActivity.java	2026-11-04 09:17:15.848000000 +0000
 @@ -20,6 +20,20 @@
      /** Opens All Apps (a remote's All Apps button, RemoteKeys). */
      static final String EXTRA_ALL_APPS = "io.freemytv.ALL_APPS";
@@ -482,7 +499,7 @@ diff -ruN '--exclude=FreeMyTV.apk' '--exclude=*.idsig' '--exclude=.git' '--exclu
      private int prefsVersion = Prefs.version;   // settings changed while we were away: start over
  
      @Override protected void onCreate(Bundle savedInstanceState) {
-@@ -40,8 +187,18 @@
+@@ -40,8 +54,18 @@
              return;
          }
          Ui.init(this);
@@ -502,13 +519,14 @@ diff -ruN '--exclude=FreeMyTV.apk' '--exclude=*.idsig' '--exclude=.git' '--exclu
          getWindow().setBackgroundDrawable(null);
          if (getIntent().getBooleanExtra(EXTRA_ALL_APPS, false)) home.showAllApps();
          // At power-on "Live TV" (#346): the first time the home screen comes up after a full start, in Free My TV mode.
-@@ -73,12 +231,24 @@
+@@ -73,12 +97,27 @@
              recreate();   // a new language or city: draw everything again
              return;
          }
 +        Wallpaper.resume(root);
 +        if (neon != null) neon.run(true);
 +        CinemaOverlay.update(this, true);   // home is in front: no veil over it
++        PictureOverlay.update(this, true);
          if (home != null) home.resume();
          Updates.tellOnce(this);   // an update the week's check got ready: said once
      }
@@ -521,13 +539,15 @@ diff -ruN '--exclude=FreeMyTV.apk' '--exclude=*.idsig' '--exclude=.git' '--exclu
 +        mainHandler.postDelayed(() -> Neon.preloadTrack(getApplicationContext()), 600);
 +        // Dim other apps when Cinema is on. A short delay lets the next app draw first, then the veil sits on top.
 +        CinemaOverlay.update(this, false);
++        PictureOverlay.update(this, false);
 +        mainHandler.postDelayed(() -> {
 +            if (!resumed && Prefs.cinema()) CinemaOverlay.update(getApplicationContext(), false);
++            if (!resumed && Prefs.pictureMode() > 0) PictureOverlay.update(getApplicationContext(), false);
 +        }, 400);
          if (home != null) home.pause();
          super.onPause();
      }
-@@ -103,6 +274,10 @@
+@@ -103,6 +142,10 @@
      private static final long TWICE_MS = 700;
  
      @Override protected void onDestroy() {
@@ -538,9 +558,9 @@ diff -ruN '--exclude=FreeMyTV.apk' '--exclude=*.idsig' '--exclude=.git' '--exclu
          if (home != null) {
              home.removeCallbacks(powerOnLive);
              home.destroy();
-diff -ruN '--exclude=FreeMyTV.apk' '--exclude=*.idsig' '--exclude=.git' '--exclude=out' '--exclude=*.class' '--exclude=*.keystore' free-my-tv-orig/app/src/io/freemytv/HomeApps.java free-my-tv-main/app/src/io/freemytv/HomeApps.java
---- free-my-tv-orig/app/src/io/freemytv/HomeApps.java	2026-11-04 05:11:38.000000000 +0000
-+++ free-my-tv-main/app/src/io/freemytv/HomeApps.java	2026-11-04 07:22:35.305213512 +0000
+diff -ruN '--exclude=*.class' '--exclude=.git' '--exclude=out' '--exclude=*.apk' '--exclude=*.idsig' free-my-tv-main/app/src/io/freemytv/HomeApps.java full_new/free-my-tv-main/app/src/io/freemytv/HomeApps.java
+--- free-my-tv-main/app/src/io/freemytv/HomeApps.java	2026-11-04 08:38:53.031000000 +0000
++++ full_new/free-my-tv-main/app/src/io/freemytv/HomeApps.java	2026-11-04 09:17:08.258000000 +0000
 @@ -62,9 +62,27 @@
      static final int RECENTS = 8;
      /** A Home Assistant entity in the drawer (HomeAssistant): OK calls its service, nothing opens. */
@@ -762,9 +782,9 @@ diff -ruN '--exclude=FreeMyTV.apk' '--exclude=*.idsig' '--exclude=.git' '--exclu
          // Fire TV: the antenna (digital terrestrial) entry of Amazon's Live TV, which plays the antenna's channels or
          // opens the channel scan when there are none yet. The channels request would also offer Vewd's HbbTV player,
          // and Live TV on its own plays the last channel, which can be an app's (RaiPlay's).
-diff -ruN '--exclude=FreeMyTV.apk' '--exclude=*.idsig' '--exclude=.git' '--exclude=out' '--exclude=*.class' '--exclude=*.keystore' free-my-tv-orig/app/src/io/freemytv/HomeMode.java free-my-tv-main/app/src/io/freemytv/HomeMode.java
---- free-my-tv-orig/app/src/io/freemytv/HomeMode.java	2026-11-04 05:11:38.000000000 +0000
-+++ free-my-tv-main/app/src/io/freemytv/HomeMode.java	2026-11-04 07:22:35.305213512 +0000
+diff -ruN '--exclude=*.class' '--exclude=.git' '--exclude=out' '--exclude=*.apk' '--exclude=*.idsig' free-my-tv-main/app/src/io/freemytv/HomeMode.java full_new/free-my-tv-main/app/src/io/freemytv/HomeMode.java
+--- free-my-tv-main/app/src/io/freemytv/HomeMode.java	2026-11-04 08:38:53.572000000 +0000
++++ full_new/free-my-tv-main/app/src/io/freemytv/HomeMode.java	2026-11-04 09:17:08.862000000 +0000
 @@ -417,11 +417,11 @@
       * (or the brand's default), and on TCL's Android 11, it goes off (RemoteKeys.serviceWanted).
       */
@@ -779,9 +799,9 @@ diff -ruN '--exclude=FreeMyTV.apk' '--exclude=*.idsig' '--exclude=.git' '--exclu
          try (Adb adb = Adb.connect(app, 10_000, null)) {
              remoteService(app, adb, RemoteKeys.serviceWanted());
          } catch (IOException e) {
-diff -ruN '--exclude=FreeMyTV.apk' '--exclude=*.idsig' '--exclude=.git' '--exclude=out' '--exclude=*.class' '--exclude=*.keystore' free-my-tv-orig/app/src/io/freemytv/HomeView.java free-my-tv-main/app/src/io/freemytv/HomeView.java
---- free-my-tv-orig/app/src/io/freemytv/HomeView.java	2026-11-04 05:11:38.000000000 +0000
-+++ free-my-tv-main/app/src/io/freemytv/HomeView.java	2026-11-04 07:22:35.309213512 +0000
+diff -ruN '--exclude=*.class' '--exclude=.git' '--exclude=out' '--exclude=*.apk' '--exclude=*.idsig' free-my-tv-main/app/src/io/freemytv/HomeView.java full_new/free-my-tv-main/app/src/io/freemytv/HomeView.java
+--- free-my-tv-main/app/src/io/freemytv/HomeView.java	2026-11-04 08:38:53.985000000 +0000
++++ full_new/free-my-tv-main/app/src/io/freemytv/HomeView.java	2026-11-04 09:17:09.467000000 +0000
 @@ -251,6 +251,12 @@
      private final android.graphics.PorterDuffColorFilter whiteLogo =
              new android.graphics.PorterDuffColorFilter(0xFFFFFFFF, android.graphics.PorterDuff.Mode.SRC_IN);
@@ -945,7 +965,7 @@ diff -ruN '--exclude=FreeMyTV.apk' '--exclude=*.idsig' '--exclude=.git' '--exclu
                      } else if (okDown && holdArmed && e.isLongPress()) {
                          hold();
                      }
-@@ -3108,7 +3145,7 @@
+@@ -3108,7 +3139,7 @@
                          return;
                      }
                  } else {
@@ -954,7 +974,7 @@ diff -ruN '--exclude=FreeMyTV.apk' '--exclude=*.idsig' '--exclude=.git' '--exclu
                      openDrawer();
                  }
                  break;
-@@ -3301,17 +3338,6 @@
+@@ -3301,17 +3332,6 @@
              openSheet();
              return;
          }
@@ -972,7 +992,7 @@ diff -ruN '--exclude=FreeMyTV.apk' '--exclude=*.idsig' '--exclude=.git' '--exclu
          boolean opened = HomeApps.open(activity, it, this, Math.round(r.left), Math.round(r.top),
                  Math.round(r.width()), Math.round(r.height()));
          if (!opened) showToast(Ui.trf("Couldn't open {app}.", "app", it.label));
-@@ -4048,16 +4074,142 @@
+@@ -4048,16 +4068,142 @@
  
      /** Picks need a TMDB key: without one, "picks" shows the clock, like "nothing". */
      private boolean picksMode() {
@@ -1117,7 +1137,7 @@ diff -ruN '--exclude=FreeMyTV.apk' '--exclude=*.idsig' '--exclude=.git' '--exclu
      }
  
      /** What the top shows now (from reload, off the main thread) and, for Continue Watching, its list. */
-@@ -4502,6 +4654,7 @@
+@@ -4502,6 +4648,7 @@
       * the same photo almost black (or a dark gradient), drawn on top during the transition.
       */
      private void drawLightSky(Canvas c) {
@@ -1125,7 +1145,7 @@ diff -ruN '--exclude=FreeMyTV.apk' '--exclude=*.idsig' '--exclude=.git' '--exclu
          long up = SystemClock.uptimeMillis();
          float e = bgFadeAt == 0 ? 1 : fadeEase(bgFadeAt, up);
          boolean fading = bgFadeAt != 0;
-@@ -4600,6 +4753,7 @@
+@@ -4600,6 +4747,7 @@
          applyTone();
          if (clockMode()) {
              titleRight = 0;
@@ -1133,7 +1153,7 @@ diff -ruN '--exclude=FreeMyTV.apk' '--exclude=*.idsig' '--exclude=.git' '--exclu
              drawClock(c);
              if (HomeData.coinCount() > 0 || playingTab != null) drawQuotes(c);
              return;
-@@ -4649,10 +4803,81 @@
+@@ -4649,10 +4797,81 @@
          return Recs.hasKey(getContext());
      }
  
@@ -1216,7 +1236,7 @@ diff -ruN '--exclude=FreeMyTV.apk' '--exclude=*.idsig' '--exclude=.git' '--exclu
          HomeData.Weather wx = data.weather;
          if (!Prefs.weather() || Double.isNaN(wx.temp)) return;
          if (data.weatherAt != weatherLineAt || Prefs.version != weatherLinePrefs || !Ui.language.equals(weatherLineLanguage)) {
-@@ -4814,7 +5031,7 @@
+@@ -4814,7 +5033,7 @@
  
      /** Wi-Fi/Ethernet, Bluetooth (when something is connected) and a USB drive, at the top left. */
      private void drawStatusIcons(Canvas c) {
@@ -1225,10 +1245,10 @@ diff -ruN '--exclude=FreeMyTV.apk' '--exclude=*.idsig' '--exclude=.git' '--exclu
          float height = L_STATUS * k, gap = L_STATUS_GAP * k;
          int color = Ui.alpha(tone(L_INK, 0xEBFFFFFF), 0.85f);
          float x = MARGIN * k;
-diff -ruN '--exclude=FreeMyTV.apk' '--exclude=*.idsig' '--exclude=.git' '--exclude=out' '--exclude=*.class' '--exclude=*.keystore' free-my-tv-orig/app/src/io/freemytv/Neon.java free-my-tv-main/app/src/io/freemytv/Neon.java
---- free-my-tv-orig/app/src/io/freemytv/Neon.java	1970-01-01 00:00:00.000000000 +0000
-+++ free-my-tv-main/app/src/io/freemytv/Neon.java	2026-11-04 07:23:15.661214956 +0000
-@@ -0,0 +1,777 @@
+diff -ruN '--exclude=*.class' '--exclude=.git' '--exclude=out' '--exclude=*.apk' '--exclude=*.idsig' free-my-tv-main/app/src/io/freemytv/Neon.java full_new/free-my-tv-main/app/src/io/freemytv/Neon.java
+--- free-my-tv-main/app/src/io/freemytv/Neon.java	1970-01-01 00:00:00.000000000 +0000
++++ full_new/free-my-tv-main/app/src/io/freemytv/Neon.java	2026-11-04 09:17:14.057000000 +0000
+@@ -0,0 +1,994 @@
 +package io.freemytv;
 +
 +import android.animation.ValueAnimator;
@@ -1249,6 +1269,7 @@ diff -ruN '--exclude=FreeMyTV.apk' '--exclude=*.idsig' '--exclude=.git' '--exclu
 +import android.media.MediaMetadataRetriever;
 +import android.os.Build;
 +import android.os.Handler;
++import android.os.SystemClock;
 +import android.os.Looper;
 +import android.view.animation.AccelerateDecelerateInterpolator;
 +import android.widget.ImageView;
@@ -1312,17 +1333,209 @@ diff -ruN '--exclude=FreeMyTV.apk' '--exclude=*.idsig' '--exclude=.git' '--exclu
 +                : scheme == FOLLOW ? MODE_WALLPAPER : scheme == APP ? MODE_APP : MODE_FIXED;
 +        int fixedScheme = (scheme == FOLLOW || scheme == APP) ? 2 : scheme;
 +        Edges first = gradient(COLORS[mode == MODE_FIXED ? fixedScheme : 2]);
-+        // Lightning spikes: show a first bolt picture immediately so the edge is never blank, then flicker in more.
-+        if (Prefs.neonStyle() == 1 && !lite) {
++        int style = Prefs.neonStyle();
++        // Style 1 = Lightning: animated bolts along the edges.
++        if (style == 1 && !lite) {
 +            Bitmap firstBolt = boltFrame(first, 4242L);
 +            NeonView bolts = new NeonView(c, firstBolt, mode, true);
 +            bolts.setAlpha(1f);
 +            bolts.drawLater(first);
 +            return bolts;
 +        }
++        // Styles 2+ = alternative edge effects (flames, rain, plasma, embers, stars).
++        if (style >= 2 && !lite) {
++            Bitmap frame = effectFrame(first, style, 4242L);
++            NeonView view = new NeonView(c, frame, mode, false);
++            view.setTag(style);   // remember style for later redraws
++            view.startEffectPulse(style);
++            return view;
++        }
 +        NeonView view = new NeonView(c, render(first), mode, false);
 +        if (lite) view.setAlpha(0.85f);   // static: no breathing animation in Lite
 +        return view;
++    }
++
++    /**
++     * Draws one frame of an alternative neon style.
++     * 2 Flames, 3 Rain, 4 Plasma, 5 Embers, 6 Stars.
++     */
++    private static Bitmap effectFrame(Edges e, int style, long seed) {
++        Bitmap bitmap = Bitmap.createBitmap(W, H, Bitmap.Config.ARGB_8888);
++        Canvas canvas = new Canvas(bitmap);
++        java.util.Random rnd = new java.util.Random(seed);
++        Paint p = new Paint(Paint.ANTI_ALIAS_FLAG);
++        switch (style) {
++            case 2: drawFlames(canvas, e, p, rnd); break;
++            case 3: drawRain(canvas, e, p, rnd); break;
++            case 4: drawPlasma(canvas, e, p, rnd); break;
++            case 5: drawEmbers(canvas, e, p, rnd); break;
++            case 6: drawStars(canvas, e, p, rnd); break;
++            default: return render(e);
++        }
++        return bitmap;
++    }
++
++    private static int edgeColor(Edges e, int edge, float t) {
++        int[] row = edge == 0 ? e.top : edge == 1 ? e.bottom : edge == 2 ? e.left : e.right;
++        if (row == null || row.length == 0) return 0xFF00E5FF;
++        int i = Math.max(0, Math.min(row.length - 1, (int) (t * (row.length - 1))));
++        return row[i];
++    }
++
++    /** Flames rising from the bottom edge and licking the sides. */
++    private static void drawFlames(Canvas c, Edges e, Paint p, java.util.Random rnd) {
++        p.setStyle(Paint.Style.STROKE);
++        p.setStrokeCap(Paint.Cap.ROUND);
++        for (int i = 0; i < 28; i++) {
++            float t = rnd.nextFloat();
++            float x = 8 + t * (W - 16);
++            float base = H - 6;
++            float h = 18 + rnd.nextFloat() * 42;
++            int col = edgeColor(e, 1, t);
++            Path path = new Path();
++            path.moveTo(x, base);
++            float cx = x + (rnd.nextFloat() - 0.5f) * 16;
++            path.quadTo(cx, base - h * 0.55f, x + (rnd.nextFloat() - 0.5f) * 10, base - h);
++            for (int layer = 0; layer < 3; layer++) {
++                p.setStrokeWidth(10f - layer * 3.2f);
++                p.setMaskFilter(layer < 2 ? new BlurMaskFilter(8f - layer * 3f, BlurMaskFilter.Blur.NORMAL) : null);
++                p.setColor(col);
++                p.setAlpha(layer == 0 ? 90 : layer == 1 ? 160 : 230);
++                c.drawPath(path, p);
++            }
++        }
++        // Side licks
++        for (int side = 0; side < 2; side++) {
++            for (int i = 0; i < 10; i++) {
++                float t = rnd.nextFloat();
++                float y = 20 + t * (H - 40);
++                float x0 = side == 0 ? 6 : W - 6;
++                float out = 12 + rnd.nextFloat() * 28;
++                int col = edgeColor(e, side == 0 ? 2 : 3, t);
++                p.setStrokeWidth(5f);
++                p.setMaskFilter(new BlurMaskFilter(6f, BlurMaskFilter.Blur.NORMAL));
++                p.setColor(col);
++                p.setAlpha(180);
++                c.drawLine(x0, y, x0 + (side == 0 ? out : -out), y - 8 - rnd.nextFloat() * 18, p);
++            }
++        }
++    }
++
++    /** Rain streaks falling across the whole frame, denser near the edges. */
++    private static void drawRain(Canvas c, Edges e, Paint p, java.util.Random rnd) {
++        p.setStyle(Paint.Style.STROKE);
++        p.setStrokeCap(Paint.Cap.ROUND);
++        p.setMaskFilter(new BlurMaskFilter(1.5f, BlurMaskFilter.Blur.NORMAL));
++        for (int i = 0; i < 90; i++) {
++            float x = rnd.nextFloat() * W;
++            float y = rnd.nextFloat() * H;
++            float len = 10 + rnd.nextFloat() * 28;
++            float edgeFactor = Math.min(x, Math.min(y, Math.min(W - x, H - y))) < 40 ? 1f : 0.45f;
++            if (rnd.nextFloat() > edgeFactor) continue;
++            int col = edgeColor(e, 0, x / W);
++            p.setStrokeWidth(1.2f + rnd.nextFloat());
++            p.setColor(col);
++            p.setAlpha(100 + (int) (rnd.nextFloat() * 120));
++            c.drawLine(x, y, x + 1.5f, y + len, p);
++        }
++        // Soft edge glow under the rain
++        p.setStyle(Paint.Style.STROKE);
++        p.setStrokeWidth(6f);
++        p.setMaskFilter(new BlurMaskFilter(10f, BlurMaskFilter.Blur.NORMAL));
++        p.setAlpha(70);
++        for (int edge = 0; edge < 4; edge++) {
++            p.setColor(edgeColor(e, edge, 0.5f));
++            if (edge == 0) c.drawLine(8, 8, W - 8, 8, p);
++            else if (edge == 1) c.drawLine(8, H - 8, W - 8, H - 8, p);
++            else if (edge == 2) c.drawLine(8, 8, 8, H - 8, p);
++            else c.drawLine(W - 8, 8, W - 8, H - 8, p);
++        }
++    }
++
++    /** Soft plasma / aurora waves along the edges. */
++    private static void drawPlasma(Canvas c, Edges e, Paint p, java.util.Random rnd) {
++        p.setStyle(Paint.Style.STROKE);
++        p.setStrokeCap(Paint.Cap.ROUND);
++        for (int edge = 0; edge < 4; edge++) {
++            Path path = new Path();
++            int steps = 24;
++            for (int i = 0; i <= steps; i++) {
++                float t = i / (float) steps;
++                float wave = (float) Math.sin(t * Math.PI * 3 + rnd.nextFloat()) * 14f;
++                float[] pt = new float[2];
++                float off = 6 + Math.abs(wave);
++                boltPoint(edge, t * ((edge < 2 ? W : H) - 16), off, pt);
++                if (i == 0) path.moveTo(pt[0], pt[1]);
++                else path.lineTo(pt[0], pt[1]);
++            }
++            for (int layer = 0; layer < 3; layer++) {
++                p.setStrokeWidth(14f - layer * 4.5f);
++                p.setMaskFilter(new BlurMaskFilter(12f - layer * 3f, BlurMaskFilter.Blur.NORMAL));
++                p.setShader(boltShader(e, edge));
++                p.setAlpha(layer == 0 ? 70 : layer == 1 ? 140 : 200);
++                c.drawPath(path, p);
++            }
++            p.setShader(null);
++        }
++    }
++
++    /** Rising embers / sparks from the bottom. */
++    private static void drawEmbers(Canvas c, Edges e, Paint p, java.util.Random rnd) {
++        p.setStyle(Paint.Style.FILL);
++        for (int i = 0; i < 55; i++) {
++            float x = 10 + rnd.nextFloat() * (W - 20);
++            float y = H - 8 - rnd.nextFloat() * (H * 0.65f);
++            float r = 1.2f + rnd.nextFloat() * 3.5f;
++            int col = edgeColor(e, 1, x / W);
++            p.setMaskFilter(new BlurMaskFilter(r * 2f, BlurMaskFilter.Blur.NORMAL));
++            p.setColor(col);
++            p.setAlpha(120 + (int) (rnd.nextFloat() * 120));
++            c.drawCircle(x, y, r, p);
++            // bright core
++            p.setMaskFilter(null);
++            p.setColor(0xFFFFFFFF);
++            p.setAlpha(200);
++            c.drawCircle(x, y, r * 0.35f, p);
++        }
++        // bottom edge glow
++        p.setStyle(Paint.Style.STROKE);
++        p.setStrokeWidth(8f);
++        p.setMaskFilter(new BlurMaskFilter(12f, BlurMaskFilter.Blur.NORMAL));
++        p.setColor(edgeColor(e, 1, 0.5f));
++        p.setAlpha(100);
++        c.drawLine(10, H - 6, W - 10, H - 6, p);
++    }
++
++    /** Twinkling stars along the edges. */
++    private static void drawStars(Canvas c, Edges e, Paint p, java.util.Random rnd) {
++        p.setStyle(Paint.Style.FILL);
++        for (int i = 0; i < 40; i++) {
++            int edge = rnd.nextInt(4);
++            float t = rnd.nextFloat();
++            float off = 4 + rnd.nextFloat() * 18;
++            float[] pt = new float[2];
++            boltPoint(edge, t * ((edge < 2 ? W : H) - 16), off, pt);
++            float r = 1.0f + rnd.nextFloat() * 2.8f;
++            int col = edgeColor(e, edge, t);
++            p.setMaskFilter(new BlurMaskFilter(r * 2.5f, BlurMaskFilter.Blur.NORMAL));
++            p.setColor(col);
++            p.setAlpha(160);
++            c.drawCircle(pt[0], pt[1], r, p);
++            p.setMaskFilter(null);
++            p.setColor(0xFFFFFFFF);
++            p.setAlpha(230);
++            c.drawCircle(pt[0], pt[1], r * 0.4f, p);
++            // cross sparkle
++            if (rnd.nextFloat() < 0.35f) {
++                p.setStyle(Paint.Style.STROKE);
++                p.setStrokeWidth(1.2f);
++                p.setAlpha(180);
++                float s = r * 3.5f;
++                c.drawLine(pt[0] - s, pt[1], pt[0] + s, pt[1], p);
++                c.drawLine(pt[0], pt[1] - s, pt[0], pt[1] + s, p);
++                p.setStyle(Paint.Style.FILL);
++            }
++        }
 +    }
 +
 +    /** The colour the clock's neon style uses: the middle of the scheme in use, or a cyan when it follows something. */
@@ -1897,6 +2110,30 @@ diff -ruN '--exclude=FreeMyTV.apk' '--exclude=*.idsig' '--exclude=.git' '--exclu
 +        }
 +
 +        /**
++         * Alternative styles (flames, rain…): slowly rebuild a new frame so the effect feels alive,
++         * without the full lightning flicker machinery.
++         */
++        void startEffectPulse(final int style) {
++            final Runnable tick = new Runnable() {
++                @Override public void run() {
++                    if (!running) return;
++                    worker.execute(() -> {
++                        // Reuse last known edge colours when possible
++                        Edges e = gradient(COLORS[2]);
++                        final Bitmap frame = effectFrame(e, style, System.nanoTime());
++                        main.post(() -> {
++                            if (!running) return;
++                            setImageBitmap(frame);
++                            setAlpha(0.92f + (float) (Math.sin(SystemClock.uptimeMillis() / 900.0) * 0.08f));
++                        });
++                    });
++                    main.postDelayed(this, style == 3 ? 180 : 420);  // rain updates faster
++                }
++            };
++            main.post(tick);
++        }
++
++        /**
 +         * Reads the wallpaper's edges and moves to the new colours: a photo once; a video's colours are read once for
 +         * the whole video (in the background), and then the glow just follows the video's position, so the video's
 +         * decoder is never opened again while it plays.
@@ -2006,10 +2243,262 @@ diff -ruN '--exclude=FreeMyTV.apk' '--exclude=*.idsig' '--exclude=.git' '--exclu
 +        }
 +    }
 +}
-diff -ruN '--exclude=FreeMyTV.apk' '--exclude=*.idsig' '--exclude=.git' '--exclude=out' '--exclude=*.class' '--exclude=*.keystore' free-my-tv-orig/app/src/io/freemytv/Prefs.java free-my-tv-main/app/src/io/freemytv/Prefs.java
---- free-my-tv-orig/app/src/io/freemytv/Prefs.java	2026-11-04 05:11:38.000000000 +0000
-+++ free-my-tv-main/app/src/io/freemytv/Prefs.java	2026-11-04 07:22:35.309213512 +0000
-@@ -325,6 +325,71 @@
+diff -ruN '--exclude=*.class' '--exclude=.git' '--exclude=out' '--exclude=*.apk' '--exclude=*.idsig' free-my-tv-main/app/src/io/freemytv/PictureOverlay.java full_new/free-my-tv-main/app/src/io/freemytv/PictureOverlay.java
+--- free-my-tv-main/app/src/io/freemytv/PictureOverlay.java	1970-01-01 00:00:00.000000000 +0000
++++ full_new/free-my-tv-main/app/src/io/freemytv/PictureOverlay.java	2026-11-04 09:17:13.622000000 +0000
+@@ -0,0 +1,248 @@
++package io.freemytv;
++
++import android.app.Notification;
++import android.app.NotificationChannel;
++import android.app.NotificationManager;
++import android.app.Service;
++import android.content.Context;
++import android.content.Intent;
++import android.graphics.Canvas;
++import android.graphics.ColorMatrix;
++import android.graphics.ColorMatrixColorFilter;
++import android.graphics.Paint;
++import android.graphics.PixelFormat;
++import android.os.Build;
++import android.os.Handler;
++import android.os.IBinder;
++import android.os.Looper;
++import android.provider.Settings;
++import android.view.Gravity;
++import android.view.View;
++import android.view.WindowManager;
++import android.widget.Toast;
++
++/**
++ * Picture mode over other apps (same overlay permission as Cinema / sleep timer).
++ * Applies a soft colour matrix (contrast, saturation, temperature) on top of whatever is open.
++ * Modes: Off, Cinema, Sports, Vivid, Movie, Night — chosen in the gear panel.
++ */
++public class PictureOverlay extends Service {
++    private static final String CH = "picture";
++    private View veil;
++    private static final Handler main = new Handler(Looper.getMainLooper());
++
++    /** Show or hide according to preference and whether home is in front. */
++    static void update(Context c, boolean homeInFront) {
++        Intent i = new Intent(c, PictureOverlay.class);
++        boolean wanted = Prefs.pictureMode() > 0 && !homeInFront && !Prefs.cinema();
++        if (wanted && Settings.canDrawOverlays(c)) {
++            try {
++                if (Build.VERSION.SDK_INT >= 26) c.startForegroundService(i);
++                else c.startService(i);
++            } catch (RuntimeException e) {
++                AppLog.w("picture overlay start: " + e.getMessage());
++            }
++            return;
++        }
++        try { c.stopService(i); } catch (RuntimeException ignored) {}
++        if (wanted) {
++            if (Capabilities.overlay(c) || Capabilities.adb(c)) {
++                allow(c.getApplicationContext());
++            }
++        }
++    }
++
++    static void onModeChanged(Context c) {
++        if (Prefs.pictureMode() <= 0) {
++            update(c, true);
++            return;
++        }
++        if (!Settings.canDrawOverlays(c)) {
++            allow(c.getApplicationContext());
++            main.post(() -> Toast.makeText(c.getApplicationContext(),
++                    Ui.tr("Picture mode over other apps needs overlay permission (Free My TV mode / ADB)."),
++                    Toast.LENGTH_LONG).show());
++        }
++        update(c, true);  // home usually still in front; real veil on next onPause
++    }
++
++    private static final java.util.concurrent.atomic.AtomicBoolean allowing =
++            new java.util.concurrent.atomic.AtomicBoolean();
++
++    private static void allow(Context c) {
++        if (!allowing.compareAndSet(false, true)) return;
++        new Thread(() -> {
++            try (Adb adb = Adb.connect(c, 10_000, null)) {
++                adb.shell("appops set " + HomeMode.PKG + " SYSTEM_ALERT_WINDOW allow");
++            } catch (java.io.IOException e) {
++                AppLog.w("picture overlay allow: " + e.getMessage());
++                allowing.set(false);
++                return;
++            }
++            boolean works = Settings.canDrawOverlays(c);
++            for (int i = 0; i < 8 && !works; i++) {
++                android.os.SystemClock.sleep(250);
++                works = Settings.canDrawOverlays(c);
++            }
++            Capabilities.prove(c, Capabilities.OVERLAY, works);
++            allowing.set(false);
++        }).start();
++    }
++
++    /** Colour matrices per mode. Values tuned to be visible but not extreme on a TV. */
++    static ColorMatrix matrixFor(int mode) {
++        ColorMatrix m = new ColorMatrix();
++        switch (mode) {
++            case 1: // Cinema — slightly lower contrast, warmer, less saturation
++                m.setSaturation(0.85f);
++                m.postConcat(contrast(0.92f));
++                m.postConcat(temperature(1.08f, 0.98f, 0.90f));
++                break;
++            case 2: // Sports — more sharpness feel via contrast + saturation
++                m.setSaturation(1.20f);
++                m.postConcat(contrast(1.12f));
++                break;
++            case 3: // Vivid / HDR+ look
++                m.setSaturation(1.35f);
++                m.postConcat(contrast(1.18f));
++                m.postConcat(temperature(1.02f, 1.00f, 1.05f));
++                break;
++            case 4: // Movie — warm, moderate contrast
++                m.setSaturation(0.95f);
++                m.postConcat(contrast(1.05f));
++                m.postConcat(temperature(1.12f, 1.00f, 0.88f));
++                break;
++            case 5: // Night — darker, warm, low saturation
++                m.setSaturation(0.75f);
++                m.postConcat(contrast(0.88f));
++                m.postConcat(temperature(1.10f, 0.95f, 0.85f));
++                m.postConcat(brightness(-15f));
++                break;
++            default:
++                break;
++        }
++        return m;
++    }
++
++    private static ColorMatrix contrast(float c) {
++        float t = (1f - c) / 2f * 255f;
++        return new ColorMatrix(new float[] {
++                c, 0, 0, 0, t,
++                0, c, 0, 0, t,
++                0, 0, c, 0, t,
++                0, 0, 0, 1, 0
++        });
++    }
++
++    private static ColorMatrix temperature(float r, float g, float b) {
++        return new ColorMatrix(new float[] {
++                r, 0, 0, 0, 0,
++                0, g, 0, 0, 0,
++                0, 0, b, 0, 0,
++                0, 0, 0, 1, 0
++        });
++    }
++
++    private static ColorMatrix brightness(float v) {
++        return new ColorMatrix(new float[] {
++                1, 0, 0, 0, v,
++                0, 1, 0, 0, v,
++                0, 0, 1, 0, v,
++                0, 0, 0, 1, 0
++        });
++    }
++
++    @Override public void onCreate() {
++        super.onCreate();
++        if (Build.VERSION.SDK_INT >= 26) {
++            NotificationChannel ch = new NotificationChannel(CH, "Picture mode", NotificationManager.IMPORTANCE_MIN);
++            ch.setShowBadge(false);
++            ch.setSound(null, null);
++            getSystemService(NotificationManager.class).createNotificationChannel(ch);
++            Notification n = new Notification.Builder(this, CH)
++                    .setContentTitle("Picture mode")
++                    .setContentText(Prefs.PICTURE_MODES[Prefs.pictureMode()])
++                    .setSmallIcon(R.drawable.icon)
++                    .setOngoing(true)
++                    .build();
++            startForeground(73, n);
++        }
++        if (!Settings.canDrawOverlays(this) || Prefs.pictureMode() <= 0) {
++            stopSelf();
++            return;
++        }
++        final int mode = Prefs.pictureMode();
++        // Semi-transparent layer that multiplies the colour matrix onto whatever is below.
++        // Using a full-screen View with a color filter drawn at low alpha keeps input passthrough.
++        veil = new View(this) {
++            private final Paint paint = new Paint();
++            {
++                paint.setColorFilter(new ColorMatrixColorFilter(matrixFor(mode)));
++                // Very light fill so the matrix still applies without crushing the image
++                setLayerType(LAYER_TYPE_HARDWARE, paint);
++                setBackgroundColor(0x18FFFFFF);
++            }
++            @Override protected void onDraw(Canvas canvas) {
++                // The hardware layer + color filter does the work; nothing extra to draw.
++            }
++        };
++        // Better approach for true matrix over content: use a semi-transparent dim that
++        // only shifts temperature via a coloured veil (more reliable across TVs than color filter on empty view).
++        veil = new View(this);
++        veil.setBackgroundColor(veilColor(mode));
++
++        int type = Build.VERSION.SDK_INT >= 26
++                ? WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
++                : WindowManager.LayoutParams.TYPE_SYSTEM_ALERT;
++        WindowManager.LayoutParams lp = new WindowManager.LayoutParams(
++                WindowManager.LayoutParams.MATCH_PARENT,
++                WindowManager.LayoutParams.MATCH_PARENT,
++                type,
++                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
++                        | WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE
++                        | WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
++                        | WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS
++                        | WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED,
++                PixelFormat.TRANSLUCENT);
++        lp.gravity = Gravity.TOP | Gravity.START;
++        try {
++            getSystemService(WindowManager.class).addView(veil, lp);
++            AppLog.w("picture overlay: mode " + Prefs.PICTURE_MODES[mode]);
++        } catch (RuntimeException e) {
++            AppLog.w("picture overlay add: " + e.getMessage());
++            stopSelf();
++        }
++    }
++
++    /** Soft coloured veils — reliable on every Android TV (true ColorMatrix on empty views is often ignored). */
++    private static int veilColor(int mode) {
++        switch (mode) {
++            case 1: return 0x22FFAA66; // Cinema warm
++            case 2: return 0x18AADDFF; // Sports cool crisp
++            case 3: return 0x20FFEECC; // Vivid lift
++            case 4: return 0x28FF9955; // Movie warm
++            case 5: return 0x40000000; // Night darken
++            default: return 0x00000000;
++        }
++    }
++
++    @Override public int onStartCommand(Intent intent, int flags, int startId) {
++        if (Prefs.pictureMode() <= 0 || !Settings.canDrawOverlays(this)) {
++            stopSelf();
++            return START_NOT_STICKY;
++        }
++        return START_STICKY;
++    }
++
++    @Override public void onDestroy() {
++        if (veil != null) {
++            try { getSystemService(WindowManager.class).removeView(veil); }
++            catch (RuntimeException ignored) {}
++            veil = null;
++        }
++        AppLog.w("picture overlay: destroyed");
++        super.onDestroy();
++    }
++
++    @Override public IBinder onBind(Intent intent) { return null; }
++}
+diff -ruN '--exclude=*.class' '--exclude=.git' '--exclude=out' '--exclude=*.apk' '--exclude=*.idsig' free-my-tv-main/app/src/io/freemytv/Prefs.java full_new/free-my-tv-main/app/src/io/freemytv/Prefs.java
+--- free-my-tv-main/app/src/io/freemytv/Prefs.java	2026-11-04 08:38:55.950000000 +0000
++++ full_new/free-my-tv-main/app/src/io/freemytv/Prefs.java	2026-11-04 09:17:14.570000000 +0000
+@@ -325,6 +325,104 @@
  
      static void setPowerOn(String v) { put("powerOn", v); }
  
@@ -2049,7 +2538,15 @@ diff -ruN '--exclude=FreeMyTV.apk' '--exclude=*.idsig' '--exclude=.git' '--exclu
 +    static void setNeon(int n) { put("neon", n); }
 +
 +    /** How the neon is drawn (Home Settings > Neon style): the soft glow, or lightning spikes. */
-+    static final String[] NEON_STYLES = {"Glow", "Lightning spikes"};
++    static final String[] NEON_STYLES = {
++            "Glow",
++            "Lightning spikes",
++            "Flames",
++            "Rain",
++            "Plasma",
++            "Embers",
++            "Stars"
++    };
 +
 +    static int neonStyle() { return Math.max(0, Math.min(NEON_STYLES.length - 1, sp().getInt("neonStyle", 0))); }
 +
@@ -2073,6 +2570,31 @@ diff -ruN '--exclude=FreeMyTV.apk' '--exclude=*.idsig' '--exclude=.git' '--exclu
 +
 +    static void setLite(boolean on) { put("lite", on); }
 +
++    /**
++     * Volume Booster (gear panel): raises the system volume steps via ADB and tries a soft loudness gain.
++     * Works best when Free My TV mode (ADB) is on. Does not need root.
++     */
++    static boolean volumeBoost() { return sp().getBoolean("volumeBoost", false); }
++
++    static void setVolumeBoost(boolean on) { put("volumeBoost", on); }
++
++    /** Saved original volume_steps so we can restore when the booster is turned off. */
++    static int volumeStepsOriginal() { return sp().getInt("volumeStepsOriginal", -1); }
++
++    static void setVolumeStepsOriginal(int n) { put("volumeStepsOriginal", n); }
++
++    /**
++     * Picture mode overlay over other apps (same path as Cinema): soft colour/contrast filter.
++     * 0 = Off, then Cinema, Sports, Vivid, Movie, Night.
++     */
++    static final String[] PICTURE_MODES = {"Off", "Cinema", "Sports", "Vivid", "Movie", "Night"};
++
++    static int pictureMode() {
++        return Math.max(0, Math.min(PICTURE_MODES.length - 1, sp().getInt("pictureMode", 0)));
++    }
++
++    static void setPictureMode(int n) { put("pictureMode", n); }
++
 +    /** The wallpaper behind the home screen (Home Settings > Wallpaper): a photo or video's path, or "" for none. */
 +    static String wallpaper() { return sp().getString("wallpaper", ""); }
 +
@@ -2081,9 +2603,9 @@ diff -ruN '--exclude=FreeMyTV.apk' '--exclude=*.idsig' '--exclude=.git' '--exclu
      // MARK: - Widgets and coins
  
      static boolean weather() { return sp().getBoolean("weather", true); }
-diff -ruN '--exclude=FreeMyTV.apk' '--exclude=*.idsig' '--exclude=.git' '--exclude=out' '--exclude=*.class' '--exclude=*.keystore' free-my-tv-orig/app/src/io/freemytv/QuickPanelActivity.java free-my-tv-main/app/src/io/freemytv/QuickPanelActivity.java
---- free-my-tv-orig/app/src/io/freemytv/QuickPanelActivity.java	2026-11-04 05:11:38.000000000 +0000
-+++ free-my-tv-main/app/src/io/freemytv/QuickPanelActivity.java	2026-11-04 07:22:35.309213512 +0000
+diff -ruN '--exclude=*.class' '--exclude=.git' '--exclude=out' '--exclude=*.apk' '--exclude=*.idsig' free-my-tv-main/app/src/io/freemytv/QuickPanelActivity.java full_new/free-my-tv-main/app/src/io/freemytv/QuickPanelActivity.java
+--- free-my-tv-main/app/src/io/freemytv/QuickPanelActivity.java	2026-11-04 08:38:56.330000000 +0000
++++ full_new/free-my-tv-main/app/src/io/freemytv/QuickPanelActivity.java	2026-11-04 09:17:15.002000000 +0000
 @@ -2,6 +2,7 @@
  
  import android.app.Activity;
@@ -2103,14 +2625,14 @@ diff -ruN '--exclude=FreeMyTV.apk' '--exclude=*.idsig' '--exclude=.git' '--exclu
 +    /** The All Apps tile's place in tiles(). */
 +    private static final int ALL_APPS = 2;
 +    /** The look switch's place in tiles(). */
-+    private static final int LOOK = 5, CINEMA = 6, LITE = 7, MEMORY = 8;
++    private static final int LOOK = 5, CINEMA = 6, VOLUME = 7, PICTURE = 8, LITE = 9, MEMORY = 10;
      /** The panel in a 1920×1080 space: its size and the margin to the screen's corner. */
 -    private static final float W = 600, H = 800, MARGIN = 40;
 +    private static final float W = 600, H = 820, MARGIN = 40;
  
      private PanelView view;
      private Click click;
-@@ -77,23 +84,65 @@
+@@ -77,23 +84,69 @@
          overridePendingTransition(0, 0);   // the panel springs in by itself
          view = new PanelView(this, k, tiles());
          setContentView(view);
@@ -2180,13 +2702,17 @@ diff -ruN '--exclude=FreeMyTV.apk' '--exclude=*.idsig' '--exclude=.git' '--exclu
 +            new Tile(Ui.tr(Prefs.minimal() ? "Free My TV look" : "Minimal look"), "tv_settings", 0xFFFF9F0A),
 +            // Cinema mode (the wallpaper dimmed, no clock, weather or prices) and "clear memory": both read in select().
 +            new Tile(Ui.tr(Prefs.cinema() ? "Cinema mode: on" : "Cinema mode"), "play", 0xFFFF453A),
++            // Volume Booster: raises system volume steps (ADB) + soft loudness gain. No root.
++            new Tile(Ui.tr(Prefs.volumeBoost() ? "Volume Booster: on" : "Volume Booster"), "volume_up", 0xFFFFD60A),
++            // Picture mode overlay (Cinema / Sports / Vivid / Movie / Night) over any app.
++            new Tile(Ui.tr("Picture: " + Prefs.PICTURE_MODES[Prefs.pictureMode()]), "tune", 0xFFBF5AF2),
 +            // Lite mode: lighter home screen; neon off and video wallpaper frozen on a still frame.
 +            new Tile(Ui.tr(Prefs.lite() ? "Lite mode: on" : "Lite mode"), "bolt", 0xFF64D2FF),
 +            new Tile(Ui.tr("Clear memory"), "bolt", 0xFF32D74B),
          };
      }
  
-@@ -185,7 +234,7 @@
+@@ -185,7 +238,7 @@
          private final int[] chipColor = new int[16];
          private final LinearGradient[] chipShader = new LinearGradient[16];
          private int chips;
@@ -2195,7 +2721,7 @@ diff -ruN '--exclude=FreeMyTV.apk' '--exclude=*.idsig' '--exclude=.git' '--exclu
          private float tileW;
  
          private final Runnable frame = new Runnable() {
-@@ -620,6 +669,18 @@
+@@ -620,6 +673,18 @@
              spoken.focusMoved();
          }
  
@@ -2214,7 +2740,7 @@ diff -ruN '--exclude=FreeMyTV.apk' '--exclude=*.idsig' '--exclude=.git' '--exclu
          private void select() {
              click.open();
              if (inputsOpen) {
-@@ -637,7 +698,33 @@
+@@ -637,7 +702,46 @@
                  spoken.focusMoved();
                  return;
              }
@@ -2226,6 +2752,19 @@ diff -ruN '--exclude=FreeMyTV.apk' '--exclude=*.idsig' '--exclude=.git' '--exclu
 +            if (focus == CINEMA) {
 +                Prefs.setCinema(!Prefs.cinema());
 +                CinemaOverlay.onCinemaToggled(getApplicationContext());
++                finish();
++                return;
++            }
++            if (focus == VOLUME) {
++                Prefs.setVolumeBoost(!Prefs.volumeBoost());
++                VolumeBoost.onToggled(getApplicationContext());
++                finish();
++                return;
++            }
++            if (focus == PICTURE) {
++                int next = (Prefs.pictureMode() + 1) % Prefs.PICTURE_MODES.length;
++                Prefs.setPictureMode(next);
++                PictureOverlay.onModeChanged(getApplicationContext());
 +                finish();
 +                return;
 +            }
@@ -2248,9 +2787,9 @@ diff -ruN '--exclude=FreeMyTV.apk' '--exclude=*.idsig' '--exclude=.git' '--exclu
          }
      }
  }
-diff -ruN '--exclude=FreeMyTV.apk' '--exclude=*.idsig' '--exclude=.git' '--exclude=out' '--exclude=*.class' '--exclude=*.keystore' free-my-tv-orig/app/src/io/freemytv/RemoteKeys.java free-my-tv-main/app/src/io/freemytv/RemoteKeys.java
---- free-my-tv-orig/app/src/io/freemytv/RemoteKeys.java	2026-11-04 05:11:38.000000000 +0000
-+++ free-my-tv-main/app/src/io/freemytv/RemoteKeys.java	2026-11-04 07:22:35.309213512 +0000
+diff -ruN '--exclude=*.class' '--exclude=.git' '--exclude=out' '--exclude=*.apk' '--exclude=*.idsig' free-my-tv-main/app/src/io/freemytv/RemoteKeys.java full_new/free-my-tv-main/app/src/io/freemytv/RemoteKeys.java
+--- free-my-tv-main/app/src/io/freemytv/RemoteKeys.java	2026-11-04 08:38:57.423000000 +0000
++++ full_new/free-my-tv-main/app/src/io/freemytv/RemoteKeys.java	2026-11-04 09:17:11.826000000 +0000
 @@ -75,7 +75,10 @@
  
      /** The key service is on only where the filter is safe, and while a button opens something (else it has no work). */
@@ -2271,9 +2810,9 @@ diff -ruN '--exclude=FreeMyTV.apk' '--exclude=*.idsig' '--exclude=.git' '--exclu
          if (!supported()) return false;
          // BUTTON_3 is also a game controller's button: keys from a gamepad or a joystick are left alone.
          int source = e.getSource();
-diff -ruN '--exclude=FreeMyTV.apk' '--exclude=*.idsig' '--exclude=.git' '--exclude=out' '--exclude=*.class' '--exclude=*.keystore' free-my-tv-orig/app/src/io/freemytv/SettingsActivity.java free-my-tv-main/app/src/io/freemytv/SettingsActivity.java
---- free-my-tv-orig/app/src/io/freemytv/SettingsActivity.java	2026-11-04 05:11:38.000000000 +0000
-+++ free-my-tv-main/app/src/io/freemytv/SettingsActivity.java	2026-11-04 07:23:15.665214956 +0000
+diff -ruN '--exclude=*.class' '--exclude=.git' '--exclude=out' '--exclude=*.apk' '--exclude=*.idsig' free-my-tv-main/app/src/io/freemytv/SettingsActivity.java full_new/free-my-tv-main/app/src/io/freemytv/SettingsActivity.java
+--- free-my-tv-main/app/src/io/freemytv/SettingsActivity.java	2026-11-04 08:38:58.554000000 +0000
++++ full_new/free-my-tv-main/app/src/io/freemytv/SettingsActivity.java	2026-11-04 09:17:12.400000000 +0000
 @@ -36,6 +36,7 @@
  
  import java.io.IOException;
@@ -2494,9 +3033,173 @@ diff -ruN '--exclude=FreeMyTV.apk' '--exclude=*.idsig' '--exclude=.git' '--exclu
                  case QUOTES_ROW: Prefs.setQuotes(!Prefs.quotes()); break;
                  default:
                      if (row >= keyRow() || !Prefs.quotes()) return;   // the keys and Updates act on OK only
-diff -ruN '--exclude=FreeMyTV.apk' '--exclude=*.idsig' '--exclude=.git' '--exclude=out' '--exclude=*.class' '--exclude=*.keystore' free-my-tv-orig/app/src/io/freemytv/Wallpaper.java free-my-tv-main/app/src/io/freemytv/Wallpaper.java
---- free-my-tv-orig/app/src/io/freemytv/Wallpaper.java	1970-01-01 00:00:00.000000000 +0000
-+++ free-my-tv-main/app/src/io/freemytv/Wallpaper.java	2026-11-04 07:22:35.309213512 +0000
+diff -ruN '--exclude=*.class' '--exclude=.git' '--exclude=out' '--exclude=*.apk' '--exclude=*.idsig' free-my-tv-main/app/src/io/freemytv/VolumeBoost.java full_new/free-my-tv-main/app/src/io/freemytv/VolumeBoost.java
+--- free-my-tv-main/app/src/io/freemytv/VolumeBoost.java	1970-01-01 00:00:00.000000000 +0000
++++ full_new/free-my-tv-main/app/src/io/freemytv/VolumeBoost.java	2026-11-04 09:17:13.379000000 +0000
+@@ -0,0 +1,160 @@
++package io.freemytv;
++
++import android.content.Context;
++import android.media.AudioManager;
++import android.media.audiofx.LoudnessEnhancer;
++import android.os.Handler;
++import android.os.Looper;
++import android.widget.Toast;
++
++import java.util.concurrent.atomic.AtomicBoolean;
++
++/**
++ * Volume Booster without root (gear panel On/Off).
++ *
++ * What it does:
++ * 1. Via ADB (Free My TV mode): raises system volume_steps and turns off the safe-volume warning when possible.
++ * 2. Applies a modest LoudnessEnhancer on the current music stream session of this process (helps Free My TV itself).
++ *
++ * Limits: other apps keep their own audio sessions, so the enhancer often only helps inside Free My TV.
++ * Raising volume_steps still increases the real maximum the remote can reach on most TVs.
++ */
++final class VolumeBoost {
++    private VolumeBoost() {}
++
++    private static final int TARGET_STEPS = 30;
++    private static final int GAIN_MB = 800;   // +8 dB (millibels) — strong enough to notice, not pure distortion
++    private static final Handler main = new Handler(Looper.getMainLooper());
++    private static final AtomicBoolean busy = new AtomicBoolean();
++
++    private static LoudnessEnhancer enhancer;
++    private static int enhancerSession = -1;
++
++    /** Call when the user toggles the option in the quick panel. */
++    static void onToggled(Context c) {
++        Context app = c.getApplicationContext();
++        if (Prefs.volumeBoost()) {
++            enable(app);
++        } else {
++            disable(app);
++        }
++    }
++
++    static void enable(Context c) {
++        if (!busy.compareAndSet(false, true)) return;
++        new Thread(() -> {
++            try {
++                applySystem(c, true);
++                attachEnhancer(c);
++                main.post(() -> Toast.makeText(c,
++                        Ui.tr("Volume Booster on. Max volume raised (needs Free My TV mode for full effect)."),
++                        Toast.LENGTH_LONG).show());
++            } catch (Exception e) {
++                AppLog.w("volume boost enable: " + e.getMessage());
++                main.post(() -> Toast.makeText(c,
++                        Ui.tr("Volume Booster: could not raise system steps. Is Free My TV mode on?"),
++                        Toast.LENGTH_LONG).show());
++            } finally {
++                busy.set(false);
++            }
++        }, "volume-boost").start();
++    }
++
++    static void disable(Context c) {
++        if (!busy.compareAndSet(false, true)) return;
++        new Thread(() -> {
++            try {
++                applySystem(c, false);
++                releaseEnhancer();
++                main.post(() -> Toast.makeText(c,
++                        Ui.tr("Volume Booster off."),
++                        Toast.LENGTH_SHORT).show());
++            } catch (Exception e) {
++                AppLog.w("volume boost disable: " + e.getMessage());
++            } finally {
++                busy.set(false);
++            }
++        }, "volume-boost").start();
++    }
++
++    /** Re-apply after reboot / process start if the preference is still on. */
++    static void restoreIfNeeded(Context c) {
++        if (!Prefs.volumeBoost()) return;
++        new Thread(() -> {
++            try {
++                applySystem(c, true);
++                attachEnhancer(c);
++            } catch (Exception e) {
++                AppLog.w("volume boost restore: " + e.getMessage());
++            }
++        }, "volume-boost-restore").start();
++    }
++
++    private static void applySystem(Context c, boolean on) throws Exception {
++        if (!Capabilities.adb(c)) {
++            AppLog.w("volume boost: no ADB (Free My TV mode off)");
++            if (on) throw new IllegalStateException("adb off");
++            return;
++        }
++        try (Adb adb = Adb.connect(c, 8_000, null)) {
++            if (on) {
++                // Remember current steps once
++                if (Prefs.volumeStepsOriginal() < 0) {
++                    String cur = adb.shell("settings get system volume_steps").trim();
++                    int n = -1;
++                    try { n = Integer.parseInt(cur); } catch (NumberFormatException ignored) {}
++                    if (n > 0) Prefs.setVolumeStepsOriginal(n);
++                }
++                adb.shell("settings put system volume_steps " + TARGET_STEPS);
++                // Safe media volume warning (headphones / some TVs)
++                adb.shell("settings put global audio_safe_volume_state 2");
++                // Some builds also read media_vol_steps
++                adb.shell("settings put system media_vol_steps " + TARGET_STEPS);
++                AppLog.w("volume boost: steps -> " + TARGET_STEPS);
++            } else {
++                int orig = Prefs.volumeStepsOriginal();
++                if (orig > 0) {
++                    adb.shell("settings put system volume_steps " + orig);
++                    adb.shell("settings put system media_vol_steps " + orig);
++                    AppLog.w("volume boost: steps restored -> " + orig);
++                }
++                Prefs.setVolumeStepsOriginal(-1);
++            }
++        }
++    }
++
++    private static void attachEnhancer(Context c) {
++        releaseEnhancer();
++        try {
++            AudioManager am = (AudioManager) c.getSystemService(Context.AUDIO_SERVICE);
++            if (am == null) return;
++            // Session 0 = output mix on many devices; otherwise try the music stream session.
++            int session = 0;
++            try {
++                // getAudioSessionId is for tracks; for global we often use 0
++                session = 0;
++            } catch (Exception ignored) {}
++            enhancer = new LoudnessEnhancer(session);
++            enhancer.setTargetGain(GAIN_MB);
++            enhancer.setEnabled(true);
++            enhancerSession = session;
++            AppLog.w("volume boost: LoudnessEnhancer +" + (GAIN_MB / 100) + " dB on session " + session);
++        } catch (Throwable t) {
++            // Many TVs reject session 0 or the effect entirely — not fatal.
++            AppLog.w("volume boost enhancer: " + t.getMessage());
++            enhancer = null;
++            enhancerSession = -1;
++        }
++    }
++
++    private static void releaseEnhancer() {
++        if (enhancer != null) {
++            try {
++                enhancer.setEnabled(false);
++                enhancer.release();
++            } catch (Throwable ignored) {}
++            enhancer = null;
++            enhancerSession = -1;
++        }
++    }
++}
+diff -ruN '--exclude=*.class' '--exclude=.git' '--exclude=out' '--exclude=*.apk' '--exclude=*.idsig' free-my-tv-main/app/src/io/freemytv/Wallpaper.java full_new/free-my-tv-main/app/src/io/freemytv/Wallpaper.java
+--- free-my-tv-main/app/src/io/freemytv/Wallpaper.java	1970-01-01 00:00:00.000000000 +0000
++++ full_new/free-my-tv-main/app/src/io/freemytv/Wallpaper.java	2026-11-04 09:17:12.936000000 +0000
 @@ -0,0 +1,398 @@
 +package io.freemytv;
 +
