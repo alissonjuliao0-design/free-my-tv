@@ -1,6 +1,6 @@
 diff -ruN '--exclude=*.class' '--exclude=.git' '--exclude=out' '--exclude=*.apk' '--exclude=*.idsig' '--exclude=*.patch' free-my-tv-main/app/AndroidManifest.xml free-my-tv-main/app/AndroidManifest.xml
 --- free-my-tv-main/app/AndroidManifest.xml	2026-11-04 09:46:47.090892841 +0000
-+++ free-my-tv-main/app/AndroidManifest.xml	2026-11-05 11:17:51.325423307 +0000
++++ free-my-tv-main/app/AndroidManifest.xml	2026-11-05 11:43:08.261734064 +0000
 @@ -19,6 +19,15 @@
      <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
      <!-- "Continue watching": what you left half-way in your apps, from Android TV's own Watch Next list. -->
@@ -44,7 +44,7 @@ diff -ruN '--exclude=*.class' '--exclude=.git' '--exclude=out' '--exclude=*.apk'
              android:exported="false">
 diff -ruN '--exclude=*.class' '--exclude=.git' '--exclude=out' '--exclude=*.apk' '--exclude=*.idsig' '--exclude=*.patch' free-my-tv-main/app/src/io/freemytv/App.java free-my-tv-main/app/src/io/freemytv/App.java
 --- free-my-tv-main/app/src/io/freemytv/App.java	2026-11-04 09:46:47.092895074 +0000
-+++ free-my-tv-main/app/src/io/freemytv/App.java	2026-11-05 11:17:51.323866383 +0000
++++ free-my-tv-main/app/src/io/freemytv/App.java	2026-11-05 11:43:08.259908855 +0000
 @@ -4,9 +4,20 @@
  
  /** Gives Prefs a context in every process. */
@@ -68,7 +68,7 @@ diff -ruN '--exclude=*.class' '--exclude=.git' '--exclude=out' '--exclude=*.apk'
  }
 diff -ruN '--exclude=*.class' '--exclude=.git' '--exclude=out' '--exclude=*.apk' '--exclude=*.idsig' '--exclude=*.patch' free-my-tv-main/app/src/io/freemytv/CinemaOverlay.java free-my-tv-main/app/src/io/freemytv/CinemaOverlay.java
 --- free-my-tv-main/app/src/io/freemytv/CinemaOverlay.java	1970-01-01 00:00:00.000000000 +0000
-+++ free-my-tv-main/app/src/io/freemytv/CinemaOverlay.java	2026-11-05 11:17:51.323914413 +0000
++++ free-my-tv-main/app/src/io/freemytv/CinemaOverlay.java	2026-11-05 11:43:08.259959829 +0000
 @@ -0,0 +1,173 @@
 +package io.freemytv;
 +
@@ -245,7 +245,7 @@ diff -ruN '--exclude=*.class' '--exclude=.git' '--exclude=out' '--exclude=*.apk'
 +}
 diff -ruN '--exclude=*.class' '--exclude=.git' '--exclude=out' '--exclude=*.apk' '--exclude=*.idsig' '--exclude=*.patch' free-my-tv-main/app/src/io/freemytv/CustomKeys.java free-my-tv-main/app/src/io/freemytv/CustomKeys.java
 --- free-my-tv-main/app/src/io/freemytv/CustomKeys.java	1970-01-01 00:00:00.000000000 +0000
-+++ free-my-tv-main/app/src/io/freemytv/CustomKeys.java	2026-11-05 11:17:51.325234951 +0000
++++ free-my-tv-main/app/src/io/freemytv/CustomKeys.java	2026-11-05 11:43:08.261230103 +0000
 @@ -0,0 +1,249 @@
 +package io.freemytv;
 +
@@ -498,7 +498,7 @@ diff -ruN '--exclude=*.class' '--exclude=.git' '--exclude=out' '--exclude=*.apk'
 +}
 diff -ruN '--exclude=*.class' '--exclude=.git' '--exclude=out' '--exclude=*.apk' '--exclude=*.idsig' '--exclude=*.patch' free-my-tv-main/app/src/io/freemytv/HomeActivity.java free-my-tv-main/app/src/io/freemytv/HomeActivity.java
 --- free-my-tv-main/app/src/io/freemytv/HomeActivity.java	2026-11-04 09:46:47.093008631 +0000
-+++ free-my-tv-main/app/src/io/freemytv/HomeActivity.java	2026-11-05 11:17:51.325257425 +0000
++++ free-my-tv-main/app/src/io/freemytv/HomeActivity.java	2026-11-05 11:43:08.261246211 +0000
 @@ -20,6 +20,20 @@
      /** Opens All Apps (a remote's All Apps button, RemoteKeys). */
      static final String EXTRA_ALL_APPS = "io.freemytv.ALL_APPS";
@@ -581,7 +581,7 @@ diff -ruN '--exclude=*.class' '--exclude=.git' '--exclude=out' '--exclude=*.apk'
              home.destroy();
 diff -ruN '--exclude=*.class' '--exclude=.git' '--exclude=out' '--exclude=*.apk' '--exclude=*.idsig' '--exclude=*.patch' free-my-tv-main/app/src/io/freemytv/HomeApps.java free-my-tv-main/app/src/io/freemytv/HomeApps.java
 --- free-my-tv-main/app/src/io/freemytv/HomeApps.java	2026-11-04 09:46:47.093021873 +0000
-+++ free-my-tv-main/app/src/io/freemytv/HomeApps.java	2026-11-05 11:17:51.324100404 +0000
++++ free-my-tv-main/app/src/io/freemytv/HomeApps.java	2026-11-05 11:43:08.260113632 +0000
 @@ -62,9 +62,27 @@
      static final int RECENTS = 8;
      /** A Home Assistant entity in the drawer (HomeAssistant): OK calls its service, nothing opens. */
@@ -805,7 +805,7 @@ diff -ruN '--exclude=*.class' '--exclude=.git' '--exclude=out' '--exclude=*.apk'
          // and Live TV on its own plays the last channel, which can be an app's (RaiPlay's).
 diff -ruN '--exclude=*.class' '--exclude=.git' '--exclude=out' '--exclude=*.apk' '--exclude=*.idsig' '--exclude=*.patch' free-my-tv-main/app/src/io/freemytv/HomeMode.java free-my-tv-main/app/src/io/freemytv/HomeMode.java
 --- free-my-tv-main/app/src/io/freemytv/HomeMode.java	2026-11-04 09:46:47.093088049 +0000
-+++ free-my-tv-main/app/src/io/freemytv/HomeMode.java	2026-11-05 11:17:51.324137250 +0000
++++ free-my-tv-main/app/src/io/freemytv/HomeMode.java	2026-11-05 11:43:08.260157380 +0000
 @@ -417,11 +417,11 @@
       * (or the brand's default), and on TCL's Android 11, it goes off (RemoteKeys.serviceWanted).
       */
@@ -822,7 +822,7 @@ diff -ruN '--exclude=*.class' '--exclude=.git' '--exclude=out' '--exclude=*.apk'
          } catch (IOException e) {
 diff -ruN '--exclude=*.class' '--exclude=.git' '--exclude=out' '--exclude=*.apk' '--exclude=*.idsig' '--exclude=*.patch' free-my-tv-main/app/src/io/freemytv/HomeView.java free-my-tv-main/app/src/io/freemytv/HomeView.java
 --- free-my-tv-main/app/src/io/freemytv/HomeView.java	2026-11-04 09:46:47.093193071 +0000
-+++ free-my-tv-main/app/src/io/freemytv/HomeView.java	2026-11-05 11:17:51.324225907 +0000
++++ free-my-tv-main/app/src/io/freemytv/HomeView.java	2026-11-05 11:43:08.260247277 +0000
 @@ -251,6 +251,12 @@
      private final android.graphics.PorterDuffColorFilter whiteLogo =
              new android.graphics.PorterDuffColorFilter(0xFFFFFFFF, android.graphics.PorterDuff.Mode.SRC_IN);
@@ -1268,7 +1268,7 @@ diff -ruN '--exclude=*.class' '--exclude=.git' '--exclude=out' '--exclude=*.apk'
          float x = MARGIN * k;
 diff -ruN '--exclude=*.class' '--exclude=.git' '--exclude=out' '--exclude=*.apk' '--exclude=*.idsig' '--exclude=*.patch' free-my-tv-main/app/src/io/freemytv/Neon.java free-my-tv-main/app/src/io/freemytv/Neon.java
 --- free-my-tv-main/app/src/io/freemytv/Neon.java	1970-01-01 00:00:00.000000000 +0000
-+++ free-my-tv-main/app/src/io/freemytv/Neon.java	2026-11-05 11:17:51.324342155 +0000
++++ free-my-tv-main/app/src/io/freemytv/Neon.java	2026-11-05 11:43:08.260345618 +0000
 @@ -0,0 +1,994 @@
 +package io.freemytv;
 +
@@ -2266,7 +2266,7 @@ diff -ruN '--exclude=*.class' '--exclude=.git' '--exclude=out' '--exclude=*.apk'
 +}
 diff -ruN '--exclude=*.class' '--exclude=.git' '--exclude=out' '--exclude=*.apk' '--exclude=*.idsig' '--exclude=*.patch' free-my-tv-main/app/src/io/freemytv/PictureFilter.java free-my-tv-main/app/src/io/freemytv/PictureFilter.java
 --- free-my-tv-main/app/src/io/freemytv/PictureFilter.java	1970-01-01 00:00:00.000000000 +0000
-+++ free-my-tv-main/app/src/io/freemytv/PictureFilter.java	2026-11-05 11:17:51.325378445 +0000
++++ free-my-tv-main/app/src/io/freemytv/PictureFilter.java	2026-11-05 11:43:08.261331303 +0000
 @@ -0,0 +1,139 @@
 +package io.freemytv;
 +
@@ -2409,7 +2409,7 @@ diff -ruN '--exclude=*.class' '--exclude=.git' '--exclude=out' '--exclude=*.apk'
 +}
 diff -ruN '--exclude=*.class' '--exclude=.git' '--exclude=out' '--exclude=*.apk' '--exclude=*.idsig' '--exclude=*.patch' free-my-tv-main/app/src/io/freemytv/PictureOverlay.java free-my-tv-main/app/src/io/freemytv/PictureOverlay.java
 --- free-my-tv-main/app/src/io/freemytv/PictureOverlay.java	1970-01-01 00:00:00.000000000 +0000
-+++ free-my-tv-main/app/src/io/freemytv/PictureOverlay.java	2026-11-05 11:17:51.325277627 +0000
++++ free-my-tv-main/app/src/io/freemytv/PictureOverlay.java	2026-11-05 11:43:08.261263184 +0000
 @@ -0,0 +1,231 @@
 +package io.freemytv;
 +
@@ -2644,7 +2644,7 @@ diff -ruN '--exclude=*.class' '--exclude=.git' '--exclude=out' '--exclude=*.apk'
 +}
 diff -ruN '--exclude=*.class' '--exclude=.git' '--exclude=out' '--exclude=*.apk' '--exclude=*.idsig' '--exclude=*.patch' free-my-tv-main/app/src/io/freemytv/Prefs.java free-my-tv-main/app/src/io/freemytv/Prefs.java
 --- free-my-tv-main/app/src/io/freemytv/Prefs.java	2026-11-04 09:46:47.093375455 +0000
-+++ free-my-tv-main/app/src/io/freemytv/Prefs.java	2026-11-05 11:17:51.325299361 +0000
++++ free-my-tv-main/app/src/io/freemytv/Prefs.java	2026-11-05 11:43:08.261279587 +0000
 @@ -325,6 +325,131 @@
  
      static void setPowerOn(String v) { put("powerOn", v); }
@@ -2779,7 +2779,7 @@ diff -ruN '--exclude=*.class' '--exclude=.git' '--exclude=out' '--exclude=*.apk'
      static boolean weather() { return sp().getBoolean("weather", true); }
 diff -ruN '--exclude=*.class' '--exclude=.git' '--exclude=out' '--exclude=*.apk' '--exclude=*.idsig' '--exclude=*.patch' free-my-tv-main/app/src/io/freemytv/QuickPanelActivity.java free-my-tv-main/app/src/io/freemytv/QuickPanelActivity.java
 --- free-my-tv-main/app/src/io/freemytv/QuickPanelActivity.java	2026-11-04 09:46:47.093417314 +0000
-+++ free-my-tv-main/app/src/io/freemytv/QuickPanelActivity.java	2026-11-05 11:17:51.324540766 +0000
++++ free-my-tv-main/app/src/io/freemytv/QuickPanelActivity.java	2026-11-05 11:43:08.260505099 +0000
 @@ -2,6 +2,7 @@
  
  import android.app.Activity;
@@ -2858,7 +2858,7 @@ diff -ruN '--exclude=*.class' '--exclude=.git' '--exclude=out' '--exclude=*.apk'
 +        int pct = VolumeBoost.level(this);
 +        if (pct <= 0) return Ui.tr("Volume Booster");
 +        String how = VolumeBoost.status(this);
-+        String mark = how.equals("refused") ? " - " + Ui.tr("refused") : how.isEmpty() ? " ..." : " OK";
++        String mark = how.startsWith("refused") ? " - " + Ui.tr("refused") : how.isEmpty() ? " ..." : " OK " + how;
 +        return Ui.tr("Volume") + " +" + pct + "% (" + (VolumeBoost.gainMb(pct) / 100) + " dB)" + mark;
 +    }
 +
@@ -3063,7 +3063,7 @@ diff -ruN '--exclude=*.class' '--exclude=.git' '--exclude=out' '--exclude=*.apk'
  }
 diff -ruN '--exclude=*.class' '--exclude=.git' '--exclude=out' '--exclude=*.apk' '--exclude=*.idsig' '--exclude=*.patch' free-my-tv-main/app/src/io/freemytv/RemoteKeys.java free-my-tv-main/app/src/io/freemytv/RemoteKeys.java
 --- free-my-tv-main/app/src/io/freemytv/RemoteKeys.java	2026-11-04 09:46:47.093527091 +0000
-+++ free-my-tv-main/app/src/io/freemytv/RemoteKeys.java	2026-11-05 11:17:51.324594038 +0000
++++ free-my-tv-main/app/src/io/freemytv/RemoteKeys.java	2026-11-05 11:43:08.260583154 +0000
 @@ -75,7 +75,10 @@
  
      /** The key service is on only where the filter is safe, and while a button opens something (else it has no work). */
@@ -3086,7 +3086,7 @@ diff -ruN '--exclude=*.class' '--exclude=.git' '--exclude=out' '--exclude=*.apk'
          int source = e.getSource();
 diff -ruN '--exclude=*.class' '--exclude=.git' '--exclude=out' '--exclude=*.apk' '--exclude=*.idsig' '--exclude=*.patch' free-my-tv-main/app/src/io/freemytv/SettingsActivity.java free-my-tv-main/app/src/io/freemytv/SettingsActivity.java
 --- free-my-tv-main/app/src/io/freemytv/SettingsActivity.java	2026-11-04 09:46:47.093605352 +0000
-+++ free-my-tv-main/app/src/io/freemytv/SettingsActivity.java	2026-11-05 11:17:51.324732733 +0000
++++ free-my-tv-main/app/src/io/freemytv/SettingsActivity.java	2026-11-05 11:43:08.260728311 +0000
 @@ -36,6 +36,7 @@
  
  import java.io.IOException;
@@ -3309,7 +3309,7 @@ diff -ruN '--exclude=*.class' '--exclude=.git' '--exclude=out' '--exclude=*.apk'
                      if (row >= keyRow() || !Prefs.quotes()) return;   // the keys and Updates act on OK only
 diff -ruN '--exclude=*.class' '--exclude=.git' '--exclude=out' '--exclude=*.apk' '--exclude=*.idsig' '--exclude=*.patch' free-my-tv-main/app/src/io/freemytv/VolumeBoost.java free-my-tv-main/app/src/io/freemytv/VolumeBoost.java
 --- free-my-tv-main/app/src/io/freemytv/VolumeBoost.java	1970-01-01 00:00:00.000000000 +0000
-+++ free-my-tv-main/app/src/io/freemytv/VolumeBoost.java	2026-11-05 11:17:51.324886494 +0000
++++ free-my-tv-main/app/src/io/freemytv/VolumeBoost.java	2026-11-05 11:43:08.260888181 +0000
 @@ -0,0 +1,144 @@
 +package io.freemytv;
 +
@@ -3367,7 +3367,7 @@ diff -ruN '--exclude=*.class' '--exclude=.git' '--exclude=out' '--exclude=*.apk'
 +        }
 +    }
 +
-+    /** How the service got on: "LE" (loudness enhancer), "EQ" (equalizer), "refused" or "" (not known yet). */
++    /** How the service got on: "LE" (loudness enhancer), "EQ" (equalizer), "DP" (dynamics), "refused: why" or "" (not yet). */
 +    static String status(Context c) {
 +        File f = new File(c.getFilesDir(), STATUS);
 +        if (!f.exists()) return "";
@@ -3457,8 +3457,8 @@ diff -ruN '--exclude=*.class' '--exclude=.git' '--exclude=out' '--exclude=*.apk'
 +}
 diff -ruN '--exclude=*.class' '--exclude=.git' '--exclude=out' '--exclude=*.apk' '--exclude=*.idsig' '--exclude=*.patch' free-my-tv-main/app/src/io/freemytv/VolumeBoostService.java free-my-tv-main/app/src/io/freemytv/VolumeBoostService.java
 --- free-my-tv-main/app/src/io/freemytv/VolumeBoostService.java	1970-01-01 00:00:00.000000000 +0000
-+++ free-my-tv-main/app/src/io/freemytv/VolumeBoostService.java	2026-11-05 11:17:51.325399022 +0000
-@@ -0,0 +1,223 @@
++++ free-my-tv-main/app/src/io/freemytv/VolumeBoostService.java	2026-11-05 11:43:08.261347322 +0000
+@@ -0,0 +1,269 @@
 +package io.freemytv;
 +
 +import android.app.Notification;
@@ -3472,15 +3472,18 @@ diff -ruN '--exclude=*.class' '--exclude=.git' '--exclude=out' '--exclude=*.apk'
 +import android.os.Handler;
 +import android.os.IBinder;
 +import android.os.Looper;
-+import android.os.SystemClock;
 +import android.widget.Toast;
 +
 +/**
-+ * Holds the volume boost for as long as the user leaves it on.
-+ * Primary: LoudnessEnhancer on session 0 (global).
-+ * Fallback: Equalizer on session 0 with shaped band gains (like commercial boosters).
-+ * Runs as sticky foreground service and re-applies every 45 s so TVs that drop the
-+ * effect keep the boost until the user cycles it back to 0 %.
++ * Holds the volume boost for as long as the user leaves it on, on the whole sound output (session 0).
++ *
++ * It tries three effects, one after the other, and keeps the first one the TV accepts:
++ *   LE  LoudnessEnhancer: a gain with a limiter, the best one;
++ *   EQ  Equalizer with the bands raised (like the commercial boosters);
++ *   DP  DynamicsProcessing (Android 9 and up): a gain at the input and a limiter.
++ * Each one is tried on its own, so a TV that has no LoudnessEnhancer still gets the Equalizer. Why one was refused is
++ * kept (VolumeBoost.saveStatus) and shown. A sticky foreground service, it puts the effect back every 45 seconds, since
++ * some TVs drop it, and the level is read from a file (VolumeBoost.level): this is a process of its own.
 + */
 +public class VolumeBoostService extends Service {
 +    private static final String CH = "volume";
@@ -3488,15 +3491,13 @@ diff -ruN '--exclude=*.class' '--exclude=.git' '--exclude=out' '--exclude=*.apk'
 +
 +    private LoudnessEnhancer loudness;
 +    private Equalizer equalizer;
-+    private short eqBands;
-+    private short eqMinLevel;
-+    private short eqMaxLevel;
-+    private boolean useEqualizer;   // true when LoudnessEnhancer failed / not available
++    private Object dynamics;   // a DynamicsProcessing, made by reflection: the class is new in Android 9
++    private short eqBands, eqMin, eqMax;
++    private String working = "";   // which of "LE", "EQ", "DP" is holding the boost now
++    private boolean told;          // the refusal was said once already
 +
 +    private final Handler main = new Handler(Looper.getMainLooper());
 +    private final Runnable reapply = this::reapplyIfNeeded;
-+    private boolean userToldRefused;
-+    private long lastRaiseAt;
 +
 +    @Override
 +    public void onCreate() {
@@ -3522,7 +3523,7 @@ diff -ruN '--exclude=*.class' '--exclude=.git' '--exclude=out' '--exclude=*.apk'
 +            stopSelf();
 +            return START_NOT_STICKY;
 +        }
-+        raise(pct, /*silent*/ false);
++        raise(pct, false);
 +        main.removeCallbacks(reapply);
 +        main.postDelayed(reapply, REAPPLY_MS);
 +        return START_STICKY;
@@ -3534,99 +3535,134 @@ diff -ruN '--exclude=*.class' '--exclude=.git' '--exclude=out' '--exclude=*.apk'
 +            stopSelf();
 +            return;
 +        }
-+        raise(pct, /*silent*/ true);
++        raise(pct, true);
 +        main.postDelayed(reapply, REAPPLY_MS);
 +    }
 +
 +    private void raise(int pct, boolean silent) {
-+        int gainMb = VolumeBoost.gainMb(pct);
-+        try {
-+            if (!useEqualizer) {
-+                if (loudness == null) {
-+                    loudness = new LoudnessEnhancer(0);
-+                }
-+                loudness.setTargetGain(gainMb);
-+                loudness.setEnabled(true);
-+                boolean on = loudness.getEnabled();
-+                lastRaiseAt = SystemClock.elapsedRealtime();
-+                AppLog.w("volume boost LE: " + pct + "% = +" + (gainMb / 100f) + " dB, enabled=" + on
-+                        + (silent ? " (re-apply)" : ""));
-+                if (!silent) {
-+                    toast(on
-+                            ? Ui.tr("Volume Booster") + " +" + pct + "%  (+" + (gainMb / 100) + " dB)"
-+                            : Ui.tr("This TV refused the volume effect."));
-+                } else if (!on && !userToldRefused) {
-+                    userToldRefused = true;
-+                    toast(Ui.tr("This TV refused the volume effect."));
-+                }
-+                if (on) {
-+                    VolumeBoost.saveStatus(this, "LE");
-+                    return;
-+                }
-+                // LE refused → fall through to Equalizer
-+                releaseLoudness();
-+                useEqualizer = true;
-+            }
++        final int gainMb = VolumeBoost.gainMb(pct);
++        StringBuilder why = new StringBuilder();
++        boolean ok = tryLoudness(gainMb, why) || tryEqualizer(pct, why) || tryDynamics(gainMb, why);
++        if (ok) {
++            VolumeBoost.saveStatus(this, working);
++            AppLog.w("volume boost " + working + ": " + pct + "% = +" + (gainMb / 100f) + " dB" + (silent ? " (re-apply)" : ""));
++            told = false;
++            if (!silent) toast(Ui.tr("Volume Booster") + " +" + pct + "% (+" + (gainMb / 100) + " dB, " + working + ")", false);
++            return;
++        }
++        working = "";
++        String reasons = why.toString().trim();
++        VolumeBoost.saveStatus(this, "refused: " + reasons);
++        AppLog.w("volume boost refused: " + reasons);
++        if (!told) {
++            told = true;
++            toast(Ui.tr("This TV refused the volume effect.") + "\n" + reasons, true);
++        }
++    }
 +
-+            // Fallback: Equalizer (session 0)
++    /** Short enough for a toast: the kind of error and the start of its message. */
++    private static String brief(Throwable t) {
++        String m = t.getMessage();
++        if (m == null) return t.getClass().getSimpleName();
++        if (m.length() > 70) m = m.substring(0, 70);
++        return t.getClass().getSimpleName() + " " + m;
++    }
++
++    // MARK: - The three effects
++
++    private boolean tryLoudness(int gainMb, StringBuilder why) {
++        try {
++            if (loudness == null) loudness = new LoudnessEnhancer(0);
++            loudness.setTargetGain(gainMb);
++            loudness.setEnabled(true);
++            if (loudness.getEnabled()) {
++                working = "LE";
++                releaseEqualizer();
++                releaseDynamics();
++                return true;
++            }
++            why.append("LE: not enabled; ");
++        } catch (Throwable t) {
++            why.append("LE: ").append(brief(t)).append("; ");
++        }
++        releaseLoudness();
++        return false;
++    }
++
++    /** Bands raised to the most the device allows at 100 per cent, a little less for the lowest and the highest ones. */
++    private boolean tryEqualizer(int pct, StringBuilder why) {
++        try {
 +            if (equalizer == null) {
-+                equalizer = new Equalizer(0, 0);   // priority 0, session 0 (global)
++                equalizer = new Equalizer(0, 0);   // priority 0, session 0 (the whole output)
 +                eqBands = equalizer.getNumberOfBands();
 +                short[] range = equalizer.getBandLevelRange();
-+                eqMinLevel = range[0];
-+                eqMaxLevel = range[1];
-+                AppLog.w("volume boost EQ: bands=" + eqBands + " range=" + eqMinLevel + ".." + eqMaxLevel);
++                eqMin = range[0];
++                eqMax = range[1];
++                AppLog.w("volume boost EQ: bands=" + eqBands + " range=" + eqMin + ".." + eqMax);
 +            }
-+            applyEqualizer(pct);
-+            VolumeBoost.saveStatus(this, "EQ");
-+            lastRaiseAt = SystemClock.elapsedRealtime();
-+            AppLog.w("volume boost EQ: " + pct + "% applied" + (silent ? " (re-apply)" : ""));
-+            if (!silent) {
-+                toast(Ui.tr("Volume Booster") + " +" + pct + "% (EQ)");
++            int target = Math.max(0, Math.min(eqMax, (int) ((pct / 100.0) * eqMax)));
++            equalizer.setEnabled(true);
++            for (short i = 0; i < eqBands; i++) {
++                int centerHz = equalizer.getCenterFreq(i) / 1000;
++                int level = centerHz < 150 ? 0 : centerHz < 250 ? target / 2 : centerHz > 8000 ? (target * 3) / 4 : target;
++                equalizer.setBandLevel(i, (short) Math.max(eqMin, Math.min(eqMax, level)));
 +            }
-+        } catch (RuntimeException | Error e) {
-+            AppLog.w("volume boost effect: " + e);
-+            VolumeBoost.saveStatus(this, "refused");
-+            releaseAll();
-+            if (!silent && !userToldRefused) {
-+                userToldRefused = true;
-+                toast(Ui.tr("This TV doesn't allow a volume boost on its sound output."));
++            if (equalizer.getEnabled()) {
++                working = "EQ";
++                releaseLoudness();
++                releaseDynamics();
++                return true;
 +            }
++            why.append("EQ: not enabled; ");
++        } catch (Throwable t) {
++            why.append("EQ: ").append(brief(t)).append("; ");
 +        }
++        releaseEqualizer();
++        return false;
 +    }
 +
-+    /**
-+     * Map 0–150 % → band levels. Uses a light "shape" so very low and very high bands
-+     * get a bit less gain (reduces boom/hiss), same idea as commercial boosters.
-+     */
-+    private void applyEqualizer(int pct) {
-+        if (equalizer == null || eqBands <= 0) return;
-+        // Scale: 100 % → full maxLevel, 150 % → a bit over (clamped by the device)
-+        int target = (int) ((pct / 100.0) * eqMaxLevel);
-+        if (target > eqMaxLevel) target = eqMaxLevel;
-+        if (target < 0) target = 0;
-+
-+        equalizer.setEnabled(target > 0);
-+        for (short i = 0; i < eqBands; i++) {
-+            int centerHz = equalizer.getCenterFreq(i) / 1000;
-+            short level;
-+            if (centerHz < 150) {
-+                level = 0;                           // protect sub-bass
-+            } else if (centerHz < 250) {
-+                level = (short) (target / 2);        // soft low-mid
-+            } else if (centerHz > 8000) {
-+                level = (short) ((target * 3) / 4);  // soft treble
-+            } else {
-+                level = (short) target;              // full boost
-+            }
-+            if (level > eqMaxLevel) level = eqMaxLevel;
-+            if (level < eqMinLevel) level = eqMinLevel;
-+            equalizer.setBandLevel(i, level);
++    /** DynamicsProcessing by reflection (a gain at the input, and a limiter so it doesn't crack): built only on Android 9+. */
++    private boolean tryDynamics(int gainMb, StringBuilder why) {
++        if (Build.VERSION.SDK_INT < 28) {
++            why.append("DP: needs Android 9; ");
++            return false;
 +        }
++        try {
++            Class<?> dpClass = Class.forName("android.media.audiofx.DynamicsProcessing");
++            if (dynamics == null) {
++                Class<?> builderClass = Class.forName("android.media.audiofx.DynamicsProcessing$Config$Builder");
++                Class<?> configClass = Class.forName("android.media.audiofx.DynamicsProcessing$Config");
++                int variant = dpClass.getField("VARIANT_FAVOR_FREQUENCY_RESOLUTION").getInt(null);
++                Object builder = builderClass.getConstructor(int.class, int.class, boolean.class, int.class, boolean.class,
++                        int.class, boolean.class, int.class, boolean.class)
++                        .newInstance(variant, 2, false, 0, false, 0, false, 0, true);
++                Object config = builderClass.getMethod("build").invoke(builder);
++                dynamics = dpClass.getConstructor(int.class, int.class, configClass).newInstance(0, 0, config);
++                Class<?> limiterClass = Class.forName("android.media.audiofx.DynamicsProcessing$Limiter");
++                Object limiter = limiterClass.getConstructor(boolean.class, boolean.class, int.class, float.class,
++                        float.class, float.class, float.class, float.class)
++                        .newInstance(true, true, 0, 1f, 60f, 10f, -2f, 0f);
++                dpClass.getMethod("setLimiterAllChannelsTo", limiterClass).invoke(dynamics, limiter);
++            }
++            dpClass.getMethod("setInputGainAllChannelsTo", float.class).invoke(dynamics, Math.min(30f, gainMb / 100f));
++            dpClass.getMethod("setEnabled", boolean.class).invoke(dynamics, true);
++            if (Boolean.TRUE.equals(dpClass.getMethod("getEnabled").invoke(dynamics))) {
++                working = "DP";
++                releaseLoudness();
++                releaseEqualizer();
++                return true;
++            }
++            why.append("DP: not enabled; ");
++        } catch (Throwable t) {
++            Throwable cause = t.getCause() != null ? t.getCause() : t;   // reflection wraps the real error
++            why.append("DP: ").append(brief(cause)).append("; ");
++        }
++        releaseDynamics();
++        return false;
 +    }
 +
-+    private void toast(String msg) {
-+        main.post(() -> Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_SHORT).show());
++    private void toast(String msg, boolean long_) {
++        main.post(() -> Toast.makeText(getApplicationContext(), msg, long_ ? Toast.LENGTH_LONG : Toast.LENGTH_SHORT).show());
 +    }
 +
 +    private void releaseLoudness() {
@@ -3651,25 +3687,35 @@ diff -ruN '--exclude=*.class' '--exclude=.git' '--exclude=out' '--exclude=*.apk'
 +        }
 +    }
 +
++    private void releaseDynamics() {
++        if (dynamics != null) {
++            try {
++                Class<?> dpClass = Class.forName("android.media.audiofx.DynamicsProcessing");
++                dpClass.getMethod("setEnabled", boolean.class).invoke(dynamics, false);
++                dpClass.getMethod("release").invoke(dynamics);
++            } catch (Throwable ignored) {
++            }
++            dynamics = null;
++        }
++    }
++
 +    private void releaseAll() {
 +        releaseLoudness();
 +        releaseEqualizer();
-+        useEqualizer = false;
++        releaseDynamics();
++        working = "";
 +    }
 +
 +    @Override
 +    public void onDestroy() {
 +        main.removeCallbacks(reapply);
 +        releaseAll();
-+        // Keep the boost alive across process death while the user still wants it.
++        // Keep the boost alive across process death while the user still wants it (the level is read from the file).
 +        if (VolumeBoost.level(this) > 0) {
 +            try {
 +                Intent i = new Intent(this, VolumeBoostService.class);
-+                if (Build.VERSION.SDK_INT >= 26) {
-+                    startForegroundService(i);
-+                } else {
-+                    startService(i);
-+                }
++                if (Build.VERSION.SDK_INT >= 26) startForegroundService(i);
++                else startService(i);
 +            } catch (RuntimeException e) {
 +                AppLog.w("volume boost restart after destroy: " + e.getMessage());
 +            }
@@ -3684,7 +3730,7 @@ diff -ruN '--exclude=*.class' '--exclude=.git' '--exclude=out' '--exclude=*.apk'
 +}
 diff -ruN '--exclude=*.class' '--exclude=.git' '--exclude=out' '--exclude=*.apk' '--exclude=*.idsig' '--exclude=*.patch' free-my-tv-main/app/src/io/freemytv/Wallpaper.java free-my-tv-main/app/src/io/freemytv/Wallpaper.java
 --- free-my-tv-main/app/src/io/freemytv/Wallpaper.java	1970-01-01 00:00:00.000000000 +0000
-+++ free-my-tv-main/app/src/io/freemytv/Wallpaper.java	2026-11-05 11:17:51.325351019 +0000
++++ free-my-tv-main/app/src/io/freemytv/Wallpaper.java	2026-11-05 11:43:08.261303242 +0000
 @@ -0,0 +1,398 @@
 +package io.freemytv;
 +
