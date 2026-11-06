@@ -47,7 +47,7 @@ diff -ruN '--exclude=*.class' '--exclude=.git' '--exclude=out' '--exclude=*.apk'
 diff -ruN '--exclude=*.class' '--exclude=.git' '--exclude=out' '--exclude=*.apk' '--exclude=*.idsig' '--exclude=*.patch' free-my-tv-main/app/assets/i18n/pt.json free-my-tv-main/app/assets/i18n/pt.json
 --- free-my-tv-main/app/assets/i18n/pt.json	2026-11-04 09:46:47.091617511 +0000
 +++ free-my-tv-main/app/assets/i18n/pt.json	2026-11-06 03:34:34.001747919 +0000
-@@ -10,32 +10,46 @@
+@@ -10,32 +10,47 @@
   "About this TV": "Sobre esta TV",
   "Accept “Allow USB debugging?” on the TV (tick “Always allow”).": "Aceite o aviso “Permitir depuração” na TV (marque “Sempre permitir”).",
   "Accessibility": "Acessibilidade",
@@ -83,6 +83,7 @@ diff -ruN '--exclude=*.class' '--exclude=.git' '--exclude=out' '--exclude=*.apk'
 + "Cinema": "Cinema",
 + "Cinema mode": "Modo cinema",
 + "Cinema mode: on": "Modo cinema: ligado",
++ "Cinema over other apps needs overlay permission (Free My TV mode / ADB).": "O Cinema sobre outros apps precisa da permissão de sobreposição (modo Free My TV / ADB).",
   "City": "Cidade",
 + "Classic": "Clássico",
   "Clear": "Céu limpo",
@@ -94,7 +95,7 @@ diff -ruN '--exclude=*.class' '--exclude=.git' '--exclude=out' '--exclude=*.apk'
   "Connecting…": "Conectando…",
   "Continue Watching": "Continuar assistindo",
   "Continue Watching apps": "Apps de Continuar assistindo",
-@@ -45,6 +59,7 @@
+@@ -45,6 +60,7 @@
   "Couldn't check Free My TV: {error}": "Não consegui conferir o Free My TV: {error}",
   "Couldn't go back to the original: {error}": "Não deu para voltar ao original: {error}",
   "Couldn't open TV Settings": "Não deu para abrir os Ajustes da TV",
@@ -102,7 +103,7 @@ diff -ruN '--exclude=*.class' '--exclude=.git' '--exclude=out' '--exclude=*.apk'
   "Couldn't open {app}.": "Não deu para abrir {app}.",
   "Couldn't reach Home Assistant.": "Não deu para falar com o Home Assistant.",
   "Couldn't reach TMDB: {error}": "Não foi possível acessar o TMDB: {error}",
-@@ -53,6 +68,7 @@
+@@ -53,6 +69,7 @@
   "Couldn't search now: {error}": "Não deu para buscar agora: {error}",
   "Couldn't sign in: {error}": "Não deu para entrar: {error}",
   "Couldn't turn on Free My TV: {error}": "Não deu para ligar o Free My TV: {error}",
@@ -110,7 +111,7 @@ diff -ruN '--exclude=*.class' '--exclude=.git' '--exclude=out' '--exclude=*.apk'
   "Couldn't update": "Não deu para atualizar",
   "Create an account at api.watchmode.com.": "Crie uma conta em api.watchmode.com.",
   "Create an account at themoviedb.org.": "Crie uma conta em themoviedb.org.",
-@@ -70,25 +86,35 @@
+@@ -70,25 +87,35 @@
   "Error: {error}.": "Erro: {error}.",
   "Explore": "Explorar",
   "Fetching titles…": "Buscando os títulos…",
@@ -146,7 +147,7 @@ diff -ruN '--exclude=*.class' '--exclude=.git' '--exclude=out' '--exclude=*.apk'
   "High {max}, low {min}.": "Máxima {max}, mínima {min}.",
   "Home Screen": "Início",
   "Home Screen, {mode}": "Início, {mode}",
-@@ -110,23 +136,35 @@
+@@ -110,23 +137,36 @@
   "Language": "Idioma",
   "Light": "Claro",
   "Links to the titles by Watchmode.": "Links dos títulos por Watchmode.",
@@ -179,10 +180,11 @@ diff -ruN '--exclude=*.class' '--exclude=.git' '--exclude=out' '--exclude=*.apk'
   "Needs Free My TV mode: turn it on in Home Screen.": "Precisa do modo Free My TV: ative em Início.",
 + "Neon": "Neon",
 + "Neon edge": "Neon nas bordas",
++ "Neon style": "Estilo do neon",
   "Netflix button": "Botão Netflix",
   "Netflix, YouTube and Prime Video: the TV itself controls those buttons.": "Netflix, YouTube e Prime Video: a própria TV controla esses botões.",
   "Netflix: the TV itself controls that button.": "Netflix: a própria TV controla esse botão.",
-@@ -136,6 +174,8 @@
+@@ -136,6 +176,8 @@
   "Next days: {list}.": "Próximos dias: {list}.",
   "Next hours": "Próximas horas",
   "Next hours: {list}.": "Próximas horas: {list}.",
@@ -191,7 +193,7 @@ diff -ruN '--exclude=*.class' '--exclude=.git' '--exclude=out' '--exclude=*.apk'
   "No TMDB key: add yours in Home Settings > TMDB key.": "Sem chave do TMDB: adicione em Ajustes do Início > Chave do TMDB.",
   "No ads, with the new screensaver": "Sem anúncios, com a tela de descanso nova",
   "No app on this TV shares what you watch.": "Nenhum app desta TV mostra o que você assiste.",
-@@ -151,6 +191,7 @@
+@@ -151,6 +193,7 @@
   "None yet.": "Nenhum ainda.",
   "Not installed": "Não instalado",
   "Not set": "Não definida",
@@ -199,7 +201,7 @@ diff -ruN '--exclude=*.class' '--exclude=.git' '--exclude=out' '--exclude=*.apk'
   "Nothing": "Nada",
   "Nothing half-watched in your apps.": "Nada pela metade nos seus apps.",
   "Now Playing widget": "Widget tocando agora",
-@@ -167,6 +208,7 @@
+@@ -167,6 +210,7 @@
   "OK removes them; the arrows turn them on or off.": "OK as remove; as setas ligam ou desligam.",
   "OK turns an app on or off in Continue Watching.": "OK liga ou desliga o app em Continuar assistindo.",
   "OK: send it from your phone, or type it.": "OK: envie pelo celular ou digite.",
@@ -207,7 +209,7 @@ diff -ruN '--exclude=*.class' '--exclude=.git' '--exclude=out' '--exclude=*.apk'
   "Off": "Desligado",
   "Off in {time}": "Desliga em {time}",
   "Okko button": "Botão Okko",
-@@ -187,6 +229,7 @@
+@@ -187,6 +231,7 @@
   "Original": "Original",
   "Original mode, but I couldn't turn back on: {list}.": "Modo original, mas não consegui religar: {list}.",
   "Original mode: the factory home screen, screensaver and apps are back.": "Modo original: Início, tela de descanso e apps de fábrica de volta.",
@@ -215,11 +217,12 @@ diff -ruN '--exclude=*.class' '--exclude=.git' '--exclude=out' '--exclude=*.apk'
   "Partly Cloudy": "Parcialmente nublado",
   "Paste the API Read Access Token (or the API Key) here:": "Cole aqui o API Read Access Token (ou a API Key):",
   "Paste the key here:": "Cole a chave aqui:",
-@@ -196,13 +239,16 @@
+@@ -196,13 +241,17 @@
   "Picks from": "Destaques de",
   "Picks per tab": "Destaques por aba",
   "Picture": "Imagem",
 + "Picture mode off.": "Modo de imagem desligado.",
++ "Picture mode over other apps needs overlay permission (Free My TV mode / ADB).": "O modo de imagem sobre outros apps precisa da permissão de sobreposição (modo Free My TV / ADB).",
   "Position": "Posição",
   "Press OK to watch on {app} · any other button to close": "Aperte OK para assistir no {app} · qualquer outro botão fecha",
 + "Press a button on the remote now": "Aperte agora um botão do controle",
@@ -232,7 +235,7 @@ diff -ruN '--exclude=*.class' '--exclude=.git' '--exclude=out' '--exclude=*.apk'
   "Quotes widget": "Widget de cotações",
   "RECOMMENDATIONS": "RECOMENDAÇÕES",
   "Rain": "Chuva",
-@@ -210,12 +256,14 @@
+@@ -210,12 +259,14 @@
   "Recommended on Trakt": "Recomendado no Trakt",
   "Remote Buttons": "Botões do Controle",
   "Remove": "Remover",
@@ -247,7 +250,7 @@ diff -ruN '--exclude=*.class' '--exclude=.git' '--exclude=out' '--exclude=*.apk'
   "Save": "Salvar",
   "Saved on the TV. You can close this page.": "Chave salva na TV. Você pode fechar esta página.",
   "Saved. The picks arrive in a moment.": "Chave salva. As recomendações chegam em instantes.",
-@@ -243,16 +291,21 @@
+@@ -243,16 +294,21 @@
   "Sign out of {name}? The picks go back to TMDB's alone.": "Sair de {name}? Os destaques voltam a vir só do TMDB.",
   "Sign-in declined on Trakt.": "Entrada recusada no Trakt.",
   "Signed in": "Conectado",
@@ -269,7 +272,7 @@ diff -ruN '--exclude=*.class' '--exclude=.git' '--exclude=out' '--exclude=*.apk'
   "Sunset {time}": "Pôr do sol {time}",
   "Switching takes a few seconds; the screen blinks while it measures.": "A troca leva uns segundos e a tela pisca nas medições.",
   "Switching the home screen and screensaver…": "Trocando o Início e a tela de descanso…",
-@@ -269,6 +322,7 @@
+@@ -269,6 +325,7 @@
   "TONIGHT": "PARA ESTA NOITE",
   "TV Settings": "Ajustes da TV",
   "TV's choice": "Escolha da TV",
@@ -277,7 +280,7 @@ diff -ruN '--exclude=*.class' '--exclude=.git' '--exclude=out' '--exclude=*.apk'
   "Tabii button": "Botão Tabii",
   "Temperature": "Temperatura",
   "That doesn't look like a TMDB key.": "Isso não parece uma chave do TMDB.",
-@@ -285,11 +339,13 @@
+@@ -285,11 +342,13 @@
   "The other buttons: the TV itself controls them.": "Os outros botões: a própria TV os controla.",
   "The shelf is full. Make room in Free My TV › Shelf.": "A prateleira está cheia. Abra espaço em Free My TV › Prateleira.",
   "Theme": "Tema",
@@ -291,7 +294,7 @@ diff -ruN '--exclude=*.class' '--exclude=.git' '--exclude=out' '--exclude=*.apk'
   "This TV's remote has no app buttons that Free My TV knows.": "O controle desta TV não tem botões de app que o Free My TV reconheça.",
   "This code has expired.": "Este código expirou.",
   "This product uses the TMDB API but is not endorsed or certified by TMDB.": "Usa a API do TMDB, sem endosso ou certificação do TMDB.",
-@@ -306,15 +362,24 @@
+@@ -306,15 +365,24 @@
   "Turned off what was missing: {list}.": "Desliguei o que faltava: {list}.",
   "Turning apps back on ({done}/{total})…": "Religando apps ({done}/{total})…",
   "Turning off apps ({done}/{total})…": "Desligando apps ({done}/{total})…",
@@ -316,7 +319,7 @@ diff -ruN '--exclude=*.class' '--exclude=.git' '--exclude=out' '--exclude=*.apk'
   "Watch from the screensaver": "Assistir pela tela de descanso",
   "Watchmode key": "Chave do Watchmode",
   "Watchmode refused this key.": "O Watchmode recusou esta chave.",
-@@ -377,6 +442,8 @@
+@@ -377,6 +445,8 @@
   "not in the top buttons": "fora dos botões do topo",
   "not on the shelf": "fora da prateleira",
   "now": "agora",
@@ -325,7 +328,7 @@ diff -ruN '--exclude=*.class' '--exclude=.git' '--exclude=out' '--exclude=*.apk'
   "on the shelf, place {n}": "na prateleira, posição {n}",
   "photos|Default": "Padrão",
   "photos|None": "Nenhuma",
-@@ -389,6 +456,7 @@
+@@ -389,6 +459,7 @@
   "quotes|{ago}": "de {ago}",
   "recents|Drawer and Home twice": "Gaveta e Início duas vezes",
   "recents|In the drawer": "Na gaveta",
@@ -333,13 +336,32 @@ diff -ruN '--exclude=*.class' '--exclude=.git' '--exclude=out' '--exclude=*.apk'
   "services|All": "Todos",
   "services|Some": "Alguns",
   "shelf|Off": "Fora",
+@@ -403,6 +474,7 @@
+  "the screensaver": "a tela de descanso",
+  "unexpected reply from ADB": "resposta inesperada do ADB",
+  "unit|Automatic": "Automática",
++ "veil over the apps; turn on Free My TV mode for the home screen's colours": "película sobre os apps; ligue o modo Free My TV para as cores da tela inicial",
+  "weekday|Fri": "sex.",
+  "weekday|Friday": "sexta-feira",
+  "weekday|Mon": "seg.",
 diff -ruN '--exclude=*.class' '--exclude=.git' '--exclude=out' '--exclude=*.apk' '--exclude=*.idsig' '--exclude=*.patch' free-my-tv-main/app/src/io/freemytv/App.java free-my-tv-main/app/src/io/freemytv/App.java
 --- free-my-tv-main/app/src/io/freemytv/App.java	2026-11-04 09:46:47.092895074 +0000
 +++ free-my-tv-main/app/src/io/freemytv/App.java	2026-11-06 03:34:34.194162147 +0000
-@@ -4,9 +4,20 @@
+@@ -4,9 +4,62 @@
  
  /** Gives Prefs a context in every process. */
  public class App extends Application {
++    // What the person is looking at, for the Cinema and Picture veils over other apps (see Overlays): the home screen,
++    // the quick panel, or something else (an app). Both screens live in this process; the callbacks below keep these up.
++    private static volatile boolean homeResumed, panelResumed;
++    private static volatile int homeStarted;   // above 0 from the home screen's start to its stop (it stays under a see-through panel)
++
++    static boolean homeResumed() { return homeResumed; }
++
++    static boolean panelResumed() { return panelResumed; }
++
++    static boolean homeStarted() { return homeStarted > 0; }
++
 +    private boolean isMainProcess() {
 +        if (android.os.Build.VERSION.SDK_INT >= 28) return getPackageName().equals(Application.getProcessName());
 +        return true;
@@ -355,12 +377,43 @@ diff -ruN '--exclude=*.class' '--exclude=.git' '--exclude=out' '--exclude=*.apk'
 +            VolumeBoost.restoreIfNeeded(this);
 +            PictureFilter.restoreIfNeeded(this);
 +        }
++        // Cinema and Picture mode over other apps: the veils go down while the home screen or the quick panel is in front
++        // and up when anything else is, whoever opened it (a button of the remote, the panel, an input, an app).
++        registerActivityLifecycleCallbacks(new Application.ActivityLifecycleCallbacks() {
++            @Override public void onActivityCreated(android.app.Activity a, android.os.Bundle state) {}
++
++            @Override public void onActivityStarted(android.app.Activity a) {
++                if (a instanceof HomeActivity) homeStarted++;
++            }
++
++            @Override public void onActivityResumed(android.app.Activity a) {
++                if (a instanceof HomeActivity) homeResumed = true;
++                else if (a instanceof QuickPanelActivity) panelResumed = true;
++                else return;
++                Overlays.sync(a);
++            }
++
++            @Override public void onActivityPaused(android.app.Activity a) {
++                if (a instanceof HomeActivity) homeResumed = false;
++                else if (a instanceof QuickPanelActivity) panelResumed = false;
++                else return;
++                Overlays.syncSoon(a);   // after the next screen has come up
++            }
++
++            @Override public void onActivityStopped(android.app.Activity a) {
++                if (a instanceof HomeActivity && homeStarted > 0) homeStarted--;
++            }
++
++            @Override public void onActivitySaveInstanceState(android.app.Activity a, android.os.Bundle state) {}
++
++            @Override public void onActivityDestroyed(android.app.Activity a) {}
++        });
      }
  }
 diff -ruN '--exclude=*.class' '--exclude=.git' '--exclude=out' '--exclude=*.apk' '--exclude=*.idsig' '--exclude=*.patch' free-my-tv-main/app/src/io/freemytv/CinemaOverlay.java free-my-tv-main/app/src/io/freemytv/CinemaOverlay.java
 --- free-my-tv-main/app/src/io/freemytv/CinemaOverlay.java	1970-01-01 00:00:00.000000000 +0000
 +++ free-my-tv-main/app/src/io/freemytv/CinemaOverlay.java	2026-11-06 03:34:34.194197812 +0000
-@@ -0,0 +1,173 @@
+@@ -0,0 +1,212 @@
 +package io.freemytv;
 +
 +import android.app.Notification;
@@ -380,24 +433,39 @@ diff -ruN '--exclude=*.class' '--exclude=.git' '--exclude=out' '--exclude=*.apk'
 +import android.view.WindowManager;
 +import android.widget.Toast;
 +
++import java.io.BufferedReader;
++import java.io.File;
++import java.io.FileInputStream;
++import java.io.FileOutputStream;
++import java.io.IOException;
++import java.io.InputStreamReader;
++import java.nio.charset.StandardCharsets;
++
 +/**
-+ * Cinema mode over other apps: a soft black veil on top of whatever is open (Netflix, YouTube, Live TV…), so the room
-+ * stays dim the same way the home screen does. The home screen itself already dims its own wallpaper; this only runs
-+ * while Free My TV is in the background and Cinema mode is on. Uses the same overlay permission as the sleep timer
-+ * (granted through ADB in Free My TV mode on Android TV).
++ * Cinema mode over other apps: a soft black veil on top of whatever is open (Netflix, YouTube, Live TV, an HDMI input…),
++ * so the room stays dim the same way the home screen does. The home screen itself already dims its own wallpaper; the
++ * veil only goes up while something else is in front and Cinema mode is on (Overlays decides when, as the screens come
++ * and go). Uses the same overlay permission as the sleep timer (granted through ADB in Free My TV mode on Android TV).
++ *
++ * The service runs in a process of its own (:sleep), and Android does not share the preferences between processes: what
++ * that process read once is not what the panel changed later. So "on" comes with each start, and a small file keeps it
++ * for when the system starts the service again by itself; Prefs is never read in here.
 + */
 +public class CinemaOverlay extends Service {
-+    private static final String CH = "cinema";
++    private static final String CH = "cinema", STATE = "cinema-state.txt";
++    /** How dark the veil is: about 72 per cent black, the shade the home screen uses in Cinema mode. */
++    private static final int VEIL_COLOR = 0xB8000000;
 +    private View veil;
 +    private static final Handler main = new Handler(Looper.getMainLooper());
 +
 +    /**
-+     * Show or hide the veil. {@code homeInFront}: the home screen is visible — never cover it.
-+     * Call from HomeActivity onResume/onPause and when Cinema is toggled in the gear panel.
++     * Show or hide the veil. {@code ourScreen}: the person is looking at the home screen or at the quick panel, which
++     * the veil never covers. Overlays.sync() calls this each time what is in front changes.
 +     */
-+    static void update(Context c, boolean homeInFront) {
-+        Intent i = new Intent(c, CinemaOverlay.class);
-+        boolean wanted = Prefs.cinema() && !homeInFront;
++    static void update(Context c, boolean ourScreen) {
++        final boolean wanted = Prefs.cinema() && !ourScreen;
++        saveState(c, wanted);
++        Intent i = new Intent(c, CinemaOverlay.class).putExtra("on", true);
 +        if (wanted && Settings.canDrawOverlays(c)) {
 +            try {
 +                if (Build.VERSION.SDK_INT >= 26) c.startForegroundService(i);
@@ -421,20 +489,20 @@ diff -ruN '--exclude=*.class' '--exclude=.git' '--exclude=out' '--exclude=*.apk'
 +        }
 +    }
 +
-+    /** Turn Cinema on and make sure the overlay path is ready (permission + service when home leaves). */
++    /**
++     * Cinema was turned on or off in the gear's panel: make sure the overlay permission is there, then put the veil up
++     * or down for what is in front right now (over an app it appears when the panel closes, over home it waits for
++     * the next app).
++     */
 +    static void onCinemaToggled(Context c) {
-+        if (!Prefs.cinema()) {
-+            update(c, true);   // off: drop any veil
-+            return;
-+        }
-+        if (!Settings.canDrawOverlays(c)) {
-+            allow(c.getApplicationContext());
-+            main.post(() -> Toast.makeText(c.getApplicationContext(),
++        if (Prefs.cinema() && !Settings.canDrawOverlays(c)) {
++            final Context app = c.getApplicationContext();
++            allow(app);
++            main.post(() -> Toast.makeText(app,
 +                    Ui.tr("Cinema over other apps needs overlay permission (Free My TV mode / ADB)."),
 +                    Toast.LENGTH_LONG).show());
 +        }
-+        // Home is usually still in front after the gear panel; the veil starts on the next onPause.
-+        update(c, true);
++        Overlays.sync(c);
 +    }
 +
 +    private static final java.util.concurrent.atomic.AtomicBoolean allowing =
@@ -458,8 +526,29 @@ diff -ruN '--exclude=*.class' '--exclude=.git' '--exclude=out' '--exclude=*.apk'
 +            Capabilities.prove(c, Capabilities.OVERLAY, works);
 +            allowing.set(false);
 +            AppLog.w("cinema overlay permission: " + works);
-+            // Do not show the veil while home is in front; next onPause will start it.
++            // The permission is there now: if an app is already in front, the veil goes up at once.
++            if (works) main.post(() -> Overlays.sync(c));
 +        }).start();
++    }
++
++    // MARK: - The state both processes read
++
++    private static void saveState(Context c, boolean on) {
++        try (FileOutputStream out = new FileOutputStream(new File(c.getFilesDir(), STATE))) {
++            out.write((on ? "1" : "0").getBytes(StandardCharsets.UTF_8));
++        } catch (IOException e) {
++            AppLog.w("cinema state: " + e.getMessage());
++        }
++    }
++
++    /** Whether the veil is wanted, from the file; false when there is none. */
++    private static boolean state(Context c) {
++        File f = new File(c.getFilesDir(), STATE);
++        try (BufferedReader r = new BufferedReader(new InputStreamReader(new FileInputStream(f), StandardCharsets.UTF_8))) {
++            return "1".equals(r.readLine().trim());
++        } catch (IOException | RuntimeException e) {
++            return false;
++        }
 +    }
 +
 +    @Override public void onCreate() {
@@ -477,14 +566,26 @@ diff -ruN '--exclude=*.class' '--exclude=.git' '--exclude=out' '--exclude=*.apk'
 +                    .build();
 +            startForeground(72, n);
 +        }
-+        if (!Settings.canDrawOverlays(this)) {
-+            AppLog.w("cinema overlay: no permission in onCreate");
++    }
++
++    @Override public int onStartCommand(Intent intent, int flags, int startId) {
++        final boolean on = intent != null && intent.hasExtra("on")
++                ? intent.getBooleanExtra("on", false)
++                : state(this);
++        if (!on || !Settings.canDrawOverlays(this)) {
++            AppLog.w("cinema overlay: not wanted or no permission");
 +            stopSelf();
-+            return;
++            return START_NOT_STICKY;
 +        }
++        showVeil();
++        return START_STICKY;
++    }
++
++    /** The veil is made once; later starts find it there. */
++    private void showVeil() {
++        if (veil != null) return;
 +        veil = new View(this);
-+        // Same depth of shade the home screen uses in Cinema mode (~72% black).
-+        veil.setBackgroundColor(0xB8000000);
++        veil.setBackgroundColor(VEIL_COLOR);
 +        int type = Build.VERSION.SDK_INT >= 26
 +                ? WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
 +                : WindowManager.LayoutParams.TYPE_SYSTEM_ALERT;
@@ -499,23 +600,14 @@ diff -ruN '--exclude=*.class' '--exclude=.git' '--exclude=out' '--exclude=*.apk'
 +                        | WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED,
 +                PixelFormat.TRANSLUCENT);
 +        lp.gravity = Gravity.TOP | Gravity.START;
-+        lp.width = WindowManager.LayoutParams.MATCH_PARENT;
-+        lp.height = WindowManager.LayoutParams.MATCH_PARENT;
 +        try {
 +            getSystemService(WindowManager.class).addView(veil, lp);
 +            AppLog.w("cinema overlay: veil added");
 +        } catch (RuntimeException e) {
 +            AppLog.w("cinema overlay add: " + e.getMessage());
++            veil = null;
 +            stopSelf();
 +        }
-+    }
-+
-+    @Override public int onStartCommand(Intent intent, int flags, int startId) {
-+        if (!Prefs.cinema() || !Settings.canDrawOverlays(this)) {
-+            stopSelf();
-+            return START_NOT_STICKY;
-+        }
-+        return START_STICKY;
 +    }
 +
 +    @Override public void onDestroy() {
@@ -831,14 +923,12 @@ diff -ruN '--exclude=*.class' '--exclude=.git' '--exclude=out' '--exclude=*.apk'
          getWindow().setBackgroundDrawable(null);
          if (getIntent().getBooleanExtra(EXTRA_ALL_APPS, false)) home.showAllApps();
          // At power-on "Live TV" (#346): the first time the home screen comes up after a full start, in Free My TV mode.
-@@ -73,12 +97,27 @@
+@@ -73,12 +97,19 @@
              recreate();   // a new language or city: draw everything again
              return;
          }
 +        Wallpaper.resume(root);
 +        if (neon != null) neon.run(true);
-+        CinemaOverlay.update(this, true);   // home is in front: no veil over it
-+        PictureOverlay.update(this, true);
          if (home != null) home.resume();
          Updates.tellOnce(this);   // an update the week's check got ready: said once
      }
@@ -849,17 +939,11 @@ diff -ruN '--exclude=*.class' '--exclude=.git' '--exclude=out' '--exclude=*.apk'
 +        Wallpaper.pause(root);
 +        // After the VideoView has paused, build the neon colour track for next time (never while it plays).
 +        mainHandler.postDelayed(() -> Neon.preloadTrack(getApplicationContext()), 600);
-+        // Dim other apps when Cinema is on. A short delay lets the next app draw first, then the veil sits on top.
-+        CinemaOverlay.update(this, false);
-+        PictureOverlay.update(this, false);
-+        mainHandler.postDelayed(() -> {
-+            if (!resumed && Prefs.cinema()) CinemaOverlay.update(getApplicationContext(), false);
-+            if (!resumed && Prefs.pictureMode() > 0) PictureOverlay.update(getApplicationContext(), false);
-+        }, 400);
++        // The Cinema and Picture veils over other apps are put up and down by App's lifecycle callbacks (Overlays).
          if (home != null) home.pause();
          super.onPause();
      }
-@@ -103,6 +142,10 @@
+@@ -103,6 +134,10 @@
      private static final long TWICE_MS = 700;
  
      @Override protected void onDestroy() {
@@ -2788,6 +2872,52 @@ diff -ruN '--exclude=*.class' '--exclude=.git' '--exclude=out' '--exclude=*.apk'
 +        }
 +    }
 +}
+diff -ruN '--exclude=*.class' '--exclude=.git' '--exclude=out' '--exclude=*.apk' '--exclude=*.idsig' '--exclude=*.patch' free-my-tv-main/app/src/io/freemytv/Overlays.java free-my-tv-main/app/src/io/freemytv/Overlays.java
+--- free-my-tv-main/app/src/io/freemytv/Overlays.java	1970-01-01 00:00:00.000000000 +0000
++++ free-my-tv-main/app/src/io/freemytv/Overlays.java	2026-11-06 03:34:34.195000000 +0000
+@@ -0,0 +1,42 @@
++package io.freemytv;
++
++import android.content.Context;
++import android.os.Handler;
++import android.os.Looper;
++
++/**
++ * Decides, for Cinema mode and the Picture modes, whether their veils are up over what is on screen. They are up
++ * whenever the person is looking at anything but our own home screen and quick panel, so they work in every app, the
++ * TV's live TV and the HDMI inputs alike, whoever opened them. App's lifecycle callbacks call this each time the home
++ * screen or the panel comes in front (sync: veils go down at once) or leaves (syncSoon: after the next screen has had
++ * a moment to come up, then the veils go up over it).
++ *
++ * While the quick panel is open the Cinema veil is down so the panel can be read; the Picture veil stays, over an
++ * app, so the mode being chosen can be seen. It is down over the home screen, which has the screen-wide filter.
++ */
++final class Overlays {
++    private Overlays() {}
++
++    private static final long SETTLE_MS = 350;
++    private static final Handler main = new Handler(Looper.getMainLooper());
++    private static Context later;
++    private static final Runnable LATER = () -> {
++        if (later != null) sync(later);
++    };
++
++    /** Puts both veils up or down for what is in front right now. */
++    static void sync(Context c) {
++        final Context app = c.getApplicationContext();
++        main.removeCallbacks(LATER);   // a pending sync is out of date now
++        final boolean home = App.homeResumed(), panel = App.panelResumed();
++        CinemaOverlay.update(app, home || panel);
++        PictureOverlay.update(app, home || (panel && App.homeStarted()));
++    }
++
++    /** The same, a moment later: what comes next (an app opening, the panel closing) is not in front yet. */
++    static void syncSoon(Context c) {
++        later = c.getApplicationContext();
++        main.removeCallbacks(LATER);
++        main.postDelayed(LATER, SETTLE_MS);
++    }
++}
 diff -ruN '--exclude=*.class' '--exclude=.git' '--exclude=out' '--exclude=*.apk' '--exclude=*.idsig' '--exclude=*.patch' free-my-tv-main/app/src/io/freemytv/PictureFilter.java free-my-tv-main/app/src/io/freemytv/PictureFilter.java
 --- free-my-tv-main/app/src/io/freemytv/PictureFilter.java	1970-01-01 00:00:00.000000000 +0000
 +++ free-my-tv-main/app/src/io/freemytv/PictureFilter.java	2026-11-06 03:34:34.195215070 +0000
@@ -2932,8 +3062,8 @@ diff -ruN '--exclude=*.class' '--exclude=.git' '--exclude=out' '--exclude=*.apk'
 +}
 diff -ruN '--exclude=*.class' '--exclude=.git' '--exclude=out' '--exclude=*.apk' '--exclude=*.idsig' '--exclude=*.patch' free-my-tv-main/app/src/io/freemytv/PictureOverlay.java free-my-tv-main/app/src/io/freemytv/PictureOverlay.java
 --- free-my-tv-main/app/src/io/freemytv/PictureOverlay.java	1970-01-01 00:00:00.000000000 +0000
-+++ free-my-tv-main/app/src/io/freemytv/PictureOverlay.java	2026-11-06 03:34:34.195164226 +0000
-@@ -0,0 +1,219 @@
++++ free-my-tv-main/app/src/io/freemytv/PictureOverlay.java	2026-11-06 03:34:34.195000000 +0000
+@@ -0,0 +1,225 @@
 +package io.freemytv;
 +
 +import android.app.Notification;
@@ -2965,7 +3095,9 @@ diff -ruN '--exclude=*.class' '--exclude=.git' '--exclude=out' '--exclude=*.apk'
 + * The picture mode over the other apps (the gear's panel): a coloured veil across the whole screen, the same way
 + * Cinema mode dims everything, so it is on top of every app and of the video as well. A veil can warm, cool, tint or dim
 + * the picture; it can't raise the contrast or the colour, which is what PictureFilter does for what Android draws.
-+ * Both are on together: the filter on the home screen's own picture, this veil over whatever app is open.
++ * Both are on together: the filter on the screen as a whole, this veil over whatever app is open (video the TV draws
++ * outside of Android's own composition can skip the filter, but a veil on top still reaches it). It also works with
++ * Cinema mode on: the two veils are two windows, one over the other.
 + *
 + * The service runs in a process of its own (:sleep), which doesn't see the preferences the panel changes, so the mode
 + * and the strength come with each start and are kept in a small file for when the system starts it again.
@@ -2975,12 +3107,15 @@ diff -ruN '--exclude=*.class' '--exclude=.git' '--exclude=out' '--exclude=*.apk'
 +    private View veil;
 +    private static final Handler main = new Handler(Looper.getMainLooper());
 +
-+    /** Show or hide according to preference and whether home is in front. */
-+    static void update(Context c, boolean homeInFront) {
++    /**
++     * Show or hide according to the preference and what is in front. {@code ourScreen}: the person is looking at the home
++     * screen (which has the screen-wide filter), so the veil stays down. Overlays.sync() calls this when that changes.
++     */
++    static void update(Context c, boolean ourScreen) {
 +        final int mode = Prefs.pictureMode(), strength = Prefs.pictureStrength();
 +        saveState(c, mode, strength);
 +        Intent i = new Intent(c, PictureOverlay.class).putExtra("mode", mode).putExtra("strength", strength);
-+        boolean wanted = mode > 0 && !homeInFront && !Prefs.cinema();
++        boolean wanted = mode > 0 && !ourScreen;   // on together with Cinema mode: one dims, the other tints
 +        if (wanted && Settings.canDrawOverlays(c)) {
 +            try {
 +                if (Build.VERSION.SDK_INT >= 26) c.startForegroundService(i);
@@ -3006,7 +3141,7 @@ diff -ruN '--exclude=*.class' '--exclude=.git' '--exclude=out' '--exclude=*.apk'
 +                    Ui.tr("Picture mode over other apps needs overlay permission (Free My TV mode / ADB)."),
 +                    Toast.LENGTH_LONG).show());
 +        }
-+        update(c, true);   // home is in front now; the veil starts when another app opens (HomeActivity.onPause)
++        Overlays.sync(c);   // over an app (the panel opened from it) the veil changes at once; over home it waits for the next app
 +    }
 +
 +    private static final java.util.concurrent.atomic.AtomicBoolean allowing =
@@ -3029,6 +3164,7 @@ diff -ruN '--exclude=*.class' '--exclude=.git' '--exclude=out' '--exclude=*.apk'
 +            }
 +            Capabilities.prove(c, Capabilities.OVERLAY, works);
 +            allowing.set(false);
++            if (works) main.post(() -> Overlays.sync(c));   // the permission is there now: if an app is in front, the veil goes up
 +        }).start();
 +    }
 +
@@ -3569,7 +3705,7 @@ diff -ruN '--exclude=*.class' '--exclude=.git' '--exclude=out' '--exclude=*.apk'
 +                    if (Prefs.PICTURE_STRENGTHS[i] == now) next = Prefs.PICTURE_STRENGTHS[(i + 1) % Prefs.PICTURE_STRENGTHS.length];
 +                }
 +                Prefs.setPictureStrength(next);
-+                if (Prefs.pictureMode() > 0) PictureFilter.apply(getApplicationContext());
++                if (Prefs.pictureMode() > 0) PictureOverlay.onModeChanged(getApplicationContext());   // the filter and the veil
 +                relabel(STRENGTH, strengthLabel());
 +                return;
 +            }
