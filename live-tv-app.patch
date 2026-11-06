@@ -1,10 +1,12 @@
 diff -ruN '--exclude=*.class' '--exclude=.git' '--exclude=out' '--exclude=*.apk' '--exclude=*.idsig' '--exclude=*.patch' free-my-tv-main/app/AndroidManifest.xml free-my-tv-main/app/AndroidManifest.xml
 --- free-my-tv-main/app/AndroidManifest.xml	2026-11-04 09:46:47.090892841 +0000
-+++ free-my-tv-main/app/AndroidManifest.xml	2026-11-05 11:43:08.261734064 +0000
-@@ -19,6 +19,15 @@
++++ free-my-tv-main/app/AndroidManifest.xml	2026-11-06 03:34:34.195245732 +0000
+@@ -19,6 +19,17 @@
      <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
      <!-- "Continue watching": what you left half-way in your apps, from Android TV's own Watch Next list. -->
      <uses-permission android:name="android.permission.READ_TV_LISTINGS" />
++    <!-- Held OK on an app > Uninstall: Android's own question -->
++    <uses-permission android:name="android.permission.REQUEST_DELETE_PACKAGES" />
 +    <!-- "Clear memory" in the gear's panel: closes what runs in the background -->
 +    <uses-permission android:name="android.permission.KILL_BACKGROUND_PROCESSES" />
 +    <!-- Volume Booster: an effect on the whole sound output needs this one (a normal permission, granted at install). -->
@@ -17,7 +19,7 @@ diff -ruN '--exclude=*.class' '--exclude=.git' '--exclude=out' '--exclude=*.apk'
      <!-- The Bluetooth status icon: whether headphones or a speaker are connected. Before Android 12 the permission is
           granted at install; from 12 it is asked for when Status icons is turned on (and only the icon needs it). -->
      <uses-permission android:name="android.permission.BLUETOOTH" android:maxSdkVersion="30" />
-@@ -269,6 +278,24 @@
+@@ -269,6 +280,24 @@
              </intent-filter>
          </service>
  
@@ -42,9 +44,298 @@ diff -ruN '--exclude=*.class' '--exclude=.git' '--exclude=out' '--exclude=*.apk'
          <receiver
              android:name=".HomeReceiver"
              android:exported="false">
+diff -ruN '--exclude=*.class' '--exclude=.git' '--exclude=out' '--exclude=*.apk' '--exclude=*.idsig' '--exclude=*.patch' free-my-tv-main/app/assets/i18n/pt.json free-my-tv-main/app/assets/i18n/pt.json
+--- free-my-tv-main/app/assets/i18n/pt.json	2026-11-04 09:46:47.091617511 +0000
++++ free-my-tv-main/app/assets/i18n/pt.json	2026-11-06 03:34:34.001747919 +0000
+@@ -10,32 +10,46 @@
+  "About this TV": "Sobre esta TV",
+  "Accept “Allow USB debugging?” on the TV (tick “Always allow”).": "Aceite o aviso “Permitir depuração” na TV (marque “Sempre permitir”).",
+  "Accessibility": "Acessibilidade",
++ "Add to the shelf": "Pôr na prateleira",
+  "Added to the shelf: {app}": "Adicionado à prateleira: {app}",
+  "All Apps": "Todos os Apps",
+  "All Apps button": "Botão Todos os Apps",
++ "All wallpapers, photos and videos (change by themselves)": "Todos os papéis de parede, fotos e vídeos (trocam sozinhos)",
++ "Allow storage access (press →)": "Permitir acesso ao armazenamento (aperte →)",
+  "Android apps": "Apps de Android",
+  "Android didn't accept the new home screen": "o Android não aceitou o novo Início",
++ "Anime": "Anime",
+  "App Store": "Loja de aplicativos",
+  "App: {app}": "App: {app}",
+  "At power-on": "Ao ligar",
++ "Auto change": "Troca automática",
+  "Automatic": "Automático",
+  "BRAVIA CORE button": "Botão BRAVIA CORE",
+  "Back closes.": "Voltar fecha.",
+  "Bluetooth": "Bluetooth",
++ "Bold": "Negrito",
+  "Bottom center": "Embaixo, no centro",
+  "Bottom left": "Embaixo, à esquerda",
+  "Bottom right": "Embaixo, à direita",
+  "COMPARISON": "COMPARAÇÃO",
+  "Cancel": "Cancelar",
+  "Cartoons and anime": "Desenhos e animes",
++ "Change every": "Trocar a cada",
+  "Check now": "Verificar agora",
+  "Checking the key with TMDB…": "Verificando a chave com o TMDB…",
+  "Checking the key with Watchmode…": "Verificando a chave com o Watchmode…",
+  "Checking…": "Verificando…",
++ "Cinema": "Cinema",
++ "Cinema mode": "Modo cinema",
++ "Cinema mode: on": "Modo cinema: ligado",
+  "City": "Cidade",
++ "Classic": "Clássico",
+  "Clear": "Céu limpo",
++ "Clear memory": "Limpar memória",
+  "Clock": "Relógio",
++ "Clock style": "Estilo do relógio",
+  "Cloudy": "Nublado",
++ "Compact": "Compacto",
+  "Connecting…": "Conectando…",
+  "Continue Watching": "Continuar assistindo",
+  "Continue Watching apps": "Apps de Continuar assistindo",
+@@ -45,6 +59,7 @@
+  "Couldn't check Free My TV: {error}": "Não consegui conferir o Free My TV: {error}",
+  "Couldn't go back to the original: {error}": "Não deu para voltar ao original: {error}",
+  "Couldn't open TV Settings": "Não deu para abrir os Ajustes da TV",
++ "Couldn't open this on your TV": "Não foi possível abrir isto na sua TV",
+  "Couldn't open {app}.": "Não deu para abrir {app}.",
+  "Couldn't reach Home Assistant.": "Não deu para falar com o Home Assistant.",
+  "Couldn't reach TMDB: {error}": "Não foi possível acessar o TMDB: {error}",
+@@ -53,6 +68,7 @@
+  "Couldn't search now: {error}": "Não deu para buscar agora: {error}",
+  "Couldn't sign in: {error}": "Não deu para entrar: {error}",
+  "Couldn't turn on Free My TV: {error}": "Não deu para ligar o Free My TV: {error}",
++ "Couldn't uninstall {app}.": "Não foi possível desinstalar {app}.",
+  "Couldn't update": "Não deu para atualizar",
+  "Create an account at api.watchmode.com.": "Crie uma conta em api.watchmode.com.",
+  "Create an account at themoviedb.org.": "Crie uma conta em themoviedb.org.",
+@@ -70,25 +86,35 @@
+  "Error: {error}.": "Erro: {error}.",
+  "Explore": "Explorar",
+  "Fetching titles…": "Buscando os títulos…",
++ "Fire": "Fogo",
+  "Firmware": "Firmware",
+  "Fog": "Neblina",
++ "Follow app": "Seguir o app",
++ "Follow wallpaper": "Seguir o papel de parede",
++ "Football": "Futebol",
+  "For You": "Para você",
+  "Forecast": "Previsão",
++ "Forest": "Floresta",
+  "Free My TV is a TV app: install this APK on your Android TV or Google TV (freemytv.io), not on a phone.": "O Free My TV é um app para TV: instale este APK na sua Android TV ou Google TV (freemytv.io), não no celular.",
+  "Free My TV is on: new home screen and screensaver, {n} apps turned off.": "Free My TV ligado: Início e tela de descanso novos, {n} apps desligados.",
++ "Free My TV look": "Visual Free My TV",
+  "Free My TV {version} is ready: Home Settings > Updates.": "O Free My TV {version} está pronto: Ajustes do Início > Atualizações.",
+  "Free My TV's home screen crashed 3 times in a row; I switched back to the original one.": "O Início do Free My TV caiu 3 vezes seguidas; voltei para o Início original.",
+  "Free My TV's home screen ran into a problem.\nGoing back to the TV's original home screen…": "O Início do Free My TV teve um problema.\nVoltando para o Início original da TV…",
+  "Free memory": "Memória livre",
+  "Free, and it takes two minutes:": "É grátis e leva dois minutos:",
++ "Game": "Jogo",
+  "Google Play button": "Botão Google Play",
+  "Google default": "Padrão do Google",
++ "Gradient": "Degradê",
+  "H:{max}": "Máx. {max}",
+  "HDMI Inputs": "Entradas HDMI",
++ "HDR Pop": "HDR intenso",
+  "Heavy Rain": "Chuva forte",
+  "Hidden items are back": "Os ocultos voltaram",
+  "Hidden. Settings > Home Settings shows them again.": "Oculto. Em Ajustes do Início você pode mostrá-lo de novo.",
+  "Hide from Continue Watching": "Ocultar de Continuar assistindo",
++ "Hide from the shelf": "Ocultar da prateleira",
+  "High {max}, low {min}.": "Máxima {max}, mínima {min}.",
+  "Home Screen": "Início",
+  "Home Screen, {mode}": "Início, {mode}",
+@@ -110,23 +136,35 @@
+  "Language": "Idioma",
+  "Light": "Claro",
+  "Links to the titles by Watchmode.": "Links dos títulos por Watchmode.",
++ "Lite mode": "Modo leve",
++ "Lite mode: on": "Modo leve: ligado",
+  "Live TV": "TV ao Vivo",
++ "Live TV app": "App de TV ao vivo",
+  "Looking for open apps…": "Procurando apps abertos…",
+  "Looking for the apps…": "Procurando os apps…",
+  "Measured at each switch, for both home screens.": "Medido a cada troca, para os dois Inícios.",
+  "Measuring Free My TV…": "Medindo o Free My TV…",
+  "Measuring the original home screen…": "Medindo o Início original…",
++ "Memory cleared": "Memória limpa",
+  "Mi button": "Botão Mi",
++ "Minimal look": "Visual minimalista",
+  "Missing permission: pick Continue Watching again in Home Settings.": "Falta a permissão: escolha de novo Continuar assistindo nos Ajustes do Início.",
+  "Model": "Modelo",
+  "Mostly Clear": "Poucas nuvens",
+  "Mostly Sunny": "Poucas nuvens",
++ "Move": "Mover",
+  "Movies": "Filmes",
+  "Moving {app}, position {n} of {total}": "Movendo {app}, posição {n} de {total}",
+  "My Photos": "Minhas fotos",
++ "My apps": "Meus apps",
++ "My photo": "Minha foto",
++ "My photos (change by themselves)": "Minhas fotos (trocam sozinhas)",
+  "NOTICES": "AVISOS",
++ "Natural": "Natural",
+  "Navigation sounds": "Sons de navegação",
+  "Needs Free My TV mode: turn it on in Home Screen.": "Precisa do modo Free My TV: ative em Início.",
++ "Neon": "Neon",
++ "Neon edge": "Neon nas bordas",
+  "Netflix button": "Botão Netflix",
+  "Netflix, YouTube and Prime Video: the TV itself controls those buttons.": "Netflix, YouTube e Prime Video: a própria TV controla esses botões.",
+  "Netflix: the TV itself controls that button.": "Netflix: a própria TV controla esse botão.",
+@@ -136,6 +174,8 @@
+  "Next days: {list}.": "Próximos dias: {list}.",
+  "Next hours": "Próximas horas",
+  "Next hours: {list}.": "Próximas horas: {list}.",
++ "Night": "Noite",
++ "Night wallpaper": "Papel de parede da noite",
+  "No TMDB key: add yours in Home Settings > TMDB key.": "Sem chave do TMDB: adicione em Ajustes do Início > Chave do TMDB.",
+  "No ads, with the new screensaver": "Sem anúncios, com a tela de descanso nova",
+  "No app on this TV shares what you watch.": "Nenhum app desta TV mostra o que você assiste.",
+@@ -151,6 +191,7 @@
+  "None yet.": "Nenhum ainda.",
+  "Not installed": "Não instalado",
+  "Not set": "Não definida",
++ "Not set (press → to learn a button)": "Sem botão (aperte → para aprender um botão)",
+  "Nothing": "Nada",
+  "Nothing half-watched in your apps.": "Nada pela metade nos seus apps.",
+  "Now Playing widget": "Widget tocando agora",
+@@ -167,6 +208,7 @@
+  "OK removes them; the arrows turn them on or off.": "OK as remove; as setas ligam ou desligam.",
+  "OK turns an app on or off in Continue Watching.": "OK liga ou desliga o app em Continuar assistindo.",
+  "OK: send it from your phone, or type it.": "OK: envie pelo celular ou digite.",
++ "Ocean": "Oceano",
+  "Off": "Desligado",
+  "Off in {time}": "Desliga em {time}",
+  "Okko button": "Botão Okko",
+@@ -187,6 +229,7 @@
+  "Original": "Original",
+  "Original mode, but I couldn't turn back on: {list}.": "Modo original, mas não consegui religar: {list}.",
+  "Original mode: the factory home screen, screensaver and apps are back.": "Modo original: Início, tela de descanso e apps de fábrica de volta.",
++ "Outline": "Contorno",
+  "Partly Cloudy": "Parcialmente nublado",
+  "Paste the API Read Access Token (or the API Key) here:": "Cole aqui o API Read Access Token (ou a API Key):",
+  "Paste the key here:": "Cole a chave aqui:",
+@@ -196,13 +239,16 @@
+  "Picks from": "Destaques de",
+  "Picks per tab": "Destaques por aba",
+  "Picture": "Imagem",
++ "Picture mode off.": "Modo de imagem desligado.",
+  "Position": "Posição",
+  "Press OK to watch on {app} · any other button to close": "Aperte OK para assistir no {app} · qualquer outro botão fecha",
++ "Press a button on the remote now": "Aperte agora um botão do controle",
+  "Press ▲ on an app to close it": "Pressione ▲ em um app para fechá-lo",
+  "Preview": "Ver agora",
+  "Prime Video button": "Botão Prime Video",
+  "Profile button": "Botão Perfil",
+  "Quick Settings": "Configurações rápidas",
++ "Quick panel": "Painel rápido",
+  "Quotes widget": "Widget de cotações",
+  "RECOMMENDATIONS": "RECOMENDAÇÕES",
+  "Rain": "Chuva",
+@@ -210,12 +256,14 @@
+  "Recommended on Trakt": "Recomendado no Trakt",
+  "Remote Buttons": "Botões do Controle",
+  "Remove": "Remover",
++ "Remove from the shelf": "Tirar da prateleira",
+  "Remove the TMDB key?": "Remover a chave do TMDB?",
+  "Remove the Watchmode key?": "Remover a chave do Watchmode?",
+  "Remove the key": "Remover a chave",
+  "Removed from the shelf: {app}": "Removido da prateleira: {app}",
+  "Restoring the original home screen…": "Devolvendo o Início original…",
+  "Rutube button": "Botão Rutube",
++ "Same as the day": "Igual ao do dia",
+  "Save": "Salvar",
+  "Saved on the TV. You can close this page.": "Chave salva na TV. Você pode fechar esta página.",
+  "Saved. The picks arrive in a moment.": "Chave salva. As recomendações chegam em instantes.",
+@@ -243,16 +291,21 @@
+  "Sign out of {name}? The picks go back to TMDB's alone.": "Sair de {name}? Os destaques voltam a vir só do TMDB.",
+  "Sign-in declined on Trakt.": "Entrada recusada no Trakt.",
+  "Signed in": "Conectado",
++ "Slanted": "Inclinado",
+  "Sleep Timer": "Timer de desligamento",
+  "Snow": "Neve",
+  "Sony default": "Padrão da Sony",
+  "Sony default: the button opens what it always did.": "Padrão da Sony: o botão abre o mesmo app de sempre.",
+  "SonyLIV button": "Botão SonyLIV",
+  "Sound": "Som",
++ "Spaced": "Espaçado",
++ "Sports": "Esportes",
+  "Starting…": "Começando…",
+  "Status icons": "Ícones de status",
+  "Streaming apps": "Apps de streaming",
++ "Strength": "Intensidade",
+  "Sunrise {time}": "Nascer {time}",
++ "Sunset": "Pôr do sol",
+  "Sunset {time}": "Pôr do sol {time}",
+  "Switching takes a few seconds; the screen blinks while it measures.": "A troca leva uns segundos e a tela pisca nas medições.",
+  "Switching the home screen and screensaver…": "Trocando o Início e a tela de descanso…",
+@@ -269,6 +322,7 @@
+  "TONIGHT": "PARA ESTA NOITE",
+  "TV Settings": "Ajustes da TV",
+  "TV's choice": "Escolha da TV",
++ "TV's own": "A da própria TV",
+  "Tabii button": "Botão Tabii",
+  "Temperature": "Temperatura",
+  "That doesn't look like a TMDB key.": "Isso não parece uma chave do TMDB.",
+@@ -285,11 +339,13 @@
+  "The other buttons: the TV itself controls them.": "Os outros botões: a própria TV os controla.",
+  "The shelf is full. Make room in Free My TV › Shelf.": "A prateleira está cheia. Abra espaço em Free My TV › Prateleira.",
+  "Theme": "Tema",
++ "Thin": "Fino",
+  "This TV doesn't let apps see what's playing.": "Esta TV não deixa apps verem o que está tocando.",
+  "This TV doesn't let apps show over other apps: the time left shows on the home screen.": "Esta TV não deixa apps aparecerem sobre outros apps: o tempo restante aparece no Início.",
+  "This TV has little memory, so the shelf holds fewer apps.": "Esta TV tem pouca memória, por isso a prateleira comporta menos apps.",
+  "This TV has no live TV (antenna or cable) to open.": "Esta TV não tem TV ao vivo (antena ou cabo) para abrir.",
+  "This TV has no supported app store to open.": "Esta TV não tem uma loja de aplicativos compatível para abrir.",
++ "This TV refused the volume effect.": "Esta TV recusou o efeito de volume.",
+  "This TV's remote has no app buttons that Free My TV knows.": "O controle desta TV não tem botões de app que o Free My TV reconheça.",
+  "This code has expired.": "Este código expirou.",
+  "This product uses the TMDB API but is not endorsed or certified by TMDB.": "Usa a API do TMDB, sem endosso ou certificação do TMDB.",
+@@ -306,15 +362,24 @@
+  "Turned off what was missing: {list}.": "Desliguei o que faltava: {list}.",
+  "Turning apps back on ({done}/{total})…": "Religando apps ({done}/{total})…",
+  "Turning off apps ({done}/{total})…": "Desligando apps ({done}/{total})…",
++ "Turning on the key reader...": "Ligando o leitor de teclas...",
+  "Turning the apps back on…": "Religando os apps…",
+  "Type it with the remote": "Digitar com o controle remoto",
+  "Type the city's name": "Digite o nome da cidade",
++ "Ultra Vivid": "Ultra vívido",
+  "Unavailable": "Indisponível",
++ "Uninstall": "Desinstalar",
+  "Up next: S{s} E{e}": "A seguir: T{s} E{e}",
+  "Up to date": "Em dia",
+  "Updates": "Atualizações",
+  "VK button": "Botão VK",
++ "Vivid": "Vívido",
++ "Volume": "Volume",
++ "Volume Booster": "Reforço de volume",
++ "Volume Booster off.": "Reforço de volume desligado.",
+  "Waiting for your phone. The code works for 5 minutes.": "Esperando o seu celular. O código vale por 5 minutos.",
++ "Wallpaper": "Papel de parede",
++ "Wallpaper auto": "Troca automática",
+  "Watch from the screensaver": "Assistir pela tela de descanso",
+  "Watchmode key": "Chave do Watchmode",
+  "Watchmode refused this key.": "O Watchmode recusou esta chave.",
+@@ -377,6 +442,8 @@
+  "not in the top buttons": "fora dos botões do topo",
+  "not on the shelf": "fora da prateleira",
+  "now": "agora",
++ "off": "desligada",
++ "on": "ligada",
+  "on the shelf, place {n}": "na prateleira, posição {n}",
+  "photos|Default": "Padrão",
+  "photos|None": "Nenhuma",
+@@ -389,6 +456,7 @@
+  "quotes|{ago}": "de {ago}",
+  "recents|Drawer and Home twice": "Gaveta e Início duas vezes",
+  "recents|In the drawer": "Na gaveta",
++ "refused": "recusado",
+  "services|All": "Todos",
+  "services|Some": "Alguns",
+  "shelf|Off": "Fora",
 diff -ruN '--exclude=*.class' '--exclude=.git' '--exclude=out' '--exclude=*.apk' '--exclude=*.idsig' '--exclude=*.patch' free-my-tv-main/app/src/io/freemytv/App.java free-my-tv-main/app/src/io/freemytv/App.java
 --- free-my-tv-main/app/src/io/freemytv/App.java	2026-11-04 09:46:47.092895074 +0000
-+++ free-my-tv-main/app/src/io/freemytv/App.java	2026-11-05 11:43:08.259908855 +0000
++++ free-my-tv-main/app/src/io/freemytv/App.java	2026-11-06 03:34:34.194162147 +0000
 @@ -4,9 +4,20 @@
  
  /** Gives Prefs a context in every process. */
@@ -68,7 +359,7 @@ diff -ruN '--exclude=*.class' '--exclude=.git' '--exclude=out' '--exclude=*.apk'
  }
 diff -ruN '--exclude=*.class' '--exclude=.git' '--exclude=out' '--exclude=*.apk' '--exclude=*.idsig' '--exclude=*.patch' free-my-tv-main/app/src/io/freemytv/CinemaOverlay.java free-my-tv-main/app/src/io/freemytv/CinemaOverlay.java
 --- free-my-tv-main/app/src/io/freemytv/CinemaOverlay.java	1970-01-01 00:00:00.000000000 +0000
-+++ free-my-tv-main/app/src/io/freemytv/CinemaOverlay.java	2026-11-05 11:43:08.259959829 +0000
++++ free-my-tv-main/app/src/io/freemytv/CinemaOverlay.java	2026-11-06 03:34:34.194197812 +0000
 @@ -0,0 +1,173 @@
 +package io.freemytv;
 +
@@ -245,7 +536,7 @@ diff -ruN '--exclude=*.class' '--exclude=.git' '--exclude=out' '--exclude=*.apk'
 +}
 diff -ruN '--exclude=*.class' '--exclude=.git' '--exclude=out' '--exclude=*.apk' '--exclude=*.idsig' '--exclude=*.patch' free-my-tv-main/app/src/io/freemytv/CustomKeys.java free-my-tv-main/app/src/io/freemytv/CustomKeys.java
 --- free-my-tv-main/app/src/io/freemytv/CustomKeys.java	1970-01-01 00:00:00.000000000 +0000
-+++ free-my-tv-main/app/src/io/freemytv/CustomKeys.java	2026-11-05 11:43:08.261230103 +0000
++++ free-my-tv-main/app/src/io/freemytv/CustomKeys.java	2026-11-06 03:34:34.195137489 +0000
 @@ -0,0 +1,249 @@
 +package io.freemytv;
 +
@@ -498,7 +789,7 @@ diff -ruN '--exclude=*.class' '--exclude=.git' '--exclude=out' '--exclude=*.apk'
 +}
 diff -ruN '--exclude=*.class' '--exclude=.git' '--exclude=out' '--exclude=*.apk' '--exclude=*.idsig' '--exclude=*.patch' free-my-tv-main/app/src/io/freemytv/HomeActivity.java free-my-tv-main/app/src/io/freemytv/HomeActivity.java
 --- free-my-tv-main/app/src/io/freemytv/HomeActivity.java	2026-11-04 09:46:47.093008631 +0000
-+++ free-my-tv-main/app/src/io/freemytv/HomeActivity.java	2026-11-05 11:43:08.261246211 +0000
++++ free-my-tv-main/app/src/io/freemytv/HomeActivity.java	2026-11-06 03:34:34.195150819 +0000
 @@ -20,6 +20,20 @@
      /** Opens All Apps (a remote's All Apps button, RemoteKeys). */
      static final String EXTRA_ALL_APPS = "io.freemytv.ALL_APPS";
@@ -581,7 +872,7 @@ diff -ruN '--exclude=*.class' '--exclude=.git' '--exclude=out' '--exclude=*.apk'
              home.destroy();
 diff -ruN '--exclude=*.class' '--exclude=.git' '--exclude=out' '--exclude=*.apk' '--exclude=*.idsig' '--exclude=*.patch' free-my-tv-main/app/src/io/freemytv/HomeApps.java free-my-tv-main/app/src/io/freemytv/HomeApps.java
 --- free-my-tv-main/app/src/io/freemytv/HomeApps.java	2026-11-04 09:46:47.093021873 +0000
-+++ free-my-tv-main/app/src/io/freemytv/HomeApps.java	2026-11-05 11:43:08.260113632 +0000
++++ free-my-tv-main/app/src/io/freemytv/HomeApps.java	2026-11-06 03:34:34.194310687 +0000
 @@ -62,9 +62,27 @@
      static final int RECENTS = 8;
      /** A Home Assistant entity in the drawer (HomeAssistant): OK calls its service, nothing opens. */
@@ -805,7 +1096,7 @@ diff -ruN '--exclude=*.class' '--exclude=.git' '--exclude=out' '--exclude=*.apk'
          // and Live TV on its own plays the last channel, which can be an app's (RaiPlay's).
 diff -ruN '--exclude=*.class' '--exclude=.git' '--exclude=out' '--exclude=*.apk' '--exclude=*.idsig' '--exclude=*.patch' free-my-tv-main/app/src/io/freemytv/HomeMode.java free-my-tv-main/app/src/io/freemytv/HomeMode.java
 --- free-my-tv-main/app/src/io/freemytv/HomeMode.java	2026-11-04 09:46:47.093088049 +0000
-+++ free-my-tv-main/app/src/io/freemytv/HomeMode.java	2026-11-05 11:43:08.260157380 +0000
++++ free-my-tv-main/app/src/io/freemytv/HomeMode.java	2026-11-06 03:34:34.194339279 +0000
 @@ -417,11 +417,11 @@
       * (or the brand's default), and on TCL's Android 11, it goes off (RemoteKeys.serviceWanted).
       */
@@ -822,8 +1113,23 @@ diff -ruN '--exclude=*.class' '--exclude=.git' '--exclude=out' '--exclude=*.apk'
          } catch (IOException e) {
 diff -ruN '--exclude=*.class' '--exclude=.git' '--exclude=out' '--exclude=*.apk' '--exclude=*.idsig' '--exclude=*.patch' free-my-tv-main/app/src/io/freemytv/HomeView.java free-my-tv-main/app/src/io/freemytv/HomeView.java
 --- free-my-tv-main/app/src/io/freemytv/HomeView.java	2026-11-04 09:46:47.093193071 +0000
-+++ free-my-tv-main/app/src/io/freemytv/HomeView.java	2026-11-05 11:43:08.260247277 +0000
-@@ -251,6 +251,12 @@
++++ free-my-tv-main/app/src/io/freemytv/HomeView.java	2026-11-06 03:34:34.194403893 +0000
+@@ -205,7 +205,13 @@
+     // Holding OK on a card: a small menu (hide it, open the app, cancel) on its own layer, drawn only while it shows.
+     private static final float MENU_W = 720, MENU_PAD = 44, MENU_INSET = 16, MENU_ROW = 76, MENU_STEP = 80, MENU_R = 36;
+     private final Spring menu = new Spring(0.26f, 0.86f, 0), menuPick = new Spring(0.22f, 0.9f, 0);
+-    private final String[] menuOptions = new String[3];
++    private final String[] menuOptions = new String[4];
++    /** How many of menuOptions are in use: 3 for a Continue Watching card, 3 or 4 for an app. */
++    private int menuCount = 3;
++    /** The app whose menu is open (held OK on the shelf or in All Apps), or null for a Continue Watching card's. */
++    private HomeApps.Item menuApp;
++    private final int[] menuActions = new int[4];
++    private static final int ACT_MOVE = 0, ACT_SHELF = 1, ACT_UNINSTALL = 2, ACT_CANCEL = 3;
+     private final RectF menuPanel = new RectF();
+     private final Set<String> hiddenNow = new HashSet<>();   // hidden this session (a reload already under way may not know)
+     private boolean menuOpen;
+@@ -251,6 +257,12 @@
      private final android.graphics.PorterDuffColorFilter whiteLogo =
              new android.graphics.PorterDuffColorFilter(0xFFFFFFFF, android.graphics.PorterDuff.Mode.SRC_IN);
      private final RectF platterRect = new RectF();
@@ -836,7 +1142,7 @@ diff -ruN '--exclude=*.class' '--exclude=.git' '--exclude=out' '--exclude=*.apk'
      private int shelfIndex;
      /** The first app the shelf shows: with more apps than fit, it scrolls with the focus. */
      private int shelfFirst;
-@@ -927,6 +933,7 @@
+@@ -927,6 +939,7 @@
          lDate = Ui.text(Ui.semibold, 34 * k, L_DIM);
          lClock = Ui.numbers(Ui.light, 200 * k, L_INK);
          lClock.setLetterSpacing(-0.01f);
@@ -844,7 +1150,7 @@ diff -ruN '--exclude=*.class' '--exclude=.git' '--exclude=out' '--exclude=*.apk'
          lWeather = Ui.text(Ui.medium, 34 * k, L_DIM);
          lClockQuote = Ui.numbers(Ui.medium, 28 * k, L_DIM);
          lightGradient = tintShade = null;
-@@ -1050,10 +1057,11 @@
+@@ -1050,10 +1063,11 @@
              if (clockMode()) heroLayer.invalidate();
          }
  
@@ -859,7 +1165,7 @@ diff -ruN '--exclude=*.class' '--exclude=.git' '--exclude=out' '--exclude=*.apk'
          idle = !busy;
          if (busy) Choreographer.getInstance().postFrameCallback(this);
          else Choreographer.getInstance().postFrameCallbackDelayed(this, 1000);
-@@ -1331,7 +1339,7 @@
+@@ -1331,7 +1345,7 @@
  
      /** Day or night right now (from the sun at your location); `animate`: with the transition. */
      private void checkNight(boolean animate) {
@@ -868,7 +1174,7 @@ diff -ruN '--exclude=*.class' '--exclude=.git' '--exclude=out' '--exclude=*.apk'
          if (want == nightTarget) return;
          nightTarget = want;
          if (animate && running) {
-@@ -1593,6 +1601,7 @@
+@@ -1593,6 +1607,7 @@
          boolean same = list.size() == shelf.size();
          for (int i = 0; same && i < list.size(); i++) same = list.get(i).key.equals(shelf.get(i).key);
          shelf = list;
@@ -876,7 +1182,7 @@ diff -ruN '--exclude=*.class' '--exclude=.git' '--exclude=out' '--exclude=*.apk'
          if (!same || tileFocus.length != list.size()) {
              tileFocus = new Spring[list.size()];
              tileSlide = new Spring[list.size()];
-@@ -1605,7 +1614,10 @@
+@@ -1605,7 +1620,10 @@
              shelfIndex = Math.min(shelfIndex, Math.max(0, list.size() - 1));
              retarget(true);
              layoutShelf();
@@ -887,7 +1193,7 @@ diff -ruN '--exclude=*.class' '--exclude=.git' '--exclude=out' '--exclude=*.apk'
          tilesDirty = true;
          platter.invalidate();
      }
-@@ -1616,9 +1628,11 @@
+@@ -1616,9 +1634,11 @@
          float full = (CONTENT_R - MARGIN) * k;
          // Tiles in the TV banners' own 16:9, so an app's art is never stretched; never taller than L_TILE_H. The glass
          // keeps its bottom edge, so with more apps it only gets lower.
@@ -901,7 +1207,7 @@ diff -ruN '--exclude=*.class' '--exclude=.git' '--exclude=out' '--exclude=*.apk'
          float top = (L_PLATTER_TOP + L_TILE_H) * k - th;
          platterRect.set(left - pad, top, left + width + pad, top + th + 2 * pad);
          snap(platterRect);
-@@ -1651,15 +1665,21 @@
+@@ -1651,15 +1671,21 @@
  
      /** Shelf layer: the glass bar and its shadow (it only changes with the background). */
      private void drawPlatter(Canvas c) {
@@ -927,7 +1233,7 @@ diff -ruN '--exclude=*.class' '--exclude=.git' '--exclude=out' '--exclude=*.apk'
      }
  
      /** The quotes row's text and sizes, for one set of coins, prices and text size. */
-@@ -1816,6 +1836,11 @@
+@@ -1816,6 +1842,11 @@
      }
  
      private void drawTiles(Canvas c) {
@@ -939,7 +1245,7 @@ diff -ruN '--exclude=*.class' '--exclude=.git' '--exclude=out' '--exclude=*.apk'
          // The focused one last: it grows over its neighbors without being covered by them.
          int top = -1;
          float most = 0.02f;
-@@ -2005,8 +2030,9 @@
+@@ -2005,8 +2036,9 @@
      // MARK: - Bottom drawer
  
      private static List<HomeApps.Item> drawerList(Context c) {
@@ -951,7 +1257,7 @@ diff -ruN '--exclude=*.class' '--exclude=.git' '--exclude=out' '--exclude=*.apk'
          list.addAll(HomeAssistant.items(c));   // empty unless configured and on in Home Settings
          return list;
      }
-@@ -2069,8 +2095,13 @@
+@@ -2069,8 +2101,13 @@
          drawerDirty = true;
      }
  
@@ -966,7 +1272,7 @@ diff -ruN '--exclude=*.class' '--exclude=.git' '--exclude=out' '--exclude=*.apk'
          drawerOpen = true;
          drawer.target = 1;
          zone = Z_DRAWER;
-@@ -2152,7 +2183,7 @@
+@@ -2152,7 +2189,7 @@
      }
  
      private void drawDrawer(Canvas c) {
@@ -975,18 +1281,25 @@ diff -ruN '--exclude=*.class' '--exclude=.git' '--exclude=out' '--exclude=*.apk'
          rowTitle.setColor(tone(L_DIM, 0xB3FFFFFF));
          cardTitle.setColor(tone(L_DIM, 0xB3FFFFFF));
          cardText.setColor(drawerInk(0.95f));
-@@ -3038,8 +3069,8 @@
+@@ -2913,7 +2950,7 @@
+ 
+     /** The menu's row under a point, if any. */
+     private int menuAt(float x, float y) {
+-        for (int i = 0; i < menuOptions.length; i++) {
++        for (int i = 0; i < menuCount; i++) {
+             menuRow(i, hitBox);
+             if (hitBox.contains(x, y)) return i;
+         }
+@@ -3038,7 +3075,7 @@
                          okDown = true;
                          okHeld = false;
                          handler.removeCallbacks(holdStart);
 -                        holdArmed = sheetOpen ? canToggleShelf(gridIndex) : canReorder() || canHold();
--                        if (holdArmed) handler.postDelayed(holdStart, HOLD_MS);
-+                        // Long-press actions are disabled: OK always performs the normal selection.
-+                        holdArmed = false;
++                        holdArmed = canAppMenu() || canReorder() || canHold();
+                         if (holdArmed) handler.postDelayed(holdStart, HOLD_MS);
                      } else if (okDown && holdArmed && e.isLongPress()) {
                          hold();
-                     }
-@@ -3108,7 +3139,7 @@
+@@ -3108,7 +3145,7 @@
                          return;
                      }
                  } else {
@@ -995,7 +1308,7 @@ diff -ruN '--exclude=*.class' '--exclude=.git' '--exclude=out' '--exclude=*.apk'
                      openDrawer();
                  }
                  break;
-@@ -3301,17 +3332,6 @@
+@@ -3301,17 +3338,6 @@
              openSheet();
              return;
          }
@@ -1013,7 +1326,165 @@ diff -ruN '--exclude=*.class' '--exclude=.git' '--exclude=out' '--exclude=*.apk'
          boolean opened = HomeApps.open(activity, it, this, Math.round(r.left), Math.round(r.top),
                  Math.round(r.width()), Math.round(r.height()));
          if (!opened) showToast(Ui.trf("Couldn't open {app}.", "app", it.label));
-@@ -4048,16 +4068,142 @@
+@@ -3321,9 +3347,12 @@
+     // on a Continue Watching card, its menu opens
+ 
+     private void hold() {
+-        if (sheetOpen) {
+-            toggleShelf();
+-        } else if (canReorder()) {
++        if (canAppMenu()) {   // an app on the shelf or in All Apps: its menu
++            handler.removeCallbacks(holdStart);
++            holdArmed = false;
++            okDown = false;     // the menu gets keys now: this press's release must not pick an option
++            showAppMenu();
++        } else if (canReorder()) {   // a top button
+             startReorder();
+         } else if (canHold()) {
+             handler.removeCallbacks(holdStart);
+@@ -3340,6 +3369,89 @@
+         toggleShelf();
+     }
+ 
++    /** The app that held OK would act on: the one with focus in All Apps, or on the shelf. */
++    private HomeApps.Item appHeld() {
++        if (sheetOpen) return gridIndex >= 0 && gridIndex < others.size() ? others.get(gridIndex) : null;
++        return zone == Z_SHELF && shelfIndex >= 0 && shelfIndex < shelf.size() ? shelf.get(shelfIndex) : null;
++    }
++
++    private boolean canAppMenu() {
++        if (menuOpen || drawerOpen) return false;
++        HomeApps.Item it = appHeld();
++        return it != null && it.kind == HomeApps.APP && it.pkg != null;
++    }
++
++    private boolean onShelf(String pkg) {
++        for (HomeApps.Item s : shelf) if (pkg.equals(s.pkg)) return true;
++        return false;
++    }
++
++    /**
++     * Held OK on an app: on the shelf, Move, Hide from the shelf, Uninstall; in All Apps, Add to the shelf (or Remove
++     * from it) and Uninstall. The same panel as a Continue Watching card's.
++     */
++    private void showAppMenu() {
++        HomeApps.Item it = appHeld();
++        if (menuOpen || it == null || menuTitlePaint == null) return;
++        menuApp = it;
++        menuItem = null;
++        menuTitle = TextUtils.ellipsize(it.label == null ? it.pkg : it.label, new TextPaint(menuTitlePaint),
++                (MENU_W - 2 * MENU_PAD) * k, TextUtils.TruncateAt.END).toString();
++        menuSub = "";
++        int n = 0;
++        if (sheetOpen) {
++            menuActions[n] = ACT_SHELF;
++            menuOptions[n++] = Ui.tr(onShelf(it.pkg) ? "Remove from the shelf" : "Add to the shelf");
++        } else {
++            if (shelf.size() > 1) {
++                menuActions[n] = ACT_MOVE;
++                menuOptions[n++] = Ui.tr("Move");
++            }
++            menuActions[n] = ACT_SHELF;
++            menuOptions[n++] = Ui.tr("Hide from the shelf");
++        }
++        menuActions[n] = ACT_UNINSTALL;
++        menuOptions[n++] = Ui.tr("Uninstall");
++        menuActions[n] = ACT_CANCEL;
++        menuOptions[n++] = Ui.tr("Cancel");
++        menuCount = n;
++        layoutMenu();
++        menuOpen = true;
++        menuIndex = 0;
++        menuPick.snap(0);
++        menu.target = 1;
++        menuLayer.setVisibility(VISIBLE);
++        menuLayer.invalidate();
++        wake();
++        click.open();
++        spoken.focusMoved();
++    }
++
++    private void pickAppMenu(HomeApps.Item app, int action) {
++        if (action == ACT_MOVE) {
++            click.open();
++            startReorder();
++        } else if (action == ACT_SHELF) {
++            toggleShelf(app);
++        } else if (action == ACT_UNINSTALL) {
++            click.open();
++            uninstall(app);
++        } else {
++            click.move();
++        }
++    }
++
++    /** Android's own uninstall question (apps that came with the TV can't be removed, and it says so). */
++    private void uninstall(HomeApps.Item app) {
++        try {
++            Intent intent = new Intent(Intent.ACTION_DELETE, android.net.Uri.parse("package:" + app.pkg));
++            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
++            getContext().startActivity(intent);
++        } catch (ActivityNotFoundException | SecurityException e) {
++            showToast(Ui.trf("Couldn't uninstall {app}.", "app", app.label == null ? app.pkg : app.label));
++        }
++    }
++
+     private boolean canToggleShelf(int i) {
+         if (!sheetOpen || i >= others.size()) return false;
+         HomeApps.Item it = others.get(i);
+@@ -3353,7 +3465,11 @@
+         if (!canToggleShelf(gridIndex)) return;
+         okHeld = true;
+         toggledAt = SystemClock.uptimeMillis();
+-        final HomeApps.Item it = others.get(gridIndex);
++        toggleShelf(others.get(gridIndex));
++    }
++
++    /** Puts an app at the end of the shelf, or takes it off if it's there; a toast says which. */
++    private void toggleShelf(final HomeApps.Item it) {
+         final Context c = getContext().getApplicationContext();
+         click.open();
+         LOADER.execute(() -> {
+@@ -3648,7 +3764,7 @@
+             return;
+         }
+         if (menuOpen) {
+-            for (int i = 0; i < menuOptions.length; i++) out.add(a11yId(MENU_ITEMS, i));
++            for (int i = 0; i < menuCount; i++) out.add(a11yId(MENU_ITEMS, i));
+             return;
+         }
+         if (sheetOpen) {
+@@ -3671,9 +3787,9 @@
+                 if (!recentsOpen()) return "";
+                 return recents.count() == 0 ? Ui.tr("Recent Apps") + ". " + recents.emptyText() : recents.spoken(i);
+             case MENU_ITEMS:
+-                if (!menuOpen || i >= menuOptions.length) return "";
++                if (!menuOpen || i >= menuCount) return "";
+                 return (i == 0 && menuItem != null ? menuItem.title + ". " : "") + menuOptions[i] + ", "
+-                        + Ui.trf("{i} of {n}", "i", i + 1, "n", menuOptions.length);
++                        + Ui.trf("{i} of {n}", "i", i + 1, "n", menuCount);
+             case GRID:
+                 if (i >= others.size()) return "";
+                 return label(others, i) + ", " + Ui.trf("{i} of {n}", "i", i + 1, "n", others.size());
+@@ -3718,7 +3834,7 @@
+                 dy = 0;
+                 break;
+             case MENU_ITEMS:
+-                if (!menuOpen || i >= menuOptions.length) return false;
++                if (!menuOpen || i >= menuCount) return false;
+                 menuRow(i, a11yRect);
+                 dy = 0;
+                 break;
+@@ -3844,7 +3960,7 @@
+             return;
+         }
+         if (menuOpen) {
+-            if (group == MENU_ITEMS && i < menuOptions.length && i != menuIndex) moveMenu(i - menuIndex);
++            if (group == MENU_ITEMS && i < menuCount && i != menuIndex) moveMenu(i - menuIndex);
+             return;
+         }
+         if (group == GRID) {
+@@ -4048,16 +4164,142 @@
  
      /** Picks need a TMDB key: without one, "picks" shows the clock, like "nothing". */
      private boolean picksMode() {
@@ -1158,7 +1629,60 @@ diff -ruN '--exclude=*.class' '--exclude=.git' '--exclude=out' '--exclude=*.apk'
      }
  
      /** What the top shows now (from reload, off the main thread) and, for Continue Watching, its list. */
-@@ -4502,6 +4648,7 @@
+@@ -4312,6 +4554,8 @@
+     private void showMenu() {
+         if (menuOpen || !canHold() || menuTitlePaint == null) return;
+         menuItem = watching.get(watchIndex);
++        menuApp = null;
++        menuCount = 3;
+         float width = (MENU_W - 2 * MENU_PAD) * k;
+         String title = menuItem.title + (menuItem.episode != null ? " · " + menuItem.episode : "");
+         menuTitle = TextUtils.ellipsize(title, new TextPaint(menuTitlePaint), width, TextUtils.TruncateAt.END).toString();
+@@ -4334,7 +4578,7 @@
+ 
+     /** The panel, centered on the screen: title, the app's name (if known) and the three options. */
+     private void layoutMenu() {
+-        float rows = (MENU_PAD + 34 + (menuSub.isEmpty() ? 0 : 38) + 32 + 2 * MENU_STEP + MENU_ROW + MENU_INSET) * k;
++        float rows = (MENU_PAD + 34 + (menuSub.isEmpty() ? 0 : 38) + 32 + (menuCount - 1) * MENU_STEP + MENU_ROW + MENU_INSET) * k;
+         float left = (w - MENU_W * k) / 2, top = (h - rows) / 2;
+         menuPanel.set(left, top, left + MENU_W * k, top + rows);
+         menuOptionsTop = top + (MENU_PAD + 34 + (menuSub.isEmpty() ? 0 : 38) + 32) * k;
+@@ -4398,7 +4642,7 @@
+     }
+ 
+     private void moveMenu(int d) {
+-        int next = Math.max(0, Math.min(menuOptions.length - 1, menuIndex + d));
++        int next = Math.max(0, Math.min(menuCount - 1, menuIndex + d));
+         if (next == menuIndex) return;
+         menuIndex = next;
+         menuPick.target = next;
+@@ -4409,9 +4653,16 @@
+     }
+ 
+     private void pickMenu() {
++        HomeApps.Item app = menuApp;
+         WatchNext.Item it = menuItem;
+         int choice = menuIndex;
++        int action = choice >= 0 && choice < menuActions.length ? menuActions[choice] : ACT_CANCEL;
+         closeMenu(false);
++        if (app != null) {
++            menuApp = null;
++            pickAppMenu(app, action);
++            return;
++        }
+         if (it == null) return;
+         if (choice == 0) {
+             click.open();
+@@ -4475,7 +4726,7 @@
+         fill.setColor(Ui.alpha(tone(L_INK, WHITE), a));
+         c.drawRoundRect(tmp, rowR, rowR, fill);
+         int ink = tone(L_INK, WHITE), onPill = tone(WHITE, L_INK);
+-        for (int i = 0; i < menuOptions.length; i++) {
++        for (int i = 0; i < menuCount; i++) {
+             menuRow(i, tmp);
+             float f = Ui.clamp(1 - Math.abs(pick - i));
+             int base = i == 0 ? tone(0xFFD70015, 0xFFFF6961) : ink;   // hiding is the destructive one: red
+@@ -4502,6 +4753,7 @@
       * the same photo almost black (or a dark gradient), drawn on top during the transition.
       */
      private void drawLightSky(Canvas c) {
@@ -1166,7 +1690,7 @@ diff -ruN '--exclude=*.class' '--exclude=.git' '--exclude=out' '--exclude=*.apk'
          long up = SystemClock.uptimeMillis();
          float e = bgFadeAt == 0 ? 1 : fadeEase(bgFadeAt, up);
          boolean fading = bgFadeAt != 0;
-@@ -4600,6 +4747,7 @@
+@@ -4600,6 +4852,7 @@
          applyTone();
          if (clockMode()) {
              titleRight = 0;
@@ -1174,7 +1698,7 @@ diff -ruN '--exclude=*.class' '--exclude=.git' '--exclude=out' '--exclude=*.apk'
              drawClock(c);
              if (HomeData.coinCount() > 0 || playingTab != null) drawQuotes(c);
              return;
-@@ -4649,10 +4797,81 @@
+@@ -4649,10 +4902,81 @@
          return Recs.hasKey(getContext());
      }
  
@@ -1257,7 +1781,7 @@ diff -ruN '--exclude=*.class' '--exclude=.git' '--exclude=out' '--exclude=*.apk'
          HomeData.Weather wx = data.weather;
          if (!Prefs.weather() || Double.isNaN(wx.temp)) return;
          if (data.weatherAt != weatherLineAt || Prefs.version != weatherLinePrefs || !Ui.language.equals(weatherLineLanguage)) {
-@@ -4814,7 +5033,7 @@
+@@ -4814,7 +5138,7 @@
  
      /** Wi-Fi/Ethernet, Bluetooth (when something is connected) and a USB drive, at the top left. */
      private void drawStatusIcons(Canvas c) {
@@ -1268,7 +1792,7 @@ diff -ruN '--exclude=*.class' '--exclude=.git' '--exclude=out' '--exclude=*.apk'
          float x = MARGIN * k;
 diff -ruN '--exclude=*.class' '--exclude=.git' '--exclude=out' '--exclude=*.apk' '--exclude=*.idsig' '--exclude=*.patch' free-my-tv-main/app/src/io/freemytv/Neon.java free-my-tv-main/app/src/io/freemytv/Neon.java
 --- free-my-tv-main/app/src/io/freemytv/Neon.java	1970-01-01 00:00:00.000000000 +0000
-+++ free-my-tv-main/app/src/io/freemytv/Neon.java	2026-11-05 11:43:08.260345618 +0000
++++ free-my-tv-main/app/src/io/freemytv/Neon.java	2026-11-06 03:34:34.194529987 +0000
 @@ -0,0 +1,994 @@
 +package io.freemytv;
 +
@@ -2266,8 +2790,8 @@ diff -ruN '--exclude=*.class' '--exclude=.git' '--exclude=out' '--exclude=*.apk'
 +}
 diff -ruN '--exclude=*.class' '--exclude=.git' '--exclude=out' '--exclude=*.apk' '--exclude=*.idsig' '--exclude=*.patch' free-my-tv-main/app/src/io/freemytv/PictureFilter.java free-my-tv-main/app/src/io/freemytv/PictureFilter.java
 --- free-my-tv-main/app/src/io/freemytv/PictureFilter.java	1970-01-01 00:00:00.000000000 +0000
-+++ free-my-tv-main/app/src/io/freemytv/PictureFilter.java	2026-11-05 11:43:08.261331303 +0000
-@@ -0,0 +1,139 @@
++++ free-my-tv-main/app/src/io/freemytv/PictureFilter.java	2026-11-06 03:34:34.195215070 +0000
+@@ -0,0 +1,138 @@
 +package io.freemytv;
 +
 +import android.content.Context;
@@ -2394,7 +2918,6 @@ diff -ruN '--exclude=*.class' '--exclude=.git' '--exclude=out' '--exclude=*.apk'
 +        }
 +        Prefs.setPictureSystem(ok && mode > 0);
 +        final boolean worked = ok;
-+        if (mode > 0 && !ok) PictureOverlay.update(app, false);   // the weaker veil, over other apps
 +        if (!say) return;
 +        final String name = Ui.tr(Prefs.PICTURE_MODES[mode]);
 +        final int strength = Prefs.pictureStrength();
@@ -2404,13 +2927,13 @@ diff -ruN '--exclude=*.class' '--exclude=.git' '--exclude=out' '--exclude=*.apk'
 +    private static String mode0(String name, int strength, int mode, boolean worked) {
 +        if (mode <= 0) return Ui.tr("Picture mode off.");
 +        if (worked) return Ui.tr("Picture") + ": " + name + " " + strength + "%";
-+        return Ui.tr("Picture") + ": " + name + " (" + Ui.tr("only over other apps; turn on Free My TV mode for the whole screen") + ")";
++        return Ui.tr("Picture") + ": " + name + " (" + Ui.tr("veil over the apps; turn on Free My TV mode for the home screen's colours") + ")";
 +    }
 +}
 diff -ruN '--exclude=*.class' '--exclude=.git' '--exclude=out' '--exclude=*.apk' '--exclude=*.idsig' '--exclude=*.patch' free-my-tv-main/app/src/io/freemytv/PictureOverlay.java free-my-tv-main/app/src/io/freemytv/PictureOverlay.java
 --- free-my-tv-main/app/src/io/freemytv/PictureOverlay.java	1970-01-01 00:00:00.000000000 +0000
-+++ free-my-tv-main/app/src/io/freemytv/PictureOverlay.java	2026-11-05 11:43:08.261263184 +0000
-@@ -0,0 +1,231 @@
++++ free-my-tv-main/app/src/io/freemytv/PictureOverlay.java	2026-11-06 03:34:34.195164226 +0000
+@@ -0,0 +1,219 @@
 +package io.freemytv;
 +
 +import android.app.Notification;
@@ -2419,10 +2942,6 @@ diff -ruN '--exclude=*.class' '--exclude=.git' '--exclude=out' '--exclude=*.apk'
 +import android.app.Service;
 +import android.content.Context;
 +import android.content.Intent;
-+import android.graphics.Canvas;
-+import android.graphics.ColorMatrix;
-+import android.graphics.ColorMatrixColorFilter;
-+import android.graphics.Paint;
 +import android.graphics.PixelFormat;
 +import android.os.Build;
 +import android.os.Handler;
@@ -2434,20 +2953,34 @@ diff -ruN '--exclude=*.class' '--exclude=.git' '--exclude=out' '--exclude=*.apk'
 +import android.view.WindowManager;
 +import android.widget.Toast;
 +
++import java.io.BufferedReader;
++import java.io.File;
++import java.io.FileInputStream;
++import java.io.FileOutputStream;
++import java.io.IOException;
++import java.io.InputStreamReader;
++import java.nio.charset.StandardCharsets;
++
 +/**
-+ * Picture mode over other apps (same overlay permission as Cinema / sleep timer).
-+ * Applies a soft colour matrix (contrast, saturation, temperature) on top of whatever is open.
-+ * Modes: Off, Cinema, Sports, Vivid, Movie, Night — chosen in the gear panel.
++ * The picture mode over the other apps (the gear's panel): a coloured veil across the whole screen, the same way
++ * Cinema mode dims everything, so it is on top of every app and of the video as well. A veil can warm, cool, tint or dim
++ * the picture; it can't raise the contrast or the colour, which is what PictureFilter does for what Android draws.
++ * Both are on together: the filter on the home screen's own picture, this veil over whatever app is open.
++ *
++ * The service runs in a process of its own (:sleep), which doesn't see the preferences the panel changes, so the mode
++ * and the strength come with each start and are kept in a small file for when the system starts it again.
 + */
 +public class PictureOverlay extends Service {
-+    private static final String CH = "picture";
++    private static final String CH = "picture", STATE = "picture-state.txt";
 +    private View veil;
 +    private static final Handler main = new Handler(Looper.getMainLooper());
 +
 +    /** Show or hide according to preference and whether home is in front. */
 +    static void update(Context c, boolean homeInFront) {
-+        Intent i = new Intent(c, PictureOverlay.class);
-+        boolean wanted = Prefs.pictureMode() > 0 && !homeInFront && !Prefs.cinema() && !Prefs.pictureSystem();
++        final int mode = Prefs.pictureMode(), strength = Prefs.pictureStrength();
++        saveState(c, mode, strength);
++        Intent i = new Intent(c, PictureOverlay.class).putExtra("mode", mode).putExtra("strength", strength);
++        boolean wanted = mode > 0 && !homeInFront && !Prefs.cinema();
 +        if (wanted && Settings.canDrawOverlays(c)) {
 +            try {
 +                if (Build.VERSION.SDK_INT >= 26) c.startForegroundService(i);
@@ -2457,28 +2990,23 @@ diff -ruN '--exclude=*.class' '--exclude=.git' '--exclude=out' '--exclude=*.apk'
 +            }
 +            return;
 +        }
-+        try { c.stopService(i); } catch (RuntimeException ignored) {}
-+        if (wanted) {
-+            if (Capabilities.overlay(c) || Capabilities.adb(c)) {
-+                allow(c.getApplicationContext());
-+            }
++        try {
++            c.stopService(i);
++        } catch (RuntimeException ignored) {
 +        }
++        if (wanted && (Capabilities.overlay(c) || Capabilities.adb(c))) allow(c.getApplicationContext());
 +    }
 +
++    /** A mode or a strength was chosen: the whole-screen filter, and the veil for the apps. */
 +    static void onModeChanged(Context c) {
-+        PictureFilter.apply(c);   // the real, whole-screen filter; this class is its fallback
-+        if (Prefs.pictureMode() <= 0) {
-+            update(c, true);
-+            return;
-+        }
-+        if (Capabilities.adb(c)) return;   // the filter does it; no need to ask for the overlay permission
-+        if (!Settings.canDrawOverlays(c)) {
++        PictureFilter.apply(c);
++        if (Prefs.pictureMode() > 0 && !Settings.canDrawOverlays(c)) {
 +            allow(c.getApplicationContext());
 +            main.post(() -> Toast.makeText(c.getApplicationContext(),
 +                    Ui.tr("Picture mode over other apps needs overlay permission (Free My TV mode / ADB)."),
 +                    Toast.LENGTH_LONG).show());
 +        }
-+        update(c, true);  // home usually still in front; real veil on next onPause
++        update(c, true);   // home is in front now; the veil starts when another app opens (HomeActivity.onPause)
 +    }
 +
 +    private static final java.util.concurrent.atomic.AtomicBoolean allowing =
@@ -2504,43 +3032,48 @@ diff -ruN '--exclude=*.class' '--exclude=.git' '--exclude=out' '--exclude=*.apk'
 +        }).start();
 +    }
 +
-+    /** Kept for callers: the colour matrix of a mode, from PictureFilter's presets. */
-+    static ColorMatrix matrixFor(int mode) {
-+        float[] m = PictureFilter.matrix(mode, 1f);
-+        return new ColorMatrix(new float[] {
-+                m[0], m[4], m[8], 0, m[12] * 255f,
-+                m[1], m[5], m[9], 0, m[13] * 255f,
-+                m[2], m[6], m[10], 0, m[14] * 255f,
-+                0, 0, 0, 1, 0
-+        });
++    // MARK: - The state both processes read
++
++    private static void saveState(Context c, int mode, int strength) {
++        try (FileOutputStream out = new FileOutputStream(new File(c.getFilesDir(), STATE))) {
++            out.write((mode + "," + strength).getBytes(StandardCharsets.UTF_8));
++        } catch (IOException e) {
++            AppLog.w("picture state: " + e.getMessage());
++        }
 +    }
 +
-+    private static ColorMatrix contrast(float c) {
-+        float t = (1f - c) / 2f * 255f;
-+        return new ColorMatrix(new float[] {
-+                c, 0, 0, 0, t,
-+                0, c, 0, 0, t,
-+                0, 0, c, 0, t,
-+                0, 0, 0, 1, 0
-+        });
++    /** {mode, strength} from the file; {0, 100} when there is none. */
++    private static int[] state(Context c) {
++        File f = new File(c.getFilesDir(), STATE);
++        try (BufferedReader r = new BufferedReader(new InputStreamReader(new FileInputStream(f), StandardCharsets.UTF_8))) {
++            String[] p = r.readLine().trim().split(",");
++            return new int[] {Integer.parseInt(p[0]), Integer.parseInt(p[1])};
++        } catch (IOException | RuntimeException e) {
++            return new int[] {0, 100};
++        }
 +    }
 +
-+    private static ColorMatrix temperature(float r, float g, float b) {
-+        return new ColorMatrix(new float[] {
-+                r, 0, 0, 0, 0,
-+                0, g, 0, 0, 0,
-+                0, 0, b, 0, 0,
-+                0, 0, 0, 1, 0
-+        });
-+    }
-+
-+    private static ColorMatrix brightness(float v) {
-+        return new ColorMatrix(new float[] {
-+                1, 0, 0, 0, v,
-+                0, 1, 0, 0, v,
-+                0, 0, 1, 0, v,
-+                0, 0, 0, 1, 0
-+        });
++    /**
++     * Each mode's veil: its colour, and how opaque it is at 100 per cent. A little, tinted: warm for Cinema, green for the
++     * grass of Football, cool and bright for Sports and the lively modes, dark and warm for Night. Strength scales it.
++     */
++    private static int veilColor(int mode, int strength) {
++        int base;
++        switch (mode) {
++            case 1: base = 0x26FF9440; break;   // Cinema: warm
++            case 2: base = 0x223CFF70; break;   // Football: a green lift
++            case 3: base = 0x1C5AB4FF; break;   // Sports: cool, crisp
++            case 4: base = 0x10A0C8FF; break;   // Game: light and cool
++            case 5: base = 0x148CB4FF; break;   // Vivid: the cool white of a shop-floor TV
++            case 6: base = 0x1878A8FF; break;   // Ultra Vivid
++            case 7: base = 0x14B4D2FF; break;   // HDR Pop
++            case 8: base = 0x16B4A0FF; break;   // Anime
++            case 9: base = 0x10FFC890; break;   // Natural: a hint warm
++            case 10: base = 0x521A0A00; break;  // Night: dark and warm
++            default: return 0;
++        }
++        int alpha = Math.min(0x8C, (base >>> 24) * strength / 100);
++        return (alpha << 24) | (base & 0xFFFFFF);
 +    }
 +
 +    @Override public void onCreate() {
@@ -2552,36 +3085,35 @@ diff -ruN '--exclude=*.class' '--exclude=.git' '--exclude=out' '--exclude=*.apk'
 +            getSystemService(NotificationManager.class).createNotificationChannel(ch);
 +            Notification n = new Notification.Builder(this, CH)
 +                    .setContentTitle("Picture mode")
-+                    .setContentText(Prefs.PICTURE_MODES[Prefs.pictureMode()])
 +                    .setSmallIcon(R.drawable.icon)
 +                    .setOngoing(true)
 +                    .build();
 +            startForeground(73, n);
 +        }
-+        if (!Settings.canDrawOverlays(this) || Prefs.pictureMode() <= 0) {
++    }
++
++    @Override public int onStartCommand(Intent intent, int flags, int startId) {
++        int[] st = intent != null && intent.hasExtra("mode")
++                ? new int[] {intent.getIntExtra("mode", 0), intent.getIntExtra("strength", 100)}
++                : state(this);
++        int mode = st[0], strength = st[1];
++        if (mode <= 0 || !Settings.canDrawOverlays(this)) {
 +            stopSelf();
++            return START_NOT_STICKY;
++        }
++        showVeil(veilColor(mode, strength));
++        AppLog.w("picture overlay: mode " + Prefs.PICTURE_MODES[Math.min(mode, Prefs.PICTURE_MODES.length - 1)] + " " + strength + "%");
++        return START_STICKY;
++    }
++
++    /** The veil is made once; a new mode or strength only changes its colour. */
++    private void showVeil(int color) {
++        if (veil != null) {
++            veil.setBackgroundColor(color);
 +            return;
 +        }
-+        final int mode = Prefs.pictureMode();
-+        // Semi-transparent layer that multiplies the colour matrix onto whatever is below.
-+        // Using a full-screen View with a color filter drawn at low alpha keeps input passthrough.
-+        veil = new View(this) {
-+            private final Paint paint = new Paint();
-+            {
-+                paint.setColorFilter(new ColorMatrixColorFilter(matrixFor(mode)));
-+                // Very light fill so the matrix still applies without crushing the image
-+                setLayerType(LAYER_TYPE_HARDWARE, paint);
-+                setBackgroundColor(0x18FFFFFF);
-+            }
-+            @Override protected void onDraw(Canvas canvas) {
-+                // The hardware layer + color filter does the work; nothing extra to draw.
-+            }
-+        };
-+        // Better approach for true matrix over content: use a semi-transparent dim that
-+        // only shifts temperature via a coloured veil (more reliable across TVs than color filter on empty view).
 +        veil = new View(this);
-+        veil.setBackgroundColor(veilColor(mode));
-+
++        veil.setBackgroundColor(color);
 +        int type = Build.VERSION.SDK_INT >= 26
 +                ? WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
 +                : WindowManager.LayoutParams.TYPE_SYSTEM_ALERT;
@@ -2598,54 +3130,33 @@ diff -ruN '--exclude=*.class' '--exclude=.git' '--exclude=out' '--exclude=*.apk'
 +        lp.gravity = Gravity.TOP | Gravity.START;
 +        try {
 +            getSystemService(WindowManager.class).addView(veil, lp);
-+            AppLog.w("picture overlay: mode " + Prefs.PICTURE_MODES[mode]);
 +        } catch (RuntimeException e) {
 +            AppLog.w("picture overlay add: " + e.getMessage());
++            veil = null;
 +            stopSelf();
 +        }
-+    }
-+
-+    /** Soft coloured veils — reliable on every Android TV (true ColorMatrix on empty views is often ignored). */
-+    private static int veilColor(int mode) {
-+        switch (mode) {
-+            case 1: return 0x1CFFAA66; // Cinema: warm
-+            case 2: return 0x1A66FF99; // Football: green lift
-+            case 3: return 0x14AADDFF; // Sports: cool, crisp
-+            case 4: return 0x10FFFFFF; // Game: light
-+            case 5: return 0x18FFEECC; // Vivid: lift
-+            case 6: return 0x20FFE0B0; // Ultra Vivid
-+            case 7: return 0x1CE0F0FF; // HDR Pop
-+            case 8: return 0x1CFFD0F0; // Anime
-+            case 9: return 0x10FFCC99; // Natural: hint warm
-+            case 10: return 0x40000000; // Night: darken
-+            default: return 0x00000000;
-+        }
-+    }
-+
-+    @Override public int onStartCommand(Intent intent, int flags, int startId) {
-+        if (Prefs.pictureMode() <= 0 || !Settings.canDrawOverlays(this)) {
-+            stopSelf();
-+            return START_NOT_STICKY;
-+        }
-+        return START_STICKY;
 +    }
 +
 +    @Override public void onDestroy() {
 +        if (veil != null) {
-+            try { getSystemService(WindowManager.class).removeView(veil); }
-+            catch (RuntimeException ignored) {}
++            try {
++                getSystemService(WindowManager.class).removeView(veil);
++            } catch (RuntimeException ignored) {
++            }
 +            veil = null;
 +        }
 +        AppLog.w("picture overlay: destroyed");
 +        super.onDestroy();
 +    }
 +
-+    @Override public IBinder onBind(Intent intent) { return null; }
++    @Override public IBinder onBind(Intent intent) {
++        return null;
++    }
 +}
 diff -ruN '--exclude=*.class' '--exclude=.git' '--exclude=out' '--exclude=*.apk' '--exclude=*.idsig' '--exclude=*.patch' free-my-tv-main/app/src/io/freemytv/Prefs.java free-my-tv-main/app/src/io/freemytv/Prefs.java
 --- free-my-tv-main/app/src/io/freemytv/Prefs.java	2026-11-04 09:46:47.093375455 +0000
-+++ free-my-tv-main/app/src/io/freemytv/Prefs.java	2026-11-05 11:43:08.261279587 +0000
-@@ -325,6 +325,131 @@
++++ free-my-tv-main/app/src/io/freemytv/Prefs.java	2026-11-06 03:34:34.195178508 +0000
+@@ -325,6 +325,141 @@
  
      static void setPowerOn(String v) { put("powerOn", v); }
  
@@ -2666,7 +3177,17 @@ diff -ruN '--exclude=*.class' '--exclude=.git' '--exclude=out' '--exclude=*.apk'
 +
 +    static void setWallpaperNight(String v) { put("wallpaperNight", v == null ? "" : v); }
 +
-+    /** Minutes between photos while the wallpaper is "My photos" (Home Settings > Change every). */
++    /** The wallpaper changes by itself (Home Settings > Auto change, or the gear's panel); off keeps the one on screen. */
++    static boolean wallpaperAuto() { return sp().getBoolean("wallpaperAuto", true); }
++
++    static void setWallpaperAuto(boolean on) { put("wallpaperAuto", on); }
++
++    /** The file kept on screen while Auto change is off. */
++    static String wallpaperFrozen() { return sp().getString("wallpaperFrozen", ""); }
++
++    static void setWallpaperFrozen(String path) { put("wallpaperFrozen", path == null ? "" : path); }
++
++    /** Minutes between wallpapers while it changes by itself (Home Settings > Change every). */
 +    static int wallpaperMinutes() { return Math.max(1, sp().getInt("wallpaperMinutes", 60)); }
 +
 +    static void setWallpaperMinutes(int m) { put("wallpaperMinutes", m); }
@@ -2779,7 +3300,7 @@ diff -ruN '--exclude=*.class' '--exclude=.git' '--exclude=out' '--exclude=*.apk'
      static boolean weather() { return sp().getBoolean("weather", true); }
 diff -ruN '--exclude=*.class' '--exclude=.git' '--exclude=out' '--exclude=*.apk' '--exclude=*.idsig' '--exclude=*.patch' free-my-tv-main/app/src/io/freemytv/QuickPanelActivity.java free-my-tv-main/app/src/io/freemytv/QuickPanelActivity.java
 --- free-my-tv-main/app/src/io/freemytv/QuickPanelActivity.java	2026-11-04 09:46:47.093417314 +0000
-+++ free-my-tv-main/app/src/io/freemytv/QuickPanelActivity.java	2026-11-05 11:43:08.260505099 +0000
++++ free-my-tv-main/app/src/io/freemytv/QuickPanelActivity.java	2026-11-06 03:34:34.194648458 +0000
 @@ -2,6 +2,7 @@
  
  import android.app.Activity;
@@ -2809,16 +3330,16 @@ diff -ruN '--exclude=*.class' '--exclude=.git' '--exclude=out' '--exclude=*.apk'
 +    /** The All Apps tile's place in tiles(). */
 +    private static final int ALL_APPS = 2;
 +    /** The look switch's place in tiles(). */
-+    private static final int LOOK = 5, CINEMA = 6, VOLUME = 7, PICTURE = 8, STRENGTH = 9, LITE = 10, MEMORY = 11;
++    private static final int LOOK = 5, CINEMA = 6, VOLUME = 7, PICTURE = 8, STRENGTH = 9, LITE = 10, MEMORY = 11, AUTOWALL = 12;
 +    /** Three tiles to a row, so all of them fit on the screen. */
 +    private static final int COLS = 3;
      /** The panel in a 1920×1080 space: its size and the margin to the screen's corner. */
 -    private static final float W = 600, H = 800, MARGIN = 40;
-+    private static final float W = 900, H = 790, MARGIN = 40;
++    private static final float W = 900, H = 900, MARGIN = 40;
  
      private PanelView view;
      private Click click;
-@@ -77,23 +87,85 @@
+@@ -77,23 +87,90 @@
          overridePendingTransition(0, 0);   // the panel springs in by itself
          view = new PanelView(this, k, tiles());
          setContentView(view);
@@ -2860,6 +3381,10 @@ diff -ruN '--exclude=*.class' '--exclude=.git' '--exclude=out' '--exclude=*.apk'
 +        String how = VolumeBoost.status(this);
 +        String mark = how.startsWith("refused") ? " - " + Ui.tr("refused") : how.isEmpty() ? " ..." : " OK " + how;
 +        return Ui.tr("Volume") + " +" + pct + "% (" + (VolumeBoost.gainMb(pct) / 100) + " dB)" + mark;
++    }
++
++    private static String wallAutoLabel() {
++        return Ui.tr("Wallpaper auto") + ": " + Ui.tr(Prefs.wallpaperAuto() ? "on" : "off");
 +    }
 +
 +    private static String pictureLabel() {
@@ -2911,10 +3436,11 @@ diff -ruN '--exclude=*.class' '--exclude=.git' '--exclude=out' '--exclude=*.apk'
 +            // Lite mode: lighter home screen; neon off and video wallpaper frozen on a still frame.
 +            new Tile(Ui.tr(Prefs.lite() ? "Lite mode: on" : "Lite mode"), "bolt", 0xFF64D2FF),
 +            new Tile(Ui.tr("Clear memory"), "bolt", 0xFF32D74B),
++            new Tile(wallAutoLabel(), "sync", 0xFF30D158),
          };
      }
  
-@@ -146,7 +218,7 @@
+@@ -146,7 +223,7 @@
      }
  
      private final class PanelView extends View {
@@ -2923,16 +3449,16 @@ diff -ruN '--exclude=*.class' '--exclude=.git' '--exclude=out' '--exclude=*.apk'
                  CARD_R = 46, TILE_R = 30, CHIP_R = 25, SYMBOL = 24;
          private static final int ROWS_VISIBLE = 6;
          /** TalkBack's ids: a tile is its index + 1, an Inputs row ROW_IDS + its index + 1. */
-@@ -185,7 +257,7 @@
+@@ -185,7 +262,7 @@
          private final int[] chipColor = new int[16];
          private final LinearGradient[] chipShader = new LinearGradient[16];
          private int chips;
 -        private final float[] tileX = new float[8], tileY = new float[8], labelSize = new float[8];   // labelSize: shrunk to fit long words
-+        private final float[] tileX = new float[12], tileY = new float[12], labelSize = new float[12];   // labelSize: shrunk to fit long words
++        private final float[] tileX = new float[16], tileY = new float[16], labelSize = new float[16];   // labelSize: shrunk to fit long words
          private float tileW;
  
          private final Runnable frame = new Runnable() {
-@@ -288,17 +360,30 @@
+@@ -288,17 +365,30 @@
                  new RadialGradient(0, 0, r, 0x2022C4FF, 0x0022C4FF, Shader.TileMode.CLAMP),
                  new RadialGradient(0, 0, r * 0.85f, 0x1AFF3D8B, 0x00FF3D8B, Shader.TileMode.CLAMP),
              };
@@ -2969,7 +3495,7 @@ diff -ruN '--exclude=*.class' '--exclude=.git' '--exclude=out' '--exclude=*.apk'
          }
  
          @Override protected void onAttachedToWindow() {
-@@ -608,10 +693,10 @@
+@@ -608,10 +698,10 @@
                  if (inputFocus == before) return;
              } else {
                  int before = focus;
@@ -2984,7 +3510,7 @@ diff -ruN '--exclude=*.class' '--exclude=.git' '--exclude=out' '--exclude=*.apk'
                  if (focus == before) return;
              }
              click.move();
-@@ -620,6 +705,18 @@
+@@ -620,6 +710,18 @@
              spoken.focusMoved();
          }
  
@@ -3003,7 +3529,7 @@ diff -ruN '--exclude=*.class' '--exclude=.git' '--exclude=out' '--exclude=*.apk'
          private void select() {
              click.open();
              if (inputsOpen) {
-@@ -637,7 +734,57 @@
+@@ -637,7 +739,62 @@
                  spoken.focusMoved();
                  return;
              }
@@ -3023,6 +3549,11 @@ diff -ruN '--exclude=*.class' '--exclude=.git' '--exclude=out' '--exclude=*.apk'
 +                relabel(VOLUME, volumeLabel());
 +                postDelayed(() -> relabel(VOLUME, volumeLabel()), 1500);   // by then the service says how it went
 +                postDelayed(() -> relabel(VOLUME, volumeLabel()), 4000);
++                return;
++            }
++            if (focus == AUTOWALL) {   // the wallpapers change by themselves, or stay where they are
++                Wallpaper.setAuto(getApplicationContext(), !Prefs.wallpaperAuto());
++                relabel(AUTOWALL, wallAutoLabel());
 +                return;
 +            }
 +            if (focus == PICTURE) {
@@ -3063,7 +3594,7 @@ diff -ruN '--exclude=*.class' '--exclude=.git' '--exclude=out' '--exclude=*.apk'
  }
 diff -ruN '--exclude=*.class' '--exclude=.git' '--exclude=out' '--exclude=*.apk' '--exclude=*.idsig' '--exclude=*.patch' free-my-tv-main/app/src/io/freemytv/RemoteKeys.java free-my-tv-main/app/src/io/freemytv/RemoteKeys.java
 --- free-my-tv-main/app/src/io/freemytv/RemoteKeys.java	2026-11-04 09:46:47.093527091 +0000
-+++ free-my-tv-main/app/src/io/freemytv/RemoteKeys.java	2026-11-05 11:43:08.260583154 +0000
++++ free-my-tv-main/app/src/io/freemytv/RemoteKeys.java	2026-11-06 03:34:34.194687864 +0000
 @@ -75,7 +75,10 @@
  
      /** The key service is on only where the filter is safe, and while a button opens something (else it has no work). */
@@ -3086,7 +3617,7 @@ diff -ruN '--exclude=*.class' '--exclude=.git' '--exclude=out' '--exclude=*.apk'
          int source = e.getSource();
 diff -ruN '--exclude=*.class' '--exclude=.git' '--exclude=out' '--exclude=*.apk' '--exclude=*.idsig' '--exclude=*.patch' free-my-tv-main/app/src/io/freemytv/SettingsActivity.java free-my-tv-main/app/src/io/freemytv/SettingsActivity.java
 --- free-my-tv-main/app/src/io/freemytv/SettingsActivity.java	2026-11-04 09:46:47.093605352 +0000
-+++ free-my-tv-main/app/src/io/freemytv/SettingsActivity.java	2026-11-05 11:43:08.260728311 +0000
++++ free-my-tv-main/app/src/io/freemytv/SettingsActivity.java	2026-11-06 03:34:34.194786225 +0000
 @@ -36,6 +36,7 @@
  
  import java.io.IOException;
@@ -3100,13 +3631,13 @@ diff -ruN '--exclude=*.class' '--exclude=.git' '--exclude=out' '--exclude=*.apk'
                  SAVER_ROW = 9, ANDROID_APPS_ROW = 10, STATUS_ICONS_ROW = 11, RECENTS_ROW = 12, POWER_ON_ROW = 13,
                  WEATHER_ROW = 14, CITY_ROW = 15, FORECAST_ROW = 16, PLAYING_ROW = 17, HOME_ROW = Config.HOME_ASSISTANT ? 18 : -1,
 -                QUOTES_ROW = Config.HOME_ASSISTANT ? 19 : 18, COIN_ROWS = QUOTES_ROW + 1;
-+                LIVE_ROW = Config.HOME_ASSISTANT ? 19 : 18, WALLPAPER_ROW = LIVE_ROW + 1, NIGHT_ROW = WALLPAPER_ROW + 1, EVERY_ROW = NIGHT_ROW + 1, NEON_ROW = EVERY_ROW + 1, NEON_STYLE_ROW = NEON_ROW + 1, STYLE_ROW = NEON_STYLE_ROW + 1, CUSTOM_ROW = STYLE_ROW + 1,
++                LIVE_ROW = Config.HOME_ASSISTANT ? 19 : 18, WALLPAPER_ROW = LIVE_ROW + 1, NIGHT_ROW = WALLPAPER_ROW + 1, EVERY_ROW = NIGHT_ROW + 1, AUTO_ROW = EVERY_ROW + 1, NEON_ROW = AUTO_ROW + 1, NEON_STYLE_ROW = NEON_ROW + 1, STYLE_ROW = NEON_STYLE_ROW + 1, CUSTOM_ROW = STYLE_ROW + 1,
 +                THEME_ROW = CUSTOM_ROW + 4, LITE_ROW = THEME_ROW + 1, QUOTES_ROW = LITE_ROW + 1,
 +                COIN_ROWS = QUOTES_ROW + 1;
          /** No "home" on Xiaomi TVs: their remote sends one Home press as a burst of presses (HomeView.BURST_MS). */
          private static final String[] RECENTS = RemoteKeys.XIAOMI ? new String[] {"off", "drawer"}
                  : new String[] {"off", "drawer", "home"};
-@@ -1008,6 +1011,16 @@
+@@ -1008,6 +1011,17 @@
              l.add(Ui.tr("Forecast"));
              l.add(Ui.tr("Now Playing widget"));
              if (HOME_ROW >= 0) l.add("Home Assistant");
@@ -3114,6 +3645,7 @@ diff -ruN '--exclude=*.class' '--exclude=.git' '--exclude=out' '--exclude=*.apk'
 +            l.add(Ui.tr("Wallpaper"));
 +            l.add(Ui.tr("Night wallpaper"));
 +            l.add(Ui.tr("Change every"));
++            l.add(Ui.tr("Auto change"));
 +            l.add(Ui.tr("Neon edge"));
 +            l.add(Ui.tr("Neon style"));  // Glow or Lightning spikes
 +            l.add(Ui.tr("Clock style"));
@@ -3123,7 +3655,7 @@ diff -ruN '--exclude=*.class' '--exclude=.git' '--exclude=out' '--exclude=*.apk'
              l.add(Ui.tr("Quotes widget"));
              l.add("Bitcoin");
              l.add("Ethereum");
-@@ -1083,6 +1096,147 @@
+@@ -1083,6 +1097,147 @@
                      .show();
          }
  
@@ -3271,7 +3803,7 @@ diff -ruN '--exclude=*.class' '--exclude=.git' '--exclude=out' '--exclude=*.apk'
          private String[] settingValues() {
              String[] labels = settingLabels();
              String[] v = new String[labels.length];
-@@ -1117,6 +1271,16 @@
+@@ -1117,6 +1272,17 @@
              v[FORECAST_ROW] = Prefs.forecast().equals("days") ? Ui.tr("Next days") : Ui.tr("Next hours");
              v[PLAYING_ROW] = onOff(Prefs.nowPlaying());
              if (HOME_ROW >= 0) v[HOME_ROW] = onOff(HomeAssistant.on(getContext()));
@@ -3279,6 +3811,7 @@ diff -ruN '--exclude=*.class' '--exclude=.git' '--exclude=out' '--exclude=*.apk'
 +            v[WALLPAPER_ROW] = wallpaperLabel();
 +            v[NIGHT_ROW] = nightLabel();
 +            v[EVERY_ROW] = everyLabel();
++            v[AUTO_ROW] = Ui.tr(Prefs.wallpaperAuto() ? "On" : "Off");
 +            v[STYLE_ROW] = Ui.tr(Prefs.CLOCK_STYLES[Math.min(Math.max(0, Prefs.clockStyle()), Prefs.CLOCK_STYLES.length - 1)]);
 +            v[NEON_ROW] = Ui.tr(Neon.NAMES[Math.min(Math.max(0, Prefs.neon()), Neon.NAMES.length - 1)]);
 +            v[NEON_STYLE_ROW] = Ui.tr(Prefs.NEON_STYLES[Prefs.neonStyle()]);
@@ -3288,7 +3821,7 @@ diff -ruN '--exclude=*.class' '--exclude=.git' '--exclude=out' '--exclude=*.apk'
              v[QUOTES_ROW] = onOff(Prefs.quotes());
              // No quotes widget, nowhere to show prices: the coins read as off (and stay locked) until it is back on.
              for (int i = COIN_ROWS; i < v.length - 3; i++) v[i] = onOff(Prefs.quotes() && Prefs.coin(i - COIN_ROWS));
-@@ -1485,6 +1649,18 @@
+@@ -1485,6 +1651,19 @@
                      Prefs.setHomeAssistant(!Prefs.homeAssistant());
                      if (!Prefs.homeAssistant()) HomeAssistant.forget(getContext());
                      return;
@@ -3296,6 +3829,7 @@ diff -ruN '--exclude=*.class' '--exclude=.git' '--exclude=out' '--exclude=*.apk'
 +                case WALLPAPER_ROW: stepWallpaper(dir); return;
 +                case NIGHT_ROW: stepNight(dir); return;
 +                case EVERY_ROW: stepEvery(dir); return;
++                case AUTO_ROW: Wallpaper.setAuto(getContext(), !Prefs.wallpaperAuto()); return;
 +                case STYLE_ROW: Prefs.setClockStyle((Prefs.clockStyle() + dir + Prefs.CLOCK_STYLES.length) % Prefs.CLOCK_STYLES.length); return;
 +                case NEON_ROW: Prefs.setNeon((Prefs.neon() + dir + Neon.NAMES.length) % Neon.NAMES.length); return;
 +                case NEON_STYLE_ROW: Prefs.setNeonStyle((Prefs.neonStyle() + dir + Prefs.NEON_STYLES.length) % Prefs.NEON_STYLES.length); return;
@@ -3309,7 +3843,7 @@ diff -ruN '--exclude=*.class' '--exclude=.git' '--exclude=out' '--exclude=*.apk'
                      if (row >= keyRow() || !Prefs.quotes()) return;   // the keys and Updates act on OK only
 diff -ruN '--exclude=*.class' '--exclude=.git' '--exclude=out' '--exclude=*.apk' '--exclude=*.idsig' '--exclude=*.patch' free-my-tv-main/app/src/io/freemytv/VolumeBoost.java free-my-tv-main/app/src/io/freemytv/VolumeBoost.java
 --- free-my-tv-main/app/src/io/freemytv/VolumeBoost.java	1970-01-01 00:00:00.000000000 +0000
-+++ free-my-tv-main/app/src/io/freemytv/VolumeBoost.java	2026-11-05 11:43:08.260888181 +0000
++++ free-my-tv-main/app/src/io/freemytv/VolumeBoost.java	2026-11-06 03:34:34.194902914 +0000
 @@ -0,0 +1,144 @@
 +package io.freemytv;
 +
@@ -3457,7 +3991,7 @@ diff -ruN '--exclude=*.class' '--exclude=.git' '--exclude=out' '--exclude=*.apk'
 +}
 diff -ruN '--exclude=*.class' '--exclude=.git' '--exclude=out' '--exclude=*.apk' '--exclude=*.idsig' '--exclude=*.patch' free-my-tv-main/app/src/io/freemytv/VolumeBoostService.java free-my-tv-main/app/src/io/freemytv/VolumeBoostService.java
 --- free-my-tv-main/app/src/io/freemytv/VolumeBoostService.java	1970-01-01 00:00:00.000000000 +0000
-+++ free-my-tv-main/app/src/io/freemytv/VolumeBoostService.java	2026-11-05 11:43:08.261347322 +0000
++++ free-my-tv-main/app/src/io/freemytv/VolumeBoostService.java	2026-11-06 03:34:34.195229038 +0000
 @@ -0,0 +1,269 @@
 +package io.freemytv;
 +
@@ -3730,8 +4264,8 @@ diff -ruN '--exclude=*.class' '--exclude=.git' '--exclude=out' '--exclude=*.apk'
 +}
 diff -ruN '--exclude=*.class' '--exclude=.git' '--exclude=out' '--exclude=*.apk' '--exclude=*.idsig' '--exclude=*.patch' free-my-tv-main/app/src/io/freemytv/Wallpaper.java free-my-tv-main/app/src/io/freemytv/Wallpaper.java
 --- free-my-tv-main/app/src/io/freemytv/Wallpaper.java	1970-01-01 00:00:00.000000000 +0000
-+++ free-my-tv-main/app/src/io/freemytv/Wallpaper.java	2026-11-05 11:43:08.261303242 +0000
-@@ -0,0 +1,398 @@
++++ free-my-tv-main/app/src/io/freemytv/Wallpaper.java	2026-11-06 03:34:34.195198429 +0000
+@@ -0,0 +1,422 @@
 +package io.freemytv;
 +
 +import android.Manifest;
@@ -3776,7 +4310,7 @@ diff -ruN '--exclude=*.class' '--exclude=.git' '--exclude=out' '--exclude=*.apk'
 +    static volatile boolean active;
 +
 +    /** The Wallpaper row's "My photos, a different one each hour" and the "allow storage access" step. */
-+    static final String ROTATE = "photos:rotate", ASK = "ask:storage";
++    static final String ROTATE = "photos:rotate", ROTATE_ALL = "all:rotate", ASK = "ask:storage";
 +    private static final String FOLDER = "FreeMyTV";
 +    private static final String[] IMAGES = {"jpg", "jpeg", "png", "webp"};
 +    private static final String[] VIDEOS = {"mp4", "webm", "mkv", "3gp"};
@@ -3856,12 +4390,21 @@ diff -ruN '--exclude=*.class' '--exclude=.git' '--exclude=out' '--exclude=*.apk'
 +        return out;
 +    }
 +
-+    /** What the Wallpaper row steps through: Off, "My photos", each of them, the files, and the permission step. */
++    /** Every wallpaper there is: the photos sent to the app, and the photos and videos of the wallpaper folders. */
++    static List<File> everything(Context c) {
++        List<File> out = new ArrayList<>(Photos.files(c));
++        for (File f : files(c)) if (!out.contains(f)) out.add(f);
++        Collections.sort(out, (a, b) -> a.getName().compareToIgnoreCase(b.getName()));
++        return out;
++    }
++
++    /** What the Wallpaper row steps through: Off, the two rotating ones, each file, and the permission step. */
 +    static List<String> choices(Context c) {
 +        List<String> out = new ArrayList<>();
 +        out.add("");
 +        List<File> photos = Photos.files(c);
 +        if (!photos.isEmpty()) out.add(ROTATE);
++        if (everything(c).size() > 1) out.add(ROTATE_ALL);
 +        for (File f : photos) out.add(f.getPath());
 +        for (File f : files(c)) out.add(f.getPath());
 +        if (!allowed(c)) out.add(ASK);
@@ -3871,7 +4414,8 @@ diff -ruN '--exclude=*.class' '--exclude=.git' '--exclude=out' '--exclude=*.apk'
 +    /** The name the Wallpaper row shows for a choice. */
 +    static String label(Context c, String value) {
 +        if (value.isEmpty()) return Ui.tr("Off");
-+        if (value.equals(ROTATE)) return Ui.tr("My photos (a new one each hour)");
++        if (value.equals(ROTATE)) return Ui.tr("My photos (change by themselves)");
++        if (value.equals(ROTATE_ALL)) return Ui.tr("All wallpapers, photos and videos (change by themselves)");
 +        if (value.equals(ASK)) return Ui.tr("Allow storage access (press →)");
 +        List<File> photos = Photos.files(c);
 +        for (int i = 0; i < photos.size(); i++) {
@@ -3897,15 +4441,29 @@ diff -ruN '--exclude=*.class' '--exclude=.git' '--exclude=out' '--exclude=*.apk'
 +
 +    private static File resolve(Context c, String value) {
 +        if (value.isEmpty() || value.equals(ASK)) return null;
-+        if (value.equals(ROTATE)) {
-+            List<File> photos = Photos.files(c);
-+            if (photos.isEmpty()) return null;
++        if (value.equals(ROTATE) || value.equals(ROTATE_ALL)) {
++            List<File> list = value.equals(ROTATE) ? Photos.files(c) : everything(c);
++            if (list.isEmpty()) return null;
++            if (!Prefs.wallpaperAuto()) {   // Auto change is off: the one that was on screen when it was turned off
++                String keep = Prefs.wallpaperFrozen();
++                for (File f : list) if (f.getPath().equals(keep)) return f;
++                return list.get(0);
++            }
 +            long slot = System.currentTimeMillis() / (Prefs.wallpaperMinutes() * 60_000L);
-+            return photos.get((int) (slot % photos.size()));
++            return list.get((int) (slot % list.size()));
 +        }
 +        File f = new File(value);
 +        if (!f.isFile()) return null;
 +        return own(c, f) || allowed(c) ? f : null;
++    }
++
++    /** Auto change on or off. Off keeps the wallpaper that is on screen now; on, they go on changing by themselves. */
++    static void setAuto(Context c, boolean on) {
++        if (!on) {
++            File now = chosen(c);   // while it is still on: what is due at this moment
++            Prefs.setWallpaperFrozen(now == null ? "" : now.getPath());
++        }
++        Prefs.setWallpaperAuto(on);
 +    }
 +
 +    /** Before the home screen reads day or night: on a wallpaper, or in Cinema mode, it leaves its own background out. */
@@ -4008,10 +4566,10 @@ diff -ruN '--exclude=*.class' '--exclude=.git' '--exclude=out' '--exclude=*.apk'
 +                    if (s.released) return;
 +                    File want = chosen(s.app);
 +                    if (!same(want, s.shown)) show(s, want);
-+                    main.postDelayed(this, 30_000);
++                    main.postDelayed(this, 15_000);
 +                }
 +            };
-+            main.postDelayed(s.tick, 30_000);
++            main.postDelayed(s.tick, 15_000);
 +        }
 +        root.addView(home, fill());
 +        return root;
